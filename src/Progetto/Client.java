@@ -1,9 +1,6 @@
-package client;
+package Progetto;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -12,8 +9,6 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Client extends Application {
 
@@ -37,7 +32,7 @@ public class Client extends Application {
 
             out.writeObject(email);
 
-            Boolean response = Common.getInputOfClass(in, Boolean.class);
+            boolean response = Common.getInputOfClass(in, Boolean.class);
 
             System.out.println(response);
         }catch(UnknownHostException e){
