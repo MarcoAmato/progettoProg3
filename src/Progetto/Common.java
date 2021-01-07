@@ -2,6 +2,7 @@ package Progetto;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -39,7 +40,7 @@ class Email{
     private String body;
     private Date sendingDate;
 
-    private final String FIELDS_DELIMITER = ";*;";
+    public static final String FIELDS_DELIMITER = ";#;";
 
     public Email(String sender, ArrayList<String> receivers, String subject, String body, Date sendingDate) {
         this.sender = sender;
@@ -51,13 +52,28 @@ class Email{
 
     public String toString(){
         String returnString = "+"+sender+FIELDS_DELIMITER;
+        boolean firstReceiver = true;
         for(String s: receivers){
-            returnString = returnString + " "+s;
+            if(firstReceiver){
+                returnString += s;
+                firstReceiver = false;
+            }else{
+                returnString += " " + s;
+            }
         }
         returnString += FIELDS_DELIMITER;
         returnString += subject + FIELDS_DELIMITER;
         returnString += body + FIELDS_DELIMITER;
-        returnString += sendingDate + FIELDS_DELIMITER;
-        return returnString; //+nomeMittente@test.it;*;nomeDestinatario1@test.it nomeDestinatario2@test.it nomeDestinatarioN@test.it;*;argomento della mail;*; corpo della mail;*; dow mon dd hh:mm:ss zzz yyyy (Data in formato toString come specificato su oracle https://docs.oracle.com/javase/8/docs/api/java/util/Date.html);*;
+
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        String dateString = formatter.format(sendingDate);
+        returnString += dateString + FIELDS_DELIMITER;
+        return returnString;
+        /*  +nomeMittente@test.it
+            ;*;nomeDestinatario1@test.it nomeDestinatario2@test.it nomeDestinatarioN@test.it
+            ;*;argomento della mail
+            ;*;corpo della mail
+            ;*;dd/MM/yyyy HH:mm:ss(Data https://docs.oracle.com/javase/8/docs/api/java/util/Date.html)
+         */
     }
 }
