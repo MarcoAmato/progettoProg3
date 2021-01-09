@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.ParseException;
@@ -108,7 +109,10 @@ public class Server extends Application {
                 while(true){
                     startConnection(inStream, outStream);
                 }
-            }catch (IOException e){
+            }catch (ConnectException e){
+                System.out.println("Client disconnected, bye bye");
+            }
+            catch (IOException e){
                 e.printStackTrace();
             }
         }

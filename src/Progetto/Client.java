@@ -49,22 +49,16 @@ public class Client extends Application {
                 System.out.println(emailIsOkay);
             }
 
+        }catch (SocketException e){
+            System.out.println("Connection interrupted. Trying to connect again...");
+            try {
+                sleep(5000);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+            throw new ConnectException();
         }catch(IOException e){
-            if (e instanceof SocketException){
-                System.out.println("Connection interrupted. Trying to connect again...");
-                try {
-                    sleep(5000);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-                throw new ConnectException();
-            }
-            else {
-                System.out.println(e.getClass());
-                System.out.println(e instanceof SocketException);
-                e.printStackTrace();
-
-            }
+            e.printStackTrace();
         }
     }
 }
