@@ -6,39 +6,79 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.SocketException;
+
+import static java.lang.Thread.sleep;
 
 public class Client extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        startClient();
+        boolean terminated = false;
+        while(!terminated){
+            try {
+                startClient();
+                terminated = true;
+            }catch (ConnectException e){}
+        }
     }
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    public static void startClient(){
+    public static void startClient() throws ConnectException {
         try {
             InetAddress localhost = InetAddress.getLocalHost();
+
             Socket serverSocket = new Socket(localhost, 5000);
-            String email = "matteo.trabacchino@libero.it"; //Qui deve essere preso l'input dell'utente tramite la view
+
+
+            String email = "bubu@bubu.bubuz"; //Qui deve essere preso l'input dell'utente tramite la view
 
             ObjectOutputStream out = new ObjectOutputStream(serverSocket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(serverSocket.getInputStream());
 
-            out.writeObject(email);
+            while(true){
+                out.writeObject(email);
 
-            boolean response = Common.getInputOfClass(in, Boolean.class);
+                boolean emailIsOkay = Common.getInputOfClass(in, Boolean.class);
+                System.out.println(emailIsOkay);
+            }
 
-            System.out.println(response);
-        }catch(UnknownHostException e){
-            e.printStackTrace();
         }catch(IOException e){
-            e.printStackTrace();
+            if (e instanceof SocketException){
+                System.out.println("Connection interrupted. Trying to connect again...");
+                try {
+                    sleep(5000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+                throw new ConnectException();
+            }
+            else {
+                System.out.println(e.getClass());
+                System.out.println(e instanceof SocketException);
+                e.printStackTrace();
+
+            }
         }
     }
 }
+
+
+/*while(true) {
+        try {
+        serverSocket = new Socket(localhost, 5000);
+        }catch (ConnectException e){
+        System.out.println("Connection interrupted. Trying to connect again...");
+        }
+        try {
+        sleep(5000);
+        } catch (InterruptedException e) {
+        e.printStackTrace();
+        }
+        }*/

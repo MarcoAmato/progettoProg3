@@ -16,21 +16,20 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class Server extends Application {
-    private static final ArrayList<String> mailBoxes = new ArrayList<>(); //Contiene i nomi delle caselle di posta memorizzate nel database
-    private static final ArrayList<Email> emails = new ArrayList<>();
+    private static final ArrayList<String> emailAddressesArray = new ArrayList<>(); //Contiene i nomi delle caselle di posta memorizzate nel database
+    private static final ArrayList<Email> emailsArray = new ArrayList<>();
 
     @Override
     public void start(Stage primaryStage){
         loadDatabase();
-        testDatabase();
-        //startServer();
+        startServer();
     }
 
-    public static void testDatabase(){
-        for(String s: mailBoxes){
+    public static void printDatabase(){
+        for(String s: emailAddressesArray){
             System.out.println(s);
         }
-        for(Email e: emails){
+        for(Email e: emailsArray){
             System.out.println(e);
         }
     }
@@ -68,10 +67,10 @@ public class Server extends Application {
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
-                        emails.add(new Email(sender, receivers, subject, body, sendingDate));
+                        emailsArray.add(new Email(sender, receivers, subject, body, sendingDate));
                     }
                     case '-' -> //La riga è un indirizzo di posta
-                        mailBoxes.add(line.substring(1));
+                        emailAddressesArray.add(line.substring(1));
                     default -> System.out.println("Error in parsing database. The read line starts with unexpected character: " + line.charAt(0));
                 }
             }
@@ -106,7 +105,9 @@ public class Server extends Application {
             try{
                 inStream = new ObjectInputStream(socket.getInputStream());
                 outStream = new ObjectOutputStream(socket.getOutputStream());
-                startConnection(inStream, outStream);
+                while(true){
+                    startConnection(inStream, outStream);
+                }
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -114,13 +115,12 @@ public class Server extends Application {
 
         private void startConnection(ObjectInputStream inStream, ObjectOutputStream outStream) throws IOException {
             String userEmail = Common.getInputOfClass(inStream,String.class);
-            boolean stringIsValid = findAccount(userEmail);
-            outStream.writeObject(stringIsValid);
+            boolean emailIsOkay = emailIsRegistered(userEmail);
+            outStream.writeObject(emailIsOkay);
         }
 
-        public boolean findAccount(String accountEmail){
-            //Questa funzione cerca l'indirizzo mail inserito nel database. Se lo trova restituisce true, altrimenti false
-            return true;
+        public boolean emailIsRegistered(String accountEmail){
+            return emailAddressesArray.contains(accountEmail);
         }
     }
 
