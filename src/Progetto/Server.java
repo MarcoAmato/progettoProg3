@@ -17,67 +17,17 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class Server extends Application {
-    private static final ArrayList<String> emailAddressesArray = new ArrayList<>(); //Contiene i nomi delle caselle di posta memorizzate nel database
-    private static final ArrayList<Email> emailsArray = new ArrayList<>();
+    private static Database database;
 
     @Override
     public void start(Stage primaryStage){
-        loadDatabase();
+        database = new Database(new File("src/database"));
         startServer();
-    }
-
-    public static void printDatabase(){
-        for(String s: emailAddressesArray){
-            System.out.println(s);
-        }
-        for(Email e: emailsArray){
-            System.out.println(e);
-        }
     }
 
 
     public static void main(String[] args) {
         launch(args);
-    }
-
-    public static void loadDatabase(){
-        Scanner scanner;
-
-        try{
-            scanner = new Scanner(new File("src/database"));
-
-            while(scanner.hasNextLine()){
-                String line = scanner.nextLine();
-                switch (line.charAt(0)) {
-                    case '+' -> {
-                        //La riga è una mail
-                        Scanner innerScanner = new Scanner(line.substring(1));
-                        innerScanner.useDelimiter(Email.FIELDS_DELIMITER);
-                        String sender = innerScanner.next();
-                        String receiversString = innerScanner.next();
-                        ArrayList<String> receivers = new ArrayList<>();
-                        Scanner receiversScanner = new Scanner(receiversString);
-                        while (receiversScanner.hasNext()) {
-                            receivers.add(receiversScanner.next());
-                        }
-                        String subject = innerScanner.next();
-                        String body = innerScanner.next();
-                        Date sendingDate = null;
-                        try {
-                            sendingDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(innerScanner.next());
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        emailsArray.add(new Email(sender, receivers, subject, body, sendingDate));
-                    }
-                    case '-' -> //La riga è un indirizzo di posta
-                        emailAddressesArray.add(line.substring(1));
-                    default -> System.out.println("Error in parsing database. The read line starts with unexpected character: " + line.charAt(0));
-                }
-            }
-        }catch (IOException e){
-            e.printStackTrace();
-        }
     }
 
     private static void startServer(){
@@ -92,8 +42,78 @@ public class Server extends Application {
         }catch(IOException e){e.printStackTrace();}
     }
 
+    private static class Database{
+        private final File databaseFile;
+        private final ArrayList<String> emailAddressesArray; //Contiene i nomi delle caselle di posta memorizzate nel database
+        private final ArrayList<Email> emailsArray;
+
+        public Database(File databaseFile){
+            this.databaseFile = databaseFile;
+            this.emailAddressesArray = new ArrayList<>();
+            this.emailsArray = new ArrayList<>();
+
+            loadDatabase();
+        }
+
+        private void loadDatabase(){
+            //scanner = new Scanner(new File("src/database"));
+            Scanner scanner;
+
+            try{
+                scanner = new Scanner(databaseFile);
+
+                while(scanner.hasNextLine()){
+                    String line = scanner.nextLine();
+                    switch (line.charAt(0)) {
+                        case '+' -> {
+                            //La riga è una mail
+                            Scanner innerScanner = new Scanner(line.substring(1));
+                            innerScanner.useDelimiter(Email.FIELDS_DELIMITER);
+                            String sender = innerScanner.next();
+                            String receiversString = innerScanner.next();
+                            ArrayList<String> receivers = new ArrayList<>();
+                            Scanner receiversScanner = new Scanner(receiversString);
+                            while (receiversScanner.hasNext()) {
+                                receivers.add(receiversScanner.next());
+                            }
+                            String subject = innerScanner.next();
+                            String body = innerScanner.next();
+                            Date sendingDate = null;
+                            try {
+                                sendingDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(innerScanner.next());
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            emailsArray.add(new Email(sender, receivers, subject, body, sendingDate));
+
+                        }
+                        case '-' -> //La riga è un indirizzo di posta
+                                emailAddressesArray.add(line.substring(1));
+                        default -> System.out.println("Error in parsing database. The read line starts with unexpected character: " + line.charAt(0));
+                    }
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        public boolean emailIsRegistered(String accountEmail){
+            return emailAddressesArray.contains(accountEmail);
+        }
+
+        public void printDatabase(){
+            for(String s: emailAddressesArray){
+                System.out.println(s);
+            }
+            for(Email e: emailsArray){
+                System.out.println(e);
+            }
+        }
+    }
+
     private static class ClientHandler implements Runnable{
         private final Socket socket;
+        private String email;
 
         public ClientHandler(Socket socket){
             this.socket = socket;
@@ -119,12 +139,11 @@ public class Server extends Application {
 
         private void startConnection(ObjectInputStream inStream, ObjectOutputStream outStream) throws IOException {
             String userEmail = Common.getInputOfClass(inStream,String.class);
-            boolean emailIsOkay = emailIsRegistered(userEmail);
-            outStream.writeObject(emailIsOkay);
-        }
+            boolean emailIsOkay = database.emailIsRegistered(userEmail);
+            if (emailIsOkay) email = userEmail;
 
-        public boolean emailIsRegistered(String accountEmail){
-            return emailAddressesArray.contains(accountEmail);
+            System.out.println(this.email);
+            outStream.writeObject(emailIsOkay);
         }
     }
 

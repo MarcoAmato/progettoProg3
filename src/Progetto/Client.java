@@ -44,7 +44,7 @@ public class Client extends Application {
             Socket serverSocket = new Socket(localhost, 5000);
 
 
-            String email = "bubu@bubu.bubuz"; //Qui deve essere preso l'input dell'utente tramite la view
+            String email = "bubu@bubu.bubu"; //Qui deve essere preso l'input dell'utente tramite la view
 
             ObjectOutputStream out = new ObjectOutputStream(serverSocket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(serverSocket.getInputStream());
