@@ -22,7 +22,14 @@ public class Client extends Application {
             try {
                 startClient();
                 terminated = true;
-            }catch (ConnectException e){}
+            }catch (ConnectException e){
+                System.out.println("Connection interrupted. Trying to connect again...");
+                try {
+                    sleep(5000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 
@@ -42,21 +49,13 @@ public class Client extends Application {
             ObjectOutputStream out = new ObjectOutputStream(serverSocket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(serverSocket.getInputStream());
 
-            while(true){
-                out.writeObject(email);
+            out.writeObject(email);
 
-                boolean emailIsOkay = Common.getInputOfClass(in, Boolean.class);
-                System.out.println(emailIsOkay);
-            }
+            boolean emailIsOkay = Common.getInputOfClass(in, Boolean.class);
+            System.out.println(emailIsOkay);
 
-        }catch (SocketException e){
-            System.out.println("Connection interrupted. Trying to connect again...");
-            try {
-                sleep(5000);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
-            throw new ConnectException();
+
+        }catch (SocketException e){throw new ConnectException();
         }catch(IOException e){
             e.printStackTrace();
         }

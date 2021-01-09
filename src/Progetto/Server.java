@@ -106,9 +106,9 @@ public class Server extends Application {
             try{
                 inStream = new ObjectInputStream(socket.getInputStream());
                 outStream = new ObjectOutputStream(socket.getOutputStream());
-                while(true){
-                    startConnection(inStream, outStream);
-                }
+
+                startConnection(inStream, outStream);
+
             }catch (ConnectException e){
                 System.out.println("Client disconnected, bye bye");
             }
