@@ -3,6 +3,7 @@ package Progetto;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
@@ -35,7 +36,7 @@ class Common {
     }
 }
 
-class Email{
+class Email implements Serializable {
     private final String sender;
     private final ArrayList<String> receivers;
     private final String subject;
@@ -50,6 +51,26 @@ class Email{
         this.subject = subject;
         this.body = body;
         this.sendingDate = sendingDate;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public ArrayList<String> getReceivers() {
+        return receivers;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public Date getSendingDate() {
+        return sendingDate;
     }
 
     public String toString(){
@@ -77,5 +98,18 @@ class Email{
             ;*;corpo della mail
             ;*;dd/MM/yyyy HH:mm:ss(Data https://docs.oracle.com/javase/8/docs/api/java/util/Date.html)
          */
+    }
+
+    public static boolean isArrayListOfEmails(ArrayList<Email> emails){
+        for(Object o: emails){
+            if(o == null){
+                System.out.println("Error: a null object was found in email arraylist");
+                return false;
+            }else if(o.getClass() != Email.class){
+                System.out.println("Error: a non-email object was found in email arraylist");
+                return false;
+            }
+        }
+        return true;
     }
 }

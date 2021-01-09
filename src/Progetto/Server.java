@@ -101,6 +101,26 @@ public class Server extends Application {
             return emailAddressesArray.contains(accountEmail);
         }
 
+        public ArrayList<Email> getEmailsSent(String sender){
+            ArrayList<Email> sentEmails = new ArrayList<>();
+
+            for(Email e: emailsArray){
+                if(e.getSender().equals(sender)) sentEmails.add(e);
+            }
+
+            return sentEmails;
+        }
+
+        public ArrayList<Email> getEmailsReceived(String receiver){
+            ArrayList<Email> sentEmails = new ArrayList<>();
+
+            for(Email e: emailsArray){
+                if(e.getReceivers().contains(receiver)) sentEmails.add(e);
+            }
+
+            return sentEmails;
+        }
+
         public void printDatabase(){
             for(String s: emailAddressesArray){
                 System.out.println(s);
@@ -113,7 +133,10 @@ public class Server extends Application {
 
     private static class ClientHandler implements Runnable{
         private final Socket socket;
-        private String email;
+
+        private String emailAddress;
+        private ArrayList<Email> emailsSent;
+        private ArrayList<Email> emailsReceived;
 
         public ClientHandler(Socket socket){
             this.socket = socket;
@@ -140,10 +163,15 @@ public class Server extends Application {
         private void startConnection(ObjectInputStream inStream, ObjectOutputStream outStream) throws IOException {
             String userEmail = Common.getInputOfClass(inStream,String.class);
             boolean emailIsOkay = database.emailIsRegistered(userEmail);
-            if (emailIsOkay) email = userEmail;
+            if (emailIsOkay) emailAddress = userEmail;
+            emailsSent = database.getEmailsSent(emailAddress);
+            emailsReceived = database.getEmailsReceived(emailAddress);
 
-            System.out.println(this.email);
-            outStream.writeObject(emailIsOkay);
+            outStream.writeObject(emailsSent);
+            outStream.writeObject(emailsReceived);
+
+            System.out.println(emailsSent);
+            System.out.println(emailsReceived);
         }
     }
 
