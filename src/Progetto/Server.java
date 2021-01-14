@@ -12,11 +12,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server extends Application {
+    private static final int NUM_THREAD = 100;
+
+    private static final ExecutorService clientHandlerExecutor = Executors.newFixedThreadPool(NUM_THREAD);
+    private static final Map<String, ClientHandler> currentClientsMap = new HashMap<>();
     private static Database database;
 
     @Override
@@ -25,9 +29,12 @@ public class Server extends Application {
         startServer();
     }
 
-
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static void addClientHandlerToHashMap(String email, ClientHandler clientHandler){
+        currentClientsMap.put(email, clientHandler);
     }
 
     private static void startServer(){
@@ -36,8 +43,7 @@ public class Server extends Application {
             while(true){ //Va aggiunto un sistema con Thread pool perchè attualmente vengono accettati tutti i client che richiedono la connessione generando nuovi Thread e questo non va bene per le prestazioni
                 Socket client = server.accept();
                 Runnable handler = new ClientHandler(client);
-                Thread t = new Thread(handler);
-                t.start();
+                clientHandlerExecutor.execute(handler);
             }
         }catch(IOException e){e.printStackTrace();}
     }
@@ -55,7 +61,7 @@ public class Server extends Application {
             loadDatabase();
         }
 
-        private void loadDatabase(){
+        private synchronized void loadDatabase(){
             //scanner = new Scanner(new File("src/database"));
             Scanner scanner;
 
@@ -121,14 +127,14 @@ public class Server extends Application {
             return sentEmails;
         }
 
-        public void printDatabase(){
+        /*public void printDatabase(){
             for(String s: emailAddressesArray){
                 System.out.println(s);
             }
             for(Email e: emailsArray){
                 System.out.println(e);
             }
-        }
+        }*/
     }
 
     private static class ClientHandler implements Runnable{
@@ -152,6 +158,17 @@ public class Server extends Application {
 
                 startConnection(inStream, outStream);
 
+                if(emailAddress!=null){ //allora non è stata trovata una email associata
+                    //vai in attesa di input utente fino a richiesta di chiusura connessione
+                    boolean clientWantsToDisconnect = false;
+                    while(!clientWantsToDisconnect){
+                        String command = Common.getInputOfClass(inStream, String.class);
+                        switch (command) {
+                            //tutti gli altri casi mi aspetto cose diverse Ex. scrivere mail, forzare refresh, ecc...
+                            default -> clientWantsToDisconnect = true;
+                        }
+                    }
+                }
             }catch (ConnectException e){
                 System.out.println("Client disconnected, bye bye");
             }
@@ -163,15 +180,24 @@ public class Server extends Application {
         private void startConnection(ObjectInputStream inStream, ObjectOutputStream outStream) throws IOException {
             String userEmail = Common.getInputOfClass(inStream,String.class);
             boolean emailIsOkay = database.emailIsRegistered(userEmail);
-            if (emailIsOkay) emailAddress = userEmail;
+            if (!emailIsOkay){
+                //email is not registered in database
+                //bisogna dare feedback negativo al client
+                return;
+            }
+            //fills variables based on email
+            emailAddress = userEmail;
             emailsSent = database.getEmailsSent(emailAddress);
             emailsReceived = database.getEmailsReceived(emailAddress);
+            //adds the clientHandler to hash map
+            Server.addClientHandlerToHashMap(emailAddress, this);
 
+            //gives positive feedback to client
             outStream.writeObject(emailsSent);
             outStream.writeObject(emailsReceived);
 
-            System.out.println(emailsSent);
-            System.out.println(emailsReceived);
+            /*System.out.println(emailsSent);
+            System.out.println(emailsReceived);*/
         }
     }
 
