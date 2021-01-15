@@ -35,6 +35,15 @@ class Common {
     }
 }
 
+class ClientServerMessages{
+    //Here are found all the constants that client and server use to know what the next objects will be
+
+    //Server constants
+    public static final int NEW_EMAILS_RECEIVED = 0;
+
+    //Client constants
+}
+
 class Email implements Serializable {
     private final String sender;
     private final ArrayList<String> receivers;

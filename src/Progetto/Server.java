@@ -40,7 +40,7 @@ public class Server extends Application {
     private static void startServer(){
         try{
             ServerSocket server = new ServerSocket(5000);
-            while(true){ //Va aggiunto un sistema con Thread pool perchè attualmente vengono accettati tutti i client che richiedono la connessione generando nuovi Thread e questo non va bene per le prestazioni
+            while(true){
                 Socket client = server.accept();
                 Runnable handler = new ClientHandler(client);
                 clientHandlerExecutor.execute(handler);
@@ -162,7 +162,7 @@ public class Server extends Application {
                     //vai in attesa di input utente fino a richiesta di chiusura connessione
                     boolean clientWantsToDisconnect = false;
                     while(!clientWantsToDisconnect){
-                        String command = Common.getInputOfClass(inStream, String.class);
+                        int command = Common.getInputOfClass(inStream, Integer.class);
                         switch (command) {
                             //tutti gli altri casi mi aspetto cose diverse Ex. scrivere mail, forzare refresh, ecc...
                             default -> clientWantsToDisconnect = true;
