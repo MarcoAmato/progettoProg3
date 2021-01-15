@@ -21,17 +21,37 @@ public class Client extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        boolean terminated = false;
-        while(!terminated){
-            try {
-                startClient();
-                terminated = true;
-            }catch (ConnectException e){
-                System.out.println("Connection interrupted. Trying to connect again...");
+        ObjectInputStream inStream = null;
+        ObjectOutputStream outStream = null;
+        boolean connectionSuccess = false;
+
+        try{
+            InetAddress localhost = InetAddress.getLocalHost();
+            Socket serverSocket = new Socket(localhost, 5000);
+
+            outStream = new ObjectOutputStream(serverSocket.getOutputStream());
+            inStream = new ObjectInputStream(serverSocket.getInputStream());
+
+            connectionSuccess = true;
+        }catch (IOException e){
+            e.printStackTrace();
+            //dai messaggio di connessione non possibile alla view
+        }
+
+        if(connectionSuccess){
+            boolean terminated = false;
+            while(!terminated){
                 try {
-                    sleep(5000);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+                    getAccessFromServer(inStream, outStream);
+
+                    terminated = true;
+                }catch (ConnectException e){
+                    System.out.println("Connection interrupted. Trying to connect again...");
+                    try {
+                        sleep(5000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 }
             }
         }
@@ -41,21 +61,23 @@ public class Client extends Application {
         launch(args);
     }
 
-    public static void startClient() throws ConnectException {
+    public static void getAccessFromServer(ObjectInputStream inStream, ObjectOutputStream outputStream) throws ConnectException {
         try {
-            InetAddress localhost = InetAddress.getLocalHost();
+            boolean emailIsOkay = false;
+            String emailFromInput = null;
 
-            Socket serverSocket = new Socket(localhost, 5000);
+            while(!emailIsOkay){ //loops until server recognises the email the user wrote
+                emailFromInput = "prova@prova.vincy"; //Qui deve essere preso l'input dell'utente tramite la view
 
-            String emailFromInput = "prova@prova.vincy"; //Qui deve essere preso l'input dell'utente tramite la view
+                outputStream.writeObject(emailFromInput);
+                emailIsOkay = Common.getInputOfClass(inStream, Boolean.class);
+                if(!emailIsOkay){
+                    //dai feedback negativo alla view del client
+                }
+            }
 
-            ObjectOutputStream out = new ObjectOutputStream(serverSocket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(serverSocket.getInputStream());
-
-            out.writeObject(emailFromInput);
-
-            ArrayList<Email> emailsReceivedInput = Common.getInputOfClass(in, ArrayList.class);
-            ArrayList<Email> emailsSentInput = Common.getInputOfClass(in, ArrayList.class);
+            ArrayList<Email> emailsReceivedInput = Common.getInputOfClass(inStream, ArrayList.class);
+            ArrayList<Email> emailsSentInput = Common.getInputOfClass(inStream, ArrayList.class);
 
             if(     emailsReceivedInput == null
                     || emailsSentInput == null

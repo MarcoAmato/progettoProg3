@@ -178,12 +178,16 @@ public class Server extends Application {
         }
 
         private void startConnection(ObjectInputStream inStream, ObjectOutputStream outStream) throws IOException {
-            String userEmail = Common.getInputOfClass(inStream,String.class);
-            boolean emailIsOkay = database.emailIsRegistered(userEmail);
-            if (!emailIsOkay){
-                //email is not registered in database
-                //bisogna dare feedback negativo al client
-                return;
+            boolean emailIsOkay = false;
+            String userEmail = null;
+            while(!emailIsOkay){
+                userEmail = Common.getInputOfClass(inStream,String.class);
+                emailIsOkay = database.emailIsRegistered(userEmail);
+                if(emailIsOkay){
+                    outStream.writeObject(true);
+                }else{
+                    outStream.writeObject(false);
+                }
             }
             //fills variables based on email
             emailAddress = userEmail;
@@ -199,6 +203,47 @@ public class Server extends Application {
             /*System.out.println(emailsSent);
             System.out.println(emailsReceived);*/
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /*
+        * public void start(Stage primaryStage) {
+        ObjectInputStream inStream;
+        ObjectOutputStream outStream;
+
+        boolean iWantToDisconnect = false;
+        while(!iWantToDisconnect){
+            try {
+                startClient();
+                while(!iWantToDisconnect){
+                    int command = Common.getInputOfClass(inStream, Integer.class);
+                    switch (command) {
+                        //tutti gli altri casi mi aspetto cose diverse Ex. scrivere mail, forzare refresh, ecc...
+                        default -> iWantToDisconnect = true;
+                    }
+                }
+                iWantToDisconnect = true;
+            }catch (ConnectException e){
+                System.out.println("Connection interrupted. Trying to connect again...");
+                try {
+                    sleep(5000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+    }
+        * */
     }
 
 }
