@@ -3,10 +3,7 @@ package Progetto;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -15,6 +12,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Server extends Application {
     private static final int NUM_THREAD = 100;
@@ -37,6 +37,14 @@ public class Server extends Application {
         currentClientsMap.put(email, clientHandler);
     }
 
+    public static ClientHandler getClientHandlerFromEmail(String email){
+        return currentClientsMap.get(email);
+    }
+
+    public static void saveEmail(Email email){
+        database.saveEmail(email);
+    }
+
     private static void startServer(){
         try{
             ServerSocket server = new ServerSocket(5000);
@@ -52,6 +60,9 @@ public class Server extends Application {
         private final File databaseFile;
         private final ArrayList<String> emailAddressesArray; //Contiene i nomi delle caselle di posta memorizzate nel database
         private final ArrayList<Email> emailsArray;
+        private final ReadWriteLock rwl = new ReentrantReadWriteLock();
+        private final Lock readLock = rwl.readLock();
+        private final Lock writeLock = rwl.writeLock();
 
         public Database(File databaseFile){
             this.databaseFile = databaseFile;
@@ -61,8 +72,9 @@ public class Server extends Application {
             loadDatabase();
         }
 
-        private synchronized void loadDatabase(){
+        private void loadDatabase(){
             //scanner = new Scanner(new File("src/database"));
+            writeLock.lock();
             Scanner scanner;
 
             try{
@@ -100,19 +112,26 @@ public class Server extends Application {
                 }
             }catch (IOException e){
                 e.printStackTrace();
+            }finally {
+                writeLock.unlock();
             }
         }
 
         public boolean emailIsRegistered(String accountEmail){
-            return emailAddressesArray.contains(accountEmail);
+            readLock.lock();
+            boolean retValue = emailAddressesArray.contains(accountEmail);
+            readLock.unlock();
+            return retValue;
         }
 
         public ArrayList<Email> getEmailsSent(String sender){
             ArrayList<Email> sentEmails = new ArrayList<>();
 
+            readLock.lock();
             for(Email e: emailsArray){
                 if(e.getSender().equals(sender)) sentEmails.add(e);
             }
+            readLock.unlock();
 
             return sentEmails;
         }
@@ -120,13 +139,29 @@ public class Server extends Application {
         public ArrayList<Email> getEmailsReceived(String receiver){
             ArrayList<Email> sentEmails = new ArrayList<>();
 
+            readLock.lock();
             for(Email e: emailsArray){
                 if(e.getReceivers().contains(receiver)) sentEmails.add(e);
             }
+            readLock.unlock();
 
             return sentEmails;
         }
 
+        public void saveEmail(Email email){
+            writeLock.lock();
+            emailsArray.add(email);
+            try{
+                BufferedWriter out = new BufferedWriter(new FileWriter(databaseFile, true));
+                out.append(email.toString()+"\n");
+                out.close();
+            }catch (IOException e){
+                System.out.println("Could not save new email to database");
+                e.printStackTrace();
+            }finally {
+                writeLock.unlock();
+            }
+        }
         /*public void printDatabase(){
             for(String s: emailAddressesArray){
                 System.out.println(s);
@@ -137,12 +172,16 @@ public class Server extends Application {
         }*/
     }
 
+    @SuppressWarnings("SynchronizeOnNonFinalField")
     private static class ClientHandler implements Runnable{
         private final Socket socket;
 
         private String emailAddress;
         private ArrayList<Email> emailsSent;
         private ArrayList<Email> emailsReceived;
+        private ObjectInputStream inStream;
+        private ObjectOutputStream outStream;
+
 
         public ClientHandler(Socket socket){
             this.socket = socket;
@@ -150,13 +189,11 @@ public class Server extends Application {
 
         @Override
         public void run() {
-            ObjectInputStream inStream;
-            ObjectOutputStream outStream;
             try{
                 inStream = new ObjectInputStream(socket.getInputStream());
                 outStream = new ObjectOutputStream(socket.getOutputStream());
 
-                startConnection(inStream, outStream);
+                startConnection();
 
                 if(emailAddress!=null){ //allora non è stata trovata una email associata
                     //vai in attesa di input utente fino a richiesta di chiusura connessione
@@ -164,8 +201,36 @@ public class Server extends Application {
                     while(!clientWantsToDisconnect){
                         int command = Common.getInputOfClass(inStream, Integer.class);
                         switch (command) {
+                            case CSMex.NEW_EMAIL_TO_SEND:
+                                synchronized (outStream){ //the outStream should be locked because in the meantime a new Email could be received and the client is waiting for the list of mispelled accounts
+                                    Email newEmailToSend = Common.getInputOfClass(inStream, Email.class);
+                                    ArrayList<String> receivers = newEmailToSend.getReceivers();
+
+                                    ArrayList<String> misspelledAccounts = new ArrayList<>();
+                                    ArrayList<String> correctAccounts = new ArrayList<>();
+                                    for(String receiver: receivers){
+                                        if(!database.emailIsRegistered(receiver)){
+                                            misspelledAccounts.add(receiver);
+                                        }else{
+                                            correctAccounts.add(receiver);
+                                        }
+                                    }
+                                    outStream.writeObject(misspelledAccounts);
+                                    outStream.writeObject(correctAccounts);
+                                    if(misspelledAccounts.size() == 0){
+                                        for(String receiver: receivers){
+                                            sendEmail(newEmailToSend, receiver);
+                                        }
+                                        Server.saveEmail(newEmailToSend);
+                                        outStream.writeObject(true);
+                                    }
+                                }
+
+                                break;
                             //tutti gli altri casi mi aspetto cose diverse Ex. scrivere mail, forzare refresh, ecc...
-                            default -> clientWantsToDisconnect = true;
+                            default:
+                                clientWantsToDisconnect = true;
+                                break;
                         }
                     }
                 }
@@ -177,7 +242,7 @@ public class Server extends Application {
             }
         }
 
-        private void startConnection(ObjectInputStream inStream, ObjectOutputStream outStream) throws IOException {
+        private void startConnection() throws IOException {
             boolean emailIsOkay = false;
             String userEmail = null;
             while(!emailIsOkay){
@@ -204,46 +269,26 @@ public class Server extends Application {
             System.out.println(emailsReceived);*/
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-        /*
-        * public void start(Stage primaryStage) {
-        ObjectInputStream inStream;
-        ObjectOutputStream outStream;
-
-        boolean iWantToDisconnect = false;
-        while(!iWantToDisconnect){
-            try {
-                startClient();
-                while(!iWantToDisconnect){
-                    int command = Common.getInputOfClass(inStream, Integer.class);
-                    switch (command) {
-                        //tutti gli altri casi mi aspetto cose diverse Ex. scrivere mail, forzare refresh, ecc...
-                        default -> iWantToDisconnect = true;
-                    }
-                }
-                iWantToDisconnect = true;
-            }catch (ConnectException e){
-                System.out.println("Connection interrupted. Trying to connect again...");
-                try {
-                    sleep(5000);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
+        private void sendEmail(Email email, String receiver){
+            emailsSent.add(email);
+            ClientHandler activeClientHandler = getClientHandlerFromEmail(receiver);
+            if(activeClientHandler != null){
+                activeClientHandler.receiveEmail(email);
             }
         }
-    }
-        * */
+
+        private void receiveEmail(Email email){
+            emailsReceived.add(email);
+            try{
+                synchronized (outStream){ //needs synchro because multiple emails could be received in a row and this could lead to errors
+                    outStream.writeObject(CSMex.NEW_EMAIL_RECEIVED);
+                    outStream.writeObject(email);
+                }
+            }catch (IOException e){
+                System.out.println("Error, server can't write new mail to client");
+                e.printStackTrace();
+            }
+        }
     }
 
 }

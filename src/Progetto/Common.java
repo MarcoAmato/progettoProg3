@@ -35,13 +35,14 @@ class Common {
     }
 }
 
-class ClientServerMessages{
+class CSMex {
     //Here are found all the constants that client and server use to know what the next objects will be
 
-    //Server constants
-    public static final int NEW_EMAILS_RECEIVED = 0;
+    //Server sent constants
+    public static final int NEW_EMAIL_RECEIVED = 0;
 
-    //Client constants
+    //Client sent constants
+    public static final int NEW_EMAIL_TO_SEND = 0;
 }
 
 class Email implements Serializable {
