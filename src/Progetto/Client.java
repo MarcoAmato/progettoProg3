@@ -90,20 +90,15 @@ public class Client extends Application {
 				}
 			}
 
-			ArrayList<Email> emailsReceivedInput = Common.getInputOfClass(inStream, ArrayList.class);
-			ArrayList<Email> emailsSentInput = Common.getInputOfClass(inStream, ArrayList.class);
+			ArrayList emailsReceivedInput = Common.getInputOfClass(inStream, ArrayList.class);
+			ArrayList emailsSentInput = Common.getInputOfClass(inStream, ArrayList.class);
 
-			if(     emailsReceivedInput == null
-					|| emailsSentInput == null
-					|| !Email.isArrayListOfEmails(emailsReceivedInput)
-					|| !Email.isArrayListOfEmails(emailsSentInput)
-			){
-				throw new RuntimeException("Error, the emails got from the server have something wrong");
-			}else{
-				emailAddress = emailFromInput;
-				emailsReceived = emailsReceivedInput;
-				emailsSent = emailsSentInput;
-			}
+			ArrayList<Email> emailsReceivedInputConverted = Common.ConvertArrayList(emailsReceivedInput, Email.class);
+			ArrayList<Email> emailsSentInputConverted = Common.ConvertArrayList(emailsReceivedInput, Email.class);
+
+			emailAddress = emailFromInput;
+			emailsReceived = emailsReceivedInputConverted;
+			emailsSent = emailsSentInputConverted;
 
             /*System.out.println(emailAddress);
             for(Email e: emailsSent){

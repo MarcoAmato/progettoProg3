@@ -33,6 +33,28 @@ class Common {
 
         return sanitizedInput;
     }
+
+    //CONTROLLARE COME CAZZO CORREGGERE, FORSE POSSO USARE LE WILDCARD, RIGUARDARE LA LEZIONE SUI TIPI GENERICI
+    public static <T> ArrayList <T> ConvertArrayList(ArrayList l, Class<T> newArrayListClass){
+        if(l == null){
+            throw new RuntimeException("Error, could not convert null ArrayList");
+        }
+
+        ArrayList<T> newArrayList = new ArrayList<>();
+
+        for (Object element: l) {
+            if(element == null){
+                throw new RuntimeException("Error, trying to insert null element in ArrayList");
+            }else if(element.getClass() != newArrayListClass){
+                throw new RuntimeException("Error, trying to insert an object of class "+element.getClass()+" in Arraylist of type " + newArrayListClass.getName());
+            }
+            else{
+                newArrayList.add((T) element);
+            }
+        }
+
+        return newArrayList;
+    }
 }
 
 class CSMex {
