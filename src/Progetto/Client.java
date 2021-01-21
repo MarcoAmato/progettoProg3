@@ -12,6 +12,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.Thread.sleep;
 
@@ -21,6 +23,8 @@ public class Client extends Application {
 	private static ArrayList<Email> emailsSent;
 	private static ObjectInputStream inStream;
 	private static ObjectOutputStream outStream;
+	private static Lock inputLock = new ReentrantLock();
+	private static Lock outputLock = new ReentrantLock();
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -45,16 +49,15 @@ public class Client extends Application {
 				try {
 					getAccessFromServer();
 					//test///////////////////
-					String sender = emailAddress;
+					String sender = "prova@prova.vincy";
 					ArrayList<String> receivers = new ArrayList<>();
 						receivers.add("ciao@nigga.it");
-						receivers.add("bubu@bubu.bubua");
-					String subject = "subject test";
-					String body = "body test bla bla bla";
+						receivers.add("bubu@bubu.bubu");
+					String subject = "vedi che uno non lo riconoscerà";
+					String body = "ano è una cosa giusta provare a capire se ti riconosce le email scritte male no Marco scrivi un altro body I love furry potevi scrivere";
 					Date date = new Date();
 
 					sendEmail(new Email(sender, receivers, subject, body, date));
-
 					//test///////////////////
 					getInputFromServerLoop();
 					terminated = true;
@@ -76,6 +79,8 @@ public class Client extends Application {
 
 	public static void getAccessFromServer() throws ConnectException {
 		try {
+			inputLock.lock();
+			outputLock.lock();
 			boolean emailIsOkay = false;
 			String emailFromInput = null;
 
@@ -112,6 +117,9 @@ public class Client extends Application {
 			throw new ConnectException();
 		}catch(IOException e){
 			e.printStackTrace();
+		}finally {
+			inputLock.unlock();
+			outputLock.unlock();
 		}
 	}
 
@@ -120,6 +128,8 @@ public class Client extends Application {
 		while(connectionOkay)
 			try{ //here client waits for server input which for the moment will be only a new email that the client has received
 				int command = Common.getInputOfClass(inStream, Integer.class);
+				inputLock.lock();
+				outputLock.lock();
 				switch (command) {
 					case CSMex.NEW_EMAIL_RECEIVED -> {
 						Email newEmail = Common.getInputOfClass(inStream, Email.class);
@@ -130,6 +140,8 @@ public class Client extends Application {
 						connectionOkay = false;
 					}
 				}
+				inputLock.unlock();
+				outputLock.unlock();
 			}catch (ConnectException e){
 				connectionOkay = false;
 			}
@@ -137,6 +149,9 @@ public class Client extends Application {
 
 	public static void sendEmail(Email emailToSend){ //la view chiama questo metodo quando vuole inviare la mail
 		try{
+			inputLock.lock();
+			outputLock.lock();
+
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
 
@@ -167,6 +182,9 @@ public class Client extends Application {
 			//dare feedback di impossibilità di inviare mail alla view
 			System.out.println("Could not send email");
 			e.printStackTrace();
+		}finally {
+			inputLock.unlock();
+			outputLock.unlock();
 		}
 	}
 }

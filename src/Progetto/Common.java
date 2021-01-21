@@ -65,6 +65,7 @@ class CSMex {
 
     //Client sent constants
     public static final int NEW_EMAIL_TO_SEND = 0;
+    public static final int DISCONNECTION = 1;
 }
 
 class Email implements Serializable {

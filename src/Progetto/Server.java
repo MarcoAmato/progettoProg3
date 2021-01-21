@@ -200,38 +200,7 @@ public class Server extends Application {
                     boolean clientWantsToDisconnect = false;
                     while(!clientWantsToDisconnect){
                         int command = Common.getInputOfClass(inStream, Integer.class);
-                        switch (command) {
-                            case CSMex.NEW_EMAIL_TO_SEND:
-                                synchronized (outStream){ //the outStream should be locked because in the meantime a new Email could be received and the client is waiting for the list of mispelled accounts
-                                    Email newEmailToSend = Common.getInputOfClass(inStream, Email.class);
-                                    ArrayList<String> receivers = newEmailToSend.getReceivers();
-
-                                    ArrayList<String> misspelledAccounts = new ArrayList<>();
-                                    ArrayList<String> correctAccounts = new ArrayList<>();
-                                    for(String receiver: receivers){
-                                        if(!database.emailIsRegistered(receiver)){
-                                            misspelledAccounts.add(receiver);
-                                        }else{
-                                            correctAccounts.add(receiver);
-                                        }
-                                    }
-                                    outStream.writeObject(misspelledAccounts);
-                                    outStream.writeObject(correctAccounts);
-                                    if(misspelledAccounts.size() == 0){
-                                        for(String receiver: receivers){
-                                            sendEmail(newEmailToSend, receiver);
-                                        }
-                                        Server.saveEmail(newEmailToSend);
-                                        outStream.writeObject(true);
-                                    }
-                                }
-
-                                break;
-                            //tutti gli altri casi mi aspetto cose diverse Ex. scrivere mail, forzare refresh, ecc...
-                            default:
-                                clientWantsToDisconnect = true;
-                                break;
-                        }
+                        clientWantsToDisconnect = answerMessage(command);
                     }
                 }
             }catch (ConnectException e){
@@ -239,6 +208,55 @@ public class Server extends Application {
             }
             catch (IOException e){
                 e.printStackTrace();
+            }
+        }
+
+        public boolean answerMessage(int command) throws ConnectException{
+            /*
+            Handles the client request based on the command that was received
+            It returns true if the message contains a disconnection request, if
+            the client is not reachable or if an unexpected message is received.
+            Otherwise returns false
+             */
+            try{
+                switch (command) {
+                    case CSMex.NEW_EMAIL_TO_SEND:
+                        synchronized (outStream){ //the outStream should be locked because in the meantime a new Email could be received and the client is waiting for the list of mispelled accounts
+                            Email newEmailToSend = Common.getInputOfClass(inStream, Email.class);
+                            ArrayList<String> receivers = newEmailToSend.getReceivers();
+
+                            ArrayList<String> misspelledAccounts = new ArrayList<>();
+                            ArrayList<String> correctAccounts = new ArrayList<>();
+                            for(String receiver: receivers){
+                                if(!database.emailIsRegistered(receiver)){
+                                    misspelledAccounts.add(receiver);
+                                }else{
+                                    correctAccounts.add(receiver);
+                                }
+                            }
+                            outStream.writeObject(misspelledAccounts);
+                            outStream.writeObject(correctAccounts);
+                            if(misspelledAccounts.size() == 0){
+                                for(String receiver: receivers){
+                                    sendEmail(newEmailToSend, receiver);
+                                }
+                                emailsSent.add(newEmailToSend);
+                                Server.saveEmail(newEmailToSend);
+                                outStream.writeObject(true);
+                            }
+                        }
+                        break;
+                    //tutti gli altri casi mi aspetto cose diverse Ex. scrivere mail, forzare refresh, ecc...
+                    default:
+                        return true;
+                }
+                return false;
+            } catch (IOException e) {
+                if(e.getClass() == ConnectException.class){
+                    throw new ConnectException();
+                }
+                e.printStackTrace();
+                return true;
             }
         }
 
@@ -270,7 +288,6 @@ public class Server extends Application {
         }
 
         private void sendEmail(Email email, String receiver){
-            emailsSent.add(email);
             ClientHandler activeClientHandler = getClientHandlerFromEmail(receiver);
             if(activeClientHandler != null){
                 activeClientHandler.receiveEmail(email);
