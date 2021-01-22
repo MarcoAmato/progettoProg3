@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.ParseException;
@@ -46,6 +45,7 @@ public class Server extends Application {
 		database.saveEmail(email);
 	}
 
+	@SuppressWarnings("InfiniteLoopStatement")
 	private static void startServer(){
 		try{
 			ServerSocket server = new ServerSocket(5000);
@@ -154,7 +154,7 @@ public class Server extends Application {
 			emailsArray.add(email);
 			try{
 				BufferedWriter out = new BufferedWriter(new FileWriter(databaseFile, true));
-				out.append(email.toString()+"\n");
+				out.append(email.toString()).append("\n");
 				out.close();
 			}catch (IOException e){
 				System.out.println("Could not save new email to database");
@@ -173,7 +173,6 @@ public class Server extends Application {
         }*/
 	}
 
-	@SuppressWarnings("SynchronizeOnNonFinalField")
 	private static class ClientHandler implements Runnable{
 		private final Socket socket;
 
@@ -182,9 +181,7 @@ public class Server extends Application {
 		private ArrayList<Email> emailsReceived;
 		private ObjectInputStream inStream;
 		private ObjectOutputStream outStream;
-		private Lock inputLock = new ReentrantLock();
-		private Lock outputLock = new ReentrantLock();
-
+		private final Lock streamLock = new ReentrantLock();
 
 		public ClientHandler(Socket socket){
 			this.socket = socket;
@@ -203,7 +200,7 @@ public class Server extends Application {
 					boolean clientWantsToDisconnect = false;
 					while(!clientWantsToDisconnect){
 						int command = Common.getInputOfClass(inStream, Integer.class);
-						clientWantsToDisconnect = answerMessage(command);
+						clientWantsToDisconnect = answerMessageWithFeedback(command);
 					}
 				}
 			}catch (IOException e){
@@ -212,16 +209,16 @@ public class Server extends Application {
 			System.out.println("Client disconnected, bye bye");
 		}
 
-		public boolean answerMessage(int command){
+		public boolean answerMessageWithFeedback(int command){
             /*
             Handles the client request based on the command that was received
-            It returns true if the message contains a disconnection request, if
-            the client is not reachable or if an unexpected message is received.
+            It returns true if the client wants to disconnect or an error makes
+            closing connection the best option, if the client is not reachable
+            or if an unexpected message is received.
             Otherwise returns false
              */
 			try{
-				inputLock.lock();
-				outputLock.lock();
+				streamLock.lock();
 				switch (command) {
 					case CSMex.NEW_EMAIL_TO_SEND:
 						 //the outStream should be locked because in the meantime a new Email could be received and the client is waiting for the list of mispelled accounts
@@ -248,24 +245,29 @@ public class Server extends Application {
 							outStream.writeObject(true);
 						}
 						break;
+
+					case CSMex.DISCONNECTION:
+						return true;
+
+					case CSMex.CHECK_EMAIL_ADDRESS_EXISTS:
+						String emailAddress = Common.getInputOfClass(inStream, String.class);
+						outStream.writeObject(database.emailIsRegistered(emailAddress));
 					//tutti gli altri casi mi aspetto cose diverse Ex. scrivere mail, forzare refresh, ecc...
 					default:
-						return true;
+						System.out.println("Unexpected input from client: "+command);
 				}
-				return false;
 			} catch (IOException e) {
 				e.printStackTrace();
 				return true;
 			}finally {
-				inputLock.unlock();
-				outputLock.unlock();
+				streamLock.unlock();
 			}
+			return false;
 		}
 
 		private boolean startConnection(){
 			try{
-				inputLock.lock();
-				outputLock.lock();
+				streamLock.lock();
 				Server.database.readLock.lock(); //the database is locked outside loop so during connection no client can send email while connection is not completed
 				boolean emailIsOkay = false;
 				String userEmail = null;
@@ -297,8 +299,7 @@ public class Server extends Application {
 				System.out.println("It was not possible to establish connection with client");
 				return false;
 			}finally {
-				inputLock.unlock();
-				outputLock.unlock();
+				streamLock.unlock();
 				Server.database.readLock.unlock();
 			}
 		}
@@ -313,13 +314,15 @@ public class Server extends Application {
 		private void receiveEmail(Email email){
 			emailsReceived.add(email);
 			try{
-				synchronized (outStream){ //needs synchro because multiple emails could be received in a row and this could lead to errors
-					outStream.writeObject(CSMex.NEW_EMAIL_RECEIVED);
-					outStream.writeObject(email);
-				}
+				//needs synchro because multiple emails could be received in a row and this could lead to errors
+				streamLock.lock();
+				outStream.writeObject(CSMex.NEW_EMAIL_RECEIVED);
+				outStream.writeObject(email);
 			}catch (IOException e){
 				System.out.println("Error, server can't write new mail to client");
 				e.printStackTrace();
+			}finally {
+				streamLock.unlock();
 			}
 		}
 	}

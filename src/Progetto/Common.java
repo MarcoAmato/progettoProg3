@@ -22,7 +22,7 @@ class Common {
             }
             else{
                 //input is not null and type arraylist
-                sanitizedInput = (E)input;
+                sanitizedInput = expectedInputClass.cast(input);
             }
         }catch(IOException | ClassNotFoundException e){
             if (e instanceof SocketException){
@@ -34,8 +34,7 @@ class Common {
         return sanitizedInput;
     }
 
-    //CONTROLLARE COME CAZZO CORREGGERE, FORSE POSSO USARE LE WILDCARD, RIGUARDARE LA LEZIONE SUI TIPI GENERICI
-    public static <T> ArrayList <T> ConvertArrayList(ArrayList l, Class<T> newArrayListClass){
+   public static <T> ArrayList <T> ConvertArrayList(ArrayList<?> l, Class<T> newArrayListClass){
         if(l == null){
             throw new RuntimeException("Error, could not convert null ArrayList");
         }
@@ -49,7 +48,7 @@ class Common {
                 throw new RuntimeException("Error, trying to insert an object of class "+element.getClass()+" in Arraylist of type " + newArrayListClass.getName());
             }
             else{
-                newArrayList.add((T) element);
+                newArrayList.add(newArrayListClass.cast(element));
             }
         }
 
@@ -66,6 +65,7 @@ class CSMex {
     //Client sent constants
     public static final int NEW_EMAIL_TO_SEND = 0;
     public static final int DISCONNECTION = 1;
+    public static final int CHECK_EMAIL_ADDRESS_EXISTS = 2;
 }
 
 class Email implements Serializable {

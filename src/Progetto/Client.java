@@ -23,8 +23,8 @@ public class Client extends Application {
 	private static ArrayList<Email> emailsSent;
 	private static ObjectInputStream inStream;
 	private static ObjectOutputStream outStream;
-	private static Lock inputLock = new ReentrantLock();
-	private static Lock outputLock = new ReentrantLock();
+	private static final Lock inputLock = new ReentrantLock();
+	private static final Lock outputLock = new ReentrantLock();
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -95,15 +95,12 @@ public class Client extends Application {
 				}
 			}
 
-			ArrayList emailsReceivedInput = Common.getInputOfClass(inStream, ArrayList.class);
-			ArrayList emailsSentInput = Common.getInputOfClass(inStream, ArrayList.class);
-
-			ArrayList<Email> emailsReceivedInputConverted = Common.ConvertArrayList(emailsReceivedInput, Email.class);
-			ArrayList<Email> emailsSentInputConverted = Common.ConvertArrayList(emailsReceivedInput, Email.class);
+			ArrayList<Email> emailsReceivedInput = Common.ConvertArrayList(Common.getInputOfClass(inStream, ArrayList.class), Email.class);
+			ArrayList<Email> emailsSentInput = Common.ConvertArrayList(Common.getInputOfClass(inStream, ArrayList.class), Email.class);
 
 			emailAddress = emailFromInput;
-			emailsReceived = emailsReceivedInputConverted;
-			emailsSent = emailsSentInputConverted;
+			emailsReceived = emailsReceivedInput;
+			emailsSent = emailsSentInput;
 
             /*System.out.println(emailAddress);
             for(Email e: emailsSent){
@@ -155,8 +152,8 @@ public class Client extends Application {
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
 
-			ArrayList<String> misspelledAccounts = Common.getInputOfClass(inStream, ArrayList.class);
-			ArrayList<String> correctAccounts = Common.getInputOfClass(inStream, ArrayList.class);
+			ArrayList<String> misspelledAccounts = Common.ConvertArrayList(Common.getInputOfClass(inStream, ArrayList.class), String.class);
+			ArrayList<String> correctAccounts = Common.ConvertArrayList(Common.getInputOfClass(inStream, ArrayList.class), String.class);
 
 			if(misspelledAccounts.size()>0){
 				//Hai inserito male gli account
@@ -182,6 +179,25 @@ public class Client extends Application {
 			//dare feedback di impossibilità di inviare mail alla view
 			System.out.println("Could not send email");
 			e.printStackTrace();
+		}finally {
+			inputLock.unlock();
+			outputLock.unlock();
+		}
+	}
+
+	public static boolean emailAddressExists(String emailAddress){
+		try{
+			inputLock.lock();
+			outputLock.lock();
+
+			outStream.writeObject(CSMex.CHECK_EMAIL_ADDRESS_EXISTS);
+			outStream.writeObject(emailAddress);
+			return Common.getInputOfClass(inStream, Boolean.class);
+		}catch (IOException e){
+			System.out.println("Email checking failed");
+			e.printStackTrace();
+			return false;
+			//continua lato server e integra lato client con quello che c è già
 		}finally {
 			inputLock.unlock();
 			outputLock.unlock();
