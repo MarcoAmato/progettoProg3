@@ -241,6 +241,7 @@ public class Server extends Application {
 				streamLock.lock();
 				switch (command) {
 					case CSMex.NEW_EMAIL_TO_SEND:
+
 						Email newEmailToSend = Common.getInputOfClass(inStream, Email.class);
 						ArrayList<String> receivers = newEmailToSend.getReceivers();
 						boolean allReceiversExist = true;
@@ -265,6 +266,10 @@ public class Server extends Application {
 							outStream.writeObject(true);
 
 							log("Email from "+emailAddress+" sent correctly");
+
+							//test
+							throw new RuntimeException("Test");
+							//test
 						}else{
 							outStream.writeObject(false);
 							log("Error, email from "+ emailAddress +" contains an incorrect receiver address");

@@ -47,6 +47,11 @@ public class Client extends Application {
 			while(!terminated){
 				try {
 					getAccessFromServer();
+					try{
+						sleep(5000);
+					}catch (InterruptedException e){
+						e.printStackTrace();
+					}
 					//test///////////////////
 					String sender = emailAddress;
 					ArrayList<String> receivers = new ArrayList<>();
@@ -71,9 +76,10 @@ public class Client extends Application {
 					}
 
 					//test///////////////////
+
 					getInputFromServerLoop();
 					terminated = true;
-				}catch (ConnectException e){
+				}catch (IOException e){
 					System.out.println("Connection interrupted. Trying to connect again...");
 					try {
 						sleep(5000);
@@ -132,13 +138,13 @@ public class Client extends Application {
 		}
 	}
 
-	public static void getInputFromServerLoop(){
+	public static void getInputFromServerLoop() throws ConnectException{
 		boolean connectionOkay = true;
-		while(connectionOkay)
-			try{ //here client waits for server input which for the moment will be only a new email that the client has received
+		while(connectionOkay) {
+			inputLock.lock();
+			outputLock.lock();
+			try { //here client waits for server input which for the moment will be only a new email that the client has received
 				int command = Common.getInputOfClass(inStream, Integer.class);
-				inputLock.lock();
-				outputLock.lock();
 				switch (command) {
 					case CSMex.NEW_EMAIL_RECEIVED -> {
 						Email newEmail = ClientUtil.getEmailFromServer();
@@ -149,11 +155,16 @@ public class Client extends Application {
 						connectionOkay = false;
 					}
 				}
+			} catch (IOException e) {
+				System.out.println("Exception during getInputFromServerLoop");
+				e.printStackTrace();
+				throw new ConnectException();
+			}finally {
 				inputLock.unlock();
 				outputLock.unlock();
-			}catch (ConnectException e){
-				connectionOkay = false;
 			}
+		}
+		System.out.println("fine");
 	}
 
 
