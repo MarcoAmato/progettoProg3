@@ -20,12 +20,14 @@ public class Server extends Application {
 	private static final int NUM_THREAD = 100;
 
 	private static final ExecutorService clientHandlerExecutor = Executors.newFixedThreadPool(NUM_THREAD);
-	private static final Map<String, ClientHandler> currentClientsMap = new HashMap<>();
+	private static final Map<String, ClientHandler> currentClientsMap = Collections.synchronizedMap(new HashMap<>());
 	private static Database database;
+	private static final List<String> logList = Collections.synchronizedList(new ArrayList<>());
 
 	@Override
 	public void start(Stage primaryStage){
 		database = new Database(new File("src/database"));
+		log("Database created");
 		startServer();
 	}
 
@@ -35,6 +37,10 @@ public class Server extends Application {
 
 	public static void addClientHandlerToHashMap(String email, ClientHandler clientHandler){
 		currentClientsMap.put(email, clientHandler);
+	}
+
+	public static void removeClientHandlerFromHashMap(String email){
+		currentClientsMap.remove(email);
 	}
 
 	public static ClientHandler getClientHandlerFromEmail(String email){
@@ -49,12 +55,20 @@ public class Server extends Application {
 	private static void startServer(){
 		try{
 			ServerSocket server = new ServerSocket(5000);
+			log("Socket created");
 			while(true){
 				Socket client = server.accept();
 				Runnable handler = new ClientHandler(client);
 				clientHandlerExecutor.execute(handler);
 			}
-		}catch(IOException e){e.printStackTrace();}
+		}catch(IOException e){
+			log("Error: exception in accepting Client");
+			e.printStackTrace();
+		}
+	}
+
+	public static void log(String logMessage){
+		logList.add(logMessage);
 	}
 
 	private static class Database{
@@ -83,9 +97,9 @@ public class Server extends Application {
 
 				while(scanner.hasNextLine()){
 					String line = scanner.nextLine();
+					//La riga è una mail
 					switch (line.charAt(0)) {
 						case '+' -> {
-							//La riga è una mail
 							Scanner innerScanner = new Scanner(line.substring(1));
 							innerScanner.useDelimiter(Email.FIELDS_DELIMITER);
 							String sender = innerScanner.next();
@@ -101,14 +115,17 @@ public class Server extends Application {
 							try {
 								sendingDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(innerScanner.next());
 							} catch (ParseException e) {
+								log("Error, incorrect date format detected in database");
 								e.printStackTrace();
 							}
 							emailsArray.add(new Email(sender, receivers, subject, body, sendingDate));
-
 						}
-						case '-' -> //La riga è un indirizzo di posta
-								emailAddressesArray.add(line.substring(1));
-						default -> System.out.println("Error in parsing database. The read line starts with unexpected character: " + line.charAt(0));
+						//La riga è un indirizzo di posta
+						case '-' -> emailAddressesArray.add(line.substring(1));
+						default -> {
+							log("Error in parsing database, unexpected line starting character: " + line.charAt(0));
+							System.out.println("Error in parsing database. The read line starts with unexpected character: " + line.charAt(0));
+						}
 					}
 				}
 			}catch (IOException e){
@@ -162,23 +179,25 @@ public class Server extends Application {
 			}finally {
 				writeLock.unlock();
 			}
+			log("New email inserted in database");
 		}
-        /*public void printDatabase(){
+
+        public void printDatabase(){
             for(String s: emailAddressesArray){
                 System.out.println(s);
             }
             for(Email e: emailsArray){
                 System.out.println(e);
             }
-        }*/
+        }
 	}
 
 	private static class ClientHandler implements Runnable{
 		private final Socket socket;
 
 		private String emailAddress;
-		private ArrayList<Email> emailsSent;
-		private ArrayList<Email> emailsReceived;
+		private List<Email> emailsSent;
+		private List<Email> emailsReceived;
 		private ObjectInputStream inStream;
 		private ObjectOutputStream outStream;
 		private final Lock streamLock = new ReentrantLock();
@@ -202,6 +221,7 @@ public class Server extends Application {
 						int command = Common.getInputOfClass(inStream, Integer.class);
 						clientWantsToDisconnect = answerMessageWithFeedback(command);
 					}
+					endConnection();
 				}
 			}catch (IOException e){
 				e.printStackTrace();
@@ -209,54 +229,62 @@ public class Server extends Application {
 			System.out.println("Client disconnected, bye bye");
 		}
 
+		/*
+		Handles the client request based on the command that was received.
+		It returns true if the client wants to disconnect or an error makes
+		closing connection the best option, if the client is not reachable
+		or if an unexpected message is received.
+		Otherwise returns false
+		 */
 		public boolean answerMessageWithFeedback(int command){
-            /*
-            Handles the client request based on the command that was received
-            It returns true if the client wants to disconnect or an error makes
-            closing connection the best option, if the client is not reachable
-            or if an unexpected message is received.
-            Otherwise returns false
-             */
 			try{
 				streamLock.lock();
 				switch (command) {
 					case CSMex.NEW_EMAIL_TO_SEND:
-						 //the outStream should be locked because in the meantime a new Email could be received and the client is waiting for the list of mispelled accounts
 						Email newEmailToSend = Common.getInputOfClass(inStream, Email.class);
 						ArrayList<String> receivers = newEmailToSend.getReceivers();
+						boolean allReceiversExist = true;
 
-						ArrayList<String> misspelledAccounts = new ArrayList<>();
-						ArrayList<String> correctAccounts = new ArrayList<>();
 						for(String receiver: receivers){
+							if(!allReceiversExist) break;
 							if(!database.emailIsRegistered(receiver)){
-								misspelledAccounts.add(receiver);
-							}else{
-								correctAccounts.add(receiver);
+
+								allReceiversExist = false;
 							}
 						}
-						outStream.writeObject(misspelledAccounts);
-						outStream.writeObject(correctAccounts);
-						if(misspelledAccounts.size() == 0){
-							for(String receiver: receivers){
-								sendEmail(newEmailToSend, receiver);
+
+						if(allReceiversExist){
+							synchronized (currentClientsMap){
+								//The HashMap is locked so while we send the emails no client logs. Otherwise he could not receive the new emails
+								for(String receiver: receivers){
+									sendEmail(newEmailToSend, receiver);
+								}
 							}
 							emailsSent.add(newEmailToSend);
 							Server.saveEmail(newEmailToSend);
 							outStream.writeObject(true);
+
+							log("Email from "+emailAddress+" sent correctly");
+						}else{
+							outStream.writeObject(false);
+							log("Error, email from "+ emailAddress +" contains an incorrect receiver address");
 						}
+
 						break;
 
 					case CSMex.DISCONNECTION:
+						log("Client "+emailAddress+" disconnected");
 						return true;
 
 					case CSMex.CHECK_EMAIL_ADDRESS_EXISTS:
 						String emailAddress = Common.getInputOfClass(inStream, String.class);
 						outStream.writeObject(database.emailIsRegistered(emailAddress));
-					//tutti gli altri casi mi aspetto cose diverse Ex. scrivere mail, forzare refresh, ecc...
+						break;
 					default:
-						System.out.println("Unexpected input from client: "+command);
+						log("Error, unexpected command from client: #"+command);
 				}
 			} catch (IOException e) {
+				log("Error in handling client message #"+command);
 				e.printStackTrace();
 				return true;
 			}finally {
@@ -280,10 +308,11 @@ public class Server extends Application {
 						outStream.writeObject(false);
 					}
 				}
+				log(emailAddress+" logged in");
 				//fills variables based on email
 				emailAddress = userEmail;
-				emailsSent = database.getEmailsSent(emailAddress);
-				emailsReceived = database.getEmailsReceived(emailAddress);
+				emailsSent = Collections.synchronizedList(database.getEmailsSent(emailAddress));
+				emailsReceived = Collections.synchronizedList(database.getEmailsReceived(emailAddress));
 				//adds the clientHandler to hash map
 				Server.addClientHandlerToHashMap(emailAddress, this);
 
@@ -296,6 +325,7 @@ public class Server extends Application {
                 /*System.out.println(emailsSent);
                 System.out.println(emailsReceived);*/
 			}catch (IOException e){
+				log("Error in client login");
 				System.out.println("It was not possible to establish connection with client");
 				return false;
 			}finally {
@@ -304,14 +334,24 @@ public class Server extends Application {
 			}
 		}
 
+		/**
+		 * ClientHandler is terminating, everything necessary to end
+		 * connection is done here
+		 */
+		private void endConnection(){
+			Server.removeClientHandlerFromHashMap(emailAddress);
+		}
+
 		private void sendEmail(Email email, String receiver){
 			ClientHandler activeClientHandler = getClientHandlerFromEmail(receiver);
 			if(activeClientHandler != null){
+				log("Sending email to Client Handler of "+activeClientHandler.emailAddress);
 				activeClientHandler.receiveEmail(email);
 			}
 		}
 
 		private void receiveEmail(Email email){
+			log(emailAddress+" received new email");
 			emailsReceived.add(email);
 			try{
 				//needs synchro because multiple emails could be received in a row and this could lead to errors

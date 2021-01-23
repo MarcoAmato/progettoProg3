@@ -10,8 +10,7 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -19,8 +18,8 @@ import static java.lang.Thread.sleep;
 
 public class Client extends Application {
 	private static String emailAddress;
-	private static ArrayList<Email> emailsReceived;
-	private static ArrayList<Email> emailsSent;
+	private static List<Email> emailsReceived;
+	private static List<Email> emailsSent;
 	private static ObjectInputStream inStream;
 	private static ObjectOutputStream outStream;
 	private static final Lock inputLock = new ReentrantLock();
@@ -49,15 +48,28 @@ public class Client extends Application {
 				try {
 					getAccessFromServer();
 					//test///////////////////
-					String sender = "prova@prova.vincy";
+					String sender = emailAddress;
 					ArrayList<String> receivers = new ArrayList<>();
 						receivers.add("ciao@nigga.it");
 						receivers.add("bubu@bubu.bubu");
-					String subject = "vedi che uno non lo riconoscerà";
-					String body = "ano è una cosa giusta provare a capire se ti riconosce le email scritte male no Marco scrivi un altro body I love furry potevi scrivere";
+					String subject = "subject";
+					String body = "body";
 					Date date = new Date();
 
-					sendEmail(new Email(sender, receivers, subject, body, date));
+					boolean correctAddresses = true;
+					
+					for(String receiver: receivers){
+						correctAddresses = emailAddressExists(receiver);
+						if(!correctAddresses) break;
+					}
+
+					if(correctAddresses){
+						sendEmail(new Email(sender, receivers, subject, body, date));
+						System.out.println("Yes");
+					}else{
+						System.out.println("No");
+					}
+
 					//test///////////////////
 					getInputFromServerLoop();
 					terminated = true;
@@ -88,15 +100,15 @@ public class Client extends Application {
 				emailFromInput = "prova@prova.vincy"; //Qui deve essere preso l'input dell'utente tramite la view
 
 				outStream.writeObject(emailFromInput);
-				emailIsOkay = Common.getInputOfClass(inStream, Boolean.class);
+				emailIsOkay = ClientUtil.getBooleanFromServer();
 				if(!emailIsOkay){
 					//dai feedback negativo alla view del client
 					System.out.println("Wrong Email, try again!");
 				}
 			}
 
-			ArrayList<Email> emailsReceivedInput = Common.ConvertArrayList(Common.getInputOfClass(inStream, ArrayList.class), Email.class);
-			ArrayList<Email> emailsSentInput = Common.ConvertArrayList(Common.getInputOfClass(inStream, ArrayList.class), Email.class);
+			List<Email> emailsReceivedInput = ClientUtil.getSynchronizedListOfEmailsFromServer();
+			List<Email> emailsSentInput = ClientUtil.getSynchronizedListOfEmailsFromServer();
 
 			emailAddress = emailFromInput;
 			emailsReceived = emailsReceivedInput;
@@ -129,7 +141,7 @@ public class Client extends Application {
 				outputLock.lock();
 				switch (command) {
 					case CSMex.NEW_EMAIL_RECEIVED -> {
-						Email newEmail = Common.getInputOfClass(inStream, Email.class);
+						Email newEmail = ClientUtil.getEmailFromServer();
 						emailsReceived.add(newEmail);
 					}
 					default -> {
@@ -144,6 +156,7 @@ public class Client extends Application {
 			}
 	}
 
+
 	public static void sendEmail(Email emailToSend){ //la view chiama questo metodo quando vuole inviare la mail
 		try{
 			inputLock.lock();
@@ -152,28 +165,14 @@ public class Client extends Application {
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
 
-			ArrayList<String> misspelledAccounts = Common.ConvertArrayList(Common.getInputOfClass(inStream, ArrayList.class), String.class);
-			ArrayList<String> correctAccounts = Common.ConvertArrayList(Common.getInputOfClass(inStream, ArrayList.class), String.class);
+			boolean emailSentCorrectly = ClientUtil.getBooleanFromServer();
 
-			if(misspelledAccounts.size()>0){
-				//Hai inserito male gli account
-				//qui andrà dato feedback opportuno alla view
-				System.out.println("You misspelled some email address.");
-				System.out.println("Correct addresses: ");
-				for(String email: correctAccounts)
-					System.out.println("\t"+email);
-				System.out.println("Misspelled addresses: ");
-				for(String email: misspelledAccounts)
-					System.out.println("\t"+email);
+			if(emailSentCorrectly){
+				//tutto corretto, si da feedback alla view
+				System.out.println("Email sent correctly");
+				emailsSent.add(emailToSend);
 			}else{
-				boolean emailSentCorrectly = Common.getInputOfClass(inStream, Boolean.class);
-				if(emailSentCorrectly){
-					//tutto corretto, si da feedback alla view
-					System.out.println("Email sent correctly");
-					emailsSent.add(emailToSend);
-				}else{
-					System.out.println("Error, server didn't send the email");
-				}
+				System.out.println("Error, server didn't send the email");
 			}
 		}catch (IOException e){
 			//dare feedback di impossibilità di inviare mail alla view
@@ -185,6 +184,11 @@ public class Client extends Application {
 		}
 	}
 
+	/**
+	 *
+	 * @param emailAddress the email we want to verify is in database
+	 * @return true if it is contained in database, false otherwise
+	 */
 	public static boolean emailAddressExists(String emailAddress){
 		try{
 			inputLock.lock();
@@ -192,7 +196,7 @@ public class Client extends Application {
 
 			outStream.writeObject(CSMex.CHECK_EMAIL_ADDRESS_EXISTS);
 			outStream.writeObject(emailAddress);
-			return Common.getInputOfClass(inStream, Boolean.class);
+			return ClientUtil.getBooleanFromServer();
 		}catch (IOException e){
 			System.out.println("Email checking failed");
 			e.printStackTrace();
@@ -201,6 +205,33 @@ public class Client extends Application {
 		}finally {
 			inputLock.unlock();
 			outputLock.unlock();
+		}
+	}
+
+	private static class ClientUtil{
+		/**
+		 * @return a List<Email> object that contains syncArraylist sent from server
+		 * @throws ConnectException when arraylist is not correctly received
+		 */
+		public static List<Email> getSynchronizedListOfEmailsFromServer() throws ConnectException {
+			final List<Email> syncArrayList =  Collections.synchronizedList(new ArrayList<>());
+			return Common.ConvertToSyncArrayList(Common.getInputOfClass(inStream, syncArrayList.getClass()), Email.class);
+		}
+
+		/**
+		 * @return an Email sent from server
+		 * @throws ConnectException when Email is not correctly received
+		 */
+		public static Email getEmailFromServer() throws ConnectException{
+			return Common.getInputOfClass(inStream, Email.class);
+		}
+
+		/**
+		 * @return an boolean sent from server
+		 * @throws ConnectException when boolean is not correctly received
+		 */
+		public static boolean getBooleanFromServer() throws ConnectException{
+			return Common.getInputOfClass(inStream, Boolean.class);
 		}
 	}
 }

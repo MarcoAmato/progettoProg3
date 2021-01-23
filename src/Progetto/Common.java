@@ -7,7 +7,9 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 class Common {
     public static <E> E getInputOfClass(ObjectInputStream inputStream, Class<E> expectedInputClass) throws ConnectException{
@@ -34,25 +36,25 @@ class Common {
         return sanitizedInput;
     }
 
-   public static <T> ArrayList <T> ConvertArrayList(ArrayList<?> l, Class<T> newArrayListClass){
+   public static <T> List <T> ConvertToSyncArrayList(List<?> l, Class<T> newSyncArrayListClass){
         if(l == null){
             throw new RuntimeException("Error, could not convert null ArrayList");
         }
 
-        ArrayList<T> newArrayList = new ArrayList<>();
+        List<T> newSyncArrayList = Collections.synchronizedList(new ArrayList<>());
 
         for (Object element: l) {
             if(element == null){
                 throw new RuntimeException("Error, trying to insert null element in ArrayList");
-            }else if(element.getClass() != newArrayListClass){
-                throw new RuntimeException("Error, trying to insert an object of class "+element.getClass()+" in Arraylist of type " + newArrayListClass.getName());
+            }else if(element.getClass() != newSyncArrayListClass){
+                throw new RuntimeException("Error, trying to insert an object of class "+element.getClass()+" in Arraylist of type " + newSyncArrayListClass.getName());
             }
             else{
-                newArrayList.add(newArrayListClass.cast(element));
+                newSyncArrayList.add(newSyncArrayListClass.cast(element));
             }
         }
 
-        return newArrayList;
+        return newSyncArrayList;
     }
 }
 
