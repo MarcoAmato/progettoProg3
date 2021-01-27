@@ -240,24 +240,21 @@ public class Server extends Application {
 			try{
 				streamLock.lock();
 				switch (command) {
-					case CSMex.NEW_EMAIL_TO_SEND:
-
+					case CSMex.NEW_EMAIL_TO_SEND -> {
 						Email newEmailToSend = Common.getInputOfClass(inStream, Email.class);
 						ArrayList<String> receivers = newEmailToSend.getReceivers();
 						boolean allReceiversExist = true;
-
-						for(String receiver: receivers){
-							if(!allReceiversExist) break;
-							if(!database.emailIsRegistered(receiver)){
+						for (String receiver : receivers) {
+							if (!allReceiversExist) break;
+							if (!database.emailIsRegistered(receiver)) {
 
 								allReceiversExist = false;
 							}
 						}
-
-						if(allReceiversExist){
-							synchronized (currentClientsMap){
+						if (allReceiversExist) {
+							synchronized (currentClientsMap) {
 								//The HashMap is locked so while we send the emails no client logs. Otherwise he could not receive the new emails
-								for(String receiver: receivers){
+								for (String receiver : receivers) {
 									sendEmail(newEmailToSend, receiver);
 								}
 							}
@@ -265,28 +262,25 @@ public class Server extends Application {
 							Server.saveEmail(newEmailToSend);
 							outStream.writeObject(true);
 
-							log("Email from "+emailAddress+" sent correctly");
+							log("Email from " + emailAddress + " sent correctly");
 
 							//test
 							throw new RuntimeException("Test");
 							//test
-						}else{
+						} else {
 							outStream.writeObject(false);
-							log("Error, email from "+ emailAddress +" contains an incorrect receiver address");
+							log("Error, email from " + emailAddress + " contains an incorrect receiver address");
 						}
-
-						break;
-
-					case CSMex.DISCONNECTION:
-						log("Client "+emailAddress+" disconnected");
+					}
+					case CSMex.DISCONNECTION -> {
+						log("Client " + emailAddress + " disconnected");
 						return true;
-
-					case CSMex.CHECK_EMAIL_ADDRESS_EXISTS:
+					}
+					case CSMex.CHECK_EMAIL_ADDRESS_EXISTS -> {
 						String emailAddress = Common.getInputOfClass(inStream, String.class);
 						outStream.writeObject(database.emailIsRegistered(emailAddress));
-						break;
-					default:
-						log("Error, unexpected command from client: #"+command);
+					}
+					default -> log("Error, unexpected command from client: #" + command);
 				}
 			} catch (IOException e) {
 				log("Error in handling client message #"+command);
