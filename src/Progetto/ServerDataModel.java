@@ -1,7 +1,7 @@
 package Progetto;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -16,24 +16,21 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class Server extends Application {
+public class ServerDataModel {
 	private static final int NUM_THREAD = 100;
 
 	private static final ExecutorService clientHandlerExecutor = Executors.newFixedThreadPool(NUM_THREAD);
 	private static final Map<String, ClientHandler> currentClientsMap = Collections.synchronizedMap(new HashMap<>());
 	private static Database database;
-	private static final List<String> logList = Collections.synchronizedList(new ArrayList<>());
+	private static final ObservableList<String> logList = FXCollections.observableArrayList();
 
-	@Override
-	public void start(Stage primaryStage){
-		database = new Database(new File("src/database"));
+	public ServerDataModel(String pathToDatabase){
+		database = new Database(new File(pathToDatabase));
 		log("Database created");
-		startServer();
+		ClientAcceptor clientAcceptor = new ClientAcceptor();
+		clientAcceptor.start();//start thread
 	}
 
-	public static void main(String[] args) {
-		launch(args);
-	}
 
 	public static void addClientHandlerToHashMap(String email, ClientHandler clientHandler){
 		currentClientsMap.put(email, clientHandler);
@@ -51,24 +48,35 @@ public class Server extends Application {
 		database.saveEmail(email);
 	}
 
-	@SuppressWarnings("InfiniteLoopStatement")
-	private static void startServer(){
-		try{
-			ServerSocket server = new ServerSocket(5000);
-			log("Socket created");
-			while(true){
-				Socket client = server.accept();
-				Runnable handler = new ClientHandler(client);
-				clientHandlerExecutor.execute(handler);
-			}
-		}catch(IOException e){
-			log("Error: exception in accepting Client");
-			e.printStackTrace();
+
+	public static void log(String logMessage){
+		synchronized (logList){
+			logList.add(logMessage);
 		}
 	}
 
-	public static void log(String logMessage){
-		logList.add(logMessage);
+	public ObservableList<String> logList(){
+		return logList;
+	}
+
+
+	private static class ClientAcceptor extends Thread{
+		@SuppressWarnings("InfiniteLoopStatement")
+		@Override
+		public void run() {
+			try{
+				ServerSocket server = new ServerSocket(5000);
+				log("Socket created");
+				while(true){
+					Socket client = server.accept();
+					Runnable handler = new ClientHandler(client);
+					clientHandlerExecutor.execute(handler);
+				}
+			}catch(IOException e){
+				log("Error: exception in accepting Client");
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private static class Database{
@@ -182,14 +190,14 @@ public class Server extends Application {
 			log("New email inserted in database");
 		}
 
-        public void printDatabase(){
-            for(String s: emailAddressesArray){
-                System.out.println(s);
-            }
-            for(Email e: emailsArray){
-                System.out.println(e);
-            }
-        }
+		public void printDatabase(){
+			for(String s: emailAddressesArray){
+				System.out.println(s);
+			}
+			for(Email e: emailsArray){
+				System.out.println(e);
+			}
+		}
 	}
 
 	private static class ClientHandler implements Runnable{
@@ -259,7 +267,7 @@ public class Server extends Application {
 								}
 							}
 							emailsSent.add(newEmailToSend);
-							Server.saveEmail(newEmailToSend);
+							saveEmail(newEmailToSend);
 							outStream.writeObject(true);
 
 							log("Email from " + emailAddress + " sent correctly");
@@ -295,7 +303,7 @@ public class Server extends Application {
 		private boolean startConnection(){
 			try{
 				streamLock.lock();
-				Server.database.readLock.lock(); //the database is locked outside loop so during connection no client can send email while connection is not completed
+				database.readLock.lock(); //the database is locked outside loop so during connection no client can send email while connection is not completed
 				boolean emailIsOkay = false;
 				String userEmail = null;
 				while(!emailIsOkay){
@@ -313,7 +321,7 @@ public class Server extends Application {
 				emailsSent = Collections.synchronizedList(database.getEmailsSent(emailAddress));
 				emailsReceived = Collections.synchronizedList(database.getEmailsReceived(emailAddress));
 				//adds the clientHandler to hash map
-				Server.addClientHandlerToHashMap(emailAddress, this);
+				addClientHandlerToHashMap(emailAddress, this);
 
 				//gives positive feedback to client
 				outStream.writeObject(emailsSent);
@@ -329,7 +337,7 @@ public class Server extends Application {
 				return false;
 			}finally {
 				streamLock.unlock();
-				Server.database.readLock.unlock();
+				database.readLock.unlock();
 			}
 		}
 
@@ -338,7 +346,7 @@ public class Server extends Application {
 		 * connection is done here
 		 */
 		private void endConnection(){
-			Server.removeClientHandlerFromHashMap(emailAddress);
+			removeClientHandlerFromHashMap(emailAddress);
 		}
 
 		private void sendEmail(Email email, String receiver){
@@ -365,5 +373,4 @@ public class Server extends Application {
 			}
 		}
 	}
-
 }
