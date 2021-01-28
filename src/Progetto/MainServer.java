@@ -1,7 +1,6 @@
 package Progetto;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -15,7 +14,7 @@ public class MainServer extends Application {
 		Parent root = fxmlLoader.load();
 		ServerController serverController = fxmlLoader.getController(); //connects to ServerController
 		ServerDataModel serverModel = new ServerDataModel("src/database"); //creates ServerDataModel
-		Platform.runLater(serverModel);
+		serverModel.start();
 		serverController.initModel(serverModel);
 		serverController.createLogList();
 		primaryStage.setTitle("Mail Server");

@@ -75,7 +75,7 @@ public class ServerDataModel extends Thread{
 
 	private static void log(String logMessage){ // lo devono fare gli handler
 		synchronized (logList){
-			logList.add(logMessage);
+			Platform.runLater(() -> logList.add(logMessage));
 		}
 	}
 
