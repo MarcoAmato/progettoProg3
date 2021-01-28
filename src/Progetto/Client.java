@@ -38,6 +38,7 @@ public class Client extends Application {
 
 			connectionSuccess = true;
 		}catch (IOException e){
+			System.out.println("Server unreachable, try again later");
 			e.printStackTrace();
 			//dai messaggio di connessione non possibile alla view
 		}

@@ -19,7 +19,6 @@ public class MainServer extends Application {
 		primaryStage.setTitle("Mail Server");
 		primaryStage.setScene(new Scene(root, 640, 400));
 		primaryStage.show();
-		System.out.println("nigga");
 	}
 
 	public static void main(String[] args) {
