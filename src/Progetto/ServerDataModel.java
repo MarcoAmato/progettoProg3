@@ -1,5 +1,6 @@
 package Progetto;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -16,7 +17,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class ServerDataModel {
+public class ServerDataModel extends Thread{
 	private static final int NUM_THREAD = 100;
 
 	private static final ExecutorService clientHandlerExecutor = Executors.newFixedThreadPool(NUM_THREAD);
@@ -28,14 +29,13 @@ public class ServerDataModel {
 	private static ObjectInputStream logInputStream;
 	/*private static Logger logger = new Logger();*/
 
-	@SuppressWarnings("InfiniteLoopStatement")
 	public ServerDataModel(String pathToDatabase){
 		boolean logStreamCreated = false;
 		try{
-			PipedInputStream pipedInputStream = new PipedInputStream();
-			PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
-			logInputStream = new ObjectInputStream(pipedInputStream);
+			PipedOutputStream pipedOutputStream = new PipedOutputStream();
+			PipedInputStream pipedInputStream = new PipedInputStream(pipedOutputStream);
 			logOutputStream = new ObjectOutputStream(pipedOutputStream);
+			logInputStream = new ObjectInputStream(pipedInputStream);
 			logStreamCreated = true;
 		}catch (IOException e){
 			System.out.println("It was not possible to create the logStream");
@@ -49,7 +49,13 @@ public class ServerDataModel {
 		}
 	}
 
-
+	@SuppressWarnings("InfiniteLoopStatement")
+	@Override
+	public synchronized void run() {
+		while (true) {
+			receiveLog();
+		}
+	}
 
 	public static void addClientHandlerToHashMap(String email, ClientHandler clientHandler){
 		currentClientsMap.put(email, clientHandler);
@@ -67,10 +73,25 @@ public class ServerDataModel {
 		database.saveEmail(email);
 	}
 
-
 	private static void log(String logMessage){ // lo devono fare gli handler
 		synchronized (logList){
 			logList.add(logMessage);
+		}
+	}
+
+	public static void receiveLog(){
+		try{
+			Object logReceived = logInputStream.readObject();
+			if(logReceived == null || logReceived.getClass()!=String.class){
+				throw new ClassNotFoundException();
+			}
+			log((String) logReceived);
+		}catch (ClassNotFoundException e){
+			System.out.println("Unexpected class received in logStream");
+			e.printStackTrace();
+		}catch (IOException e){
+			System.out.println("Log reading failed");
+			e.printStackTrace();
 		}
 	}
 
@@ -90,7 +111,7 @@ public class ServerDataModel {
 		}
 	}
 
-	private static class Logger extends Thread{
+	/*private static class Logger extends Thread{
 		private PipedOutputStream pipedOutputStream;
 
 		public Logger(PipedOutputStream pipedOutputStream){
@@ -100,26 +121,10 @@ public class ServerDataModel {
 		@Override
 		public void run() {
 			setDaemon(true);
-			while (true) {
-				receiveLog();
-			}
+
 		}
-		public static void receiveLog(){
-			try{
-				Object logReceived = logInputStream.readObject();
-				if(logReceived == null || logReceived.getClass()!=String.class){
-					throw new ClassNotFoundException();
-				}
-				log((String) logReceived);
-			}catch (ClassNotFoundException e){
-				System.out.println("Unexpected class received in logStream");
-				e.printStackTrace();
-			}catch (IOException e){
-				System.out.println("Log reading failed");
-				e.printStackTrace();
-			}
-		}
-	}
+
+	}*/
 
 	private static class ClientAcceptor extends Thread{
 		@SuppressWarnings("InfiniteLoopStatement")
