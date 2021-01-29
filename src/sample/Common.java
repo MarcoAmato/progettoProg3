@@ -80,6 +80,7 @@ class Email implements Serializable {
     public static final String FIELDS_DELIMITER = ";#;";
 
     public Email(String sender, ArrayList<String> receivers, String subject, String body, Date sendingDate) {
+        body = body.replace("\n"," ");
         this.sender = sender;
         this.receivers = receivers;
         this.subject = subject;
