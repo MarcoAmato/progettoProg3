@@ -1,4 +1,4 @@
-package sample;
+package Client;
 
 import javafx.animation.PauseTransition;
 import javafx.beans.value.ChangeListener;
