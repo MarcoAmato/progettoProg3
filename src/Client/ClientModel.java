@@ -118,7 +118,7 @@ public class ClientModel{
 		}
 	}*/
 
-	public static boolean getAccessFromServer(String emailInserted) throws ConnectException {
+	public static boolean getAccessFromServer(String emailInserted){
 		try {
 			inputLock.lock();
 			outputLock.lock();
