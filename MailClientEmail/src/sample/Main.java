@@ -1,4 +1,4 @@
-package Client;
+package sample;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -6,16 +6,16 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class MainClient extends Application {
+public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        ClientModel model = new ClientModel();
+        LoginModel model = new LoginModel();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
         Parent root = fxmlLoader.load();
-        LoginController loginController = fxmlLoader.getController();
+        Controller controller = fxmlLoader.getController();
         primaryStage.setTitle("Login");
-        loginController.initModel(model);
+        controller.initModel(model);
         primaryStage.setScene(new Scene(root, 500, 275));
         primaryStage.setResizable(false);
         primaryStage.show();
