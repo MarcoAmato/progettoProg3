@@ -18,38 +18,52 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.Thread.sleep;
 
-public class ClientModel{
-	public static BooleanProperty connectionOkay;
+public class ClientDataModel {
+	public BooleanProperty connectionOkay;
 
-	private static String emailAddress;
-	private static List<Email> emailsReceived;
-	private static List<Email> emailsSent;
-	private static ObjectInputStream inStream;
-	private static ObjectOutputStream outStream;
-	private static final Lock inputLock = new ReentrantLock();
-	private static final Lock outputLock = new ReentrantLock();
+	private String emailAddress;
+	private List<Email> emailsReceived;
+	private List<Email> emailsSent;
+	private ObjectInputStream inStream;
+	private ObjectOutputStream outStream;
+	private final Lock inputLock = new ReentrantLock();
+	private final Lock outputLock = new ReentrantLock();
 
-	public static boolean startConnection(){
-		try{
-			InetAddress localhost = InetAddress.getLocalHost();
-			Socket serverSocket = new Socket(localhost, 5000);
-
-			outStream = new ObjectOutputStream(serverSocket.getOutputStream());
-			inStream = new ObjectInputStream(serverSocket.getInputStream());
-
-			connectionOkay.set(true);
-
-			return true;
-		}catch (IOException e){
-			System.out.println("Server unreachable, try again later");
-			e.printStackTrace();
-			return false;
-		}
+	public ClientDataModel(){
+		this.connectionOkay.set(false);
 	}
 
-	private static void closeConnection(){
+	public void startConnection(){
+		new Thread(() -> {
+			while(!connectionOkay.get()){
+				try{
+					InetAddress localhost = InetAddress.getLocalHost();
+					Socket serverSocket = new Socket(localhost, 5000);
+
+					outStream = new ObjectOutputStream(serverSocket.getOutputStream());
+					inStream = new ObjectInputStream(serverSocket.getInputStream());
+
+					connectionOkay.set(true);
+				}catch (IOException e){
+					System.out.println("Connection failed, trying to connect again...");
+					try {
+						sleep(5000);
+					}catch (InterruptedException interruptedException){
+						interruptedException.printStackTrace();
+					}
+				}
+			}
+		}).start();
+	}
+
+	private void restartConnection(){
 		connectionOkay.set(false);
+		startConnection();
 	}
+
+	/*private static void closeConnection(){
+		connectionOkay.set(false);
+	}*/
 
 	/*public static void main(String[] args) {
 
@@ -118,19 +132,19 @@ public class ClientModel{
 		}
 	}*/
 
-	public static boolean getAccessFromServer(String emailInserted){
+	public boolean getAccessFromServer(String emailInserted){
 		try {
 			inputLock.lock();
 			outputLock.lock();
 
 			outStream.writeObject(emailInserted);
-			boolean emailIsOkay = ClientUtil.getBooleanFromServer();
+			boolean emailIsOkay = getBooleanFromServer();
 			if(!emailIsOkay){
 				return false;
 			}
 
-			List<Email> emailsReceivedInput = ClientUtil.getSynchronizedListOfEmailsFromServer();
-			List<Email> emailsSentInput = ClientUtil.getSynchronizedListOfEmailsFromServer();
+			List<Email> emailsReceivedInput = getSynchronizedListOfEmailsFromServer();
+			List<Email> emailsSentInput = getSynchronizedListOfEmailsFromServer();
 
 			emailAddress = emailInserted;
 			emailsReceived = emailsReceivedInput;
@@ -138,16 +152,10 @@ public class ClientModel{
 
 			return true;
 
-            /*System.out.println(emailAddress);
-            for(Email e: emailsSent){
-                System.out.println(e);
-            }
-            for(Email e: emailsReceived){
-                System.out.println(e);
-            }*/
-
+		}catch (ConnectException e){
+			restartConnection();
+			return false;
 		}catch(IOException e){
-			connectionOkay.set(false);
 			e.printStackTrace();
 			return false;
 		}finally {
@@ -156,13 +164,13 @@ public class ClientModel{
 		}
 	}
 
-	public static void getInputFromServerLoop() throws ConnectException{
-		boolean connectionOkay = true;
-		while(connectionOkay) {
-			inputLock.lock();
-			outputLock.lock();
+	/*public static void getInputFromServerLoop(){
+		boolean inputFromServerOkay = true;
+		while(inputFromServerOkay) {
 			try { //here client waits for server input which for the moment will be only a new email that the client has received
 				int command = Common.getInputOfClass(inStream, Integer.class);
+				inputLock.lock();
+				outputLock.lock();
 				switch (command) {
 					case CSMex.NEW_EMAIL_RECEIVED -> {
 						Email newEmail = ClientUtil.getEmailFromServer();
@@ -170,23 +178,22 @@ public class ClientModel{
 					}
 					default -> {
 						System.out.println("Error, unexpected server command: " + command);
-						connectionOkay = false;
+						inputFromServerOkay = false;
 					}
 				}
 			} catch (IOException e) {
 				System.out.println("Exception during getInputFromServerLoop");
 				e.printStackTrace();
-				throw new ConnectException();
+				inputFromServerOkay = false;
+				connectionOkay.set(false);
 			}finally {
 				inputLock.unlock();
 				outputLock.unlock();
 			}
 		}
-		System.out.println("fine");
-	}
+	}*/
 
-
-	public static void sendEmail(Email emailToSend){ //la view chiama questo metodo quando vuole inviare la mail
+	/*public void sendEmail(Email emailToSend){ //la view chiama questo metodo quando vuole inviare la mail
 		try{
 			inputLock.lock();
 			outputLock.lock();
@@ -211,21 +218,27 @@ public class ClientModel{
 			inputLock.unlock();
 			outputLock.unlock();
 		}
-	}
+	}*/
+
+	/*public boolean replyEmail(Email emailToReply, String replyMessage){
+		ArrayList<String> senderArrayList = new ArrayList<>();
+		senderArrayList.add(emailToReply.getSender());
+		Email emailReply = new Email(this.emailAddress, senderArrayList, emailToReply.getSubject(), replyMessage, new Date());
+		sendEmail(emailReply);
+	}*/
 
 	/**
-	 *
 	 * @param emailAddress the email we want to verify is in database
 	 * @return true if it is contained in database, false otherwise
 	 */
-	public static boolean emailAddressExists(String emailAddress){
+	/*public boolean emailAddressExists(String emailAddress){
 		try{
 			inputLock.lock();
 			outputLock.lock();
 
 			outStream.writeObject(CSMex.CHECK_EMAIL_ADDRESS_EXISTS);
 			outStream.writeObject(emailAddress);
-			return ClientUtil.getBooleanFromServer();
+			return getBooleanFromServer();
 		}catch (IOException e){
 			System.out.println("Email checking failed");
 			e.printStackTrace();
@@ -235,32 +248,30 @@ public class ClientModel{
 			inputLock.unlock();
 			outputLock.unlock();
 		}
+	}*/
+
+	/**
+	 * @return a List<Email> object that contains syncArraylist sent from server
+	 * @throws ConnectException when arraylist is not correctly received
+	 */
+	public List<Email> getSynchronizedListOfEmailsFromServer() throws ConnectException {
+		final List<Email> syncArrayList =  Collections.synchronizedList(new ArrayList<>());
+		return Common.ConvertToSyncArrayList(Common.getInputOfClass(inStream, syncArrayList.getClass()), Email.class);
 	}
 
-	private static class ClientUtil{
-		/**
-		 * @return a List<Email> object that contains syncArraylist sent from server
-		 * @throws ConnectException when arraylist is not correctly received
-		 */
-		public static List<Email> getSynchronizedListOfEmailsFromServer() throws ConnectException {
-			final List<Email> syncArrayList =  Collections.synchronizedList(new ArrayList<>());
-			return Common.ConvertToSyncArrayList(Common.getInputOfClass(inStream, syncArrayList.getClass()), Email.class);
-		}
+	/**
+	 * @return an Email sent from server
+	 * @throws ConnectException when Email is not correctly received
+	 */
+	/*public Email getEmailFromServer() throws ConnectException{
+		return Common.getInputOfClass(inStream, Email.class);
+	}*/
 
-		/**
-		 * @return an Email sent from server
-		 * @throws ConnectException when Email is not correctly received
-		 */
-		public static Email getEmailFromServer() throws ConnectException{
-			return Common.getInputOfClass(inStream, Email.class);
-		}
-
-		/**
-		 * @return an boolean sent from server
-		 * @throws ConnectException when boolean is not correctly received
-		 */
-		public static boolean getBooleanFromServer() throws ConnectException{
-			return Common.getInputOfClass(inStream, Boolean.class);
-		}
+	/**
+	 * @return an boolean sent from server
+	 * @throws ConnectException when boolean is not correctly received
+	 */
+	public boolean getBooleanFromServer() throws ConnectException{
+		return Common.getInputOfClass(inStream, Boolean.class);
 	}
 }
