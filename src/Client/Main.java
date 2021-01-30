@@ -15,7 +15,6 @@ public class Main extends Application {
         Parent root = fxmlLoader.load();
         LoginController loginController = fxmlLoader.getController();
         primaryStage.setTitle("Login");
-
         loginController.initModel(model);
         primaryStage.setScene(new Scene(root, 500, 275));
         primaryStage.setResizable(false);
