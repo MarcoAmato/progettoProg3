@@ -1,0 +1,7 @@
+.idea
+
+out
+
+progettoProg3
+
+src
