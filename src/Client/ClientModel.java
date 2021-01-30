@@ -1,5 +1,7 @@
 package Client;
 
+import javafx.beans.property.BooleanProperty;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,6 +19,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import static java.lang.Thread.sleep;
 
 public class ClientModel{
+	public static BooleanProperty connectionOkay;
+
 	private static String emailAddress;
 	private static List<Email> emailsReceived;
 	private static List<Email> emailsSent;
@@ -25,9 +29,29 @@ public class ClientModel{
 	private static final Lock inputLock = new ReentrantLock();
 	private static final Lock outputLock = new ReentrantLock();
 
+	public static boolean startConnection(){
+		try{
+			InetAddress localhost = InetAddress.getLocalHost();
+			Socket serverSocket = new Socket(localhost, 5000);
 
+			outStream = new ObjectOutputStream(serverSocket.getOutputStream());
+			inStream = new ObjectInputStream(serverSocket.getInputStream());
 
-	public static void main(String[] args) {
+			connectionOkay.set(true);
+
+			return true;
+		}catch (IOException e){
+			System.out.println("Server unreachable, try again later");
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	private static void closeConnection(){
+		connectionOkay.set(false);
+	}
+
+	/*public static void main(String[] args) {
 
 		boolean connectionSuccess = false;
 
@@ -92,32 +116,27 @@ public class ClientModel{
 				}
 			}
 		}
-	}
+	}*/
 
-	public static void getAccessFromServer() throws ConnectException {
+	public static boolean getAccessFromServer(String emailInserted) throws ConnectException {
 		try {
 			inputLock.lock();
 			outputLock.lock();
-			boolean emailIsOkay = false;
-			String emailFromInput = null;
 
-			while(!emailIsOkay){ //loops until server recognises the email the user wrote
-				emailFromInput = "prova@prova.vincy"; //Qui deve essere preso l'input dell'utente tramite la view
-
-				outStream.writeObject(emailFromInput);
-				emailIsOkay = ClientUtil.getBooleanFromServer();
-				if(!emailIsOkay){
-					//dai feedback negativo alla view del client
-					System.out.println("Wrong Email, try again!");
-				}
+			outStream.writeObject(emailInserted);
+			boolean emailIsOkay = ClientUtil.getBooleanFromServer();
+			if(!emailIsOkay){
+				return false;
 			}
 
 			List<Email> emailsReceivedInput = ClientUtil.getSynchronizedListOfEmailsFromServer();
 			List<Email> emailsSentInput = ClientUtil.getSynchronizedListOfEmailsFromServer();
 
-			emailAddress = emailFromInput;
+			emailAddress = emailInserted;
 			emailsReceived = emailsReceivedInput;
 			emailsSent = emailsSentInput;
+
+			return true;
 
             /*System.out.println(emailAddress);
             for(Email e: emailsSent){
@@ -127,10 +146,10 @@ public class ClientModel{
                 System.out.println(e);
             }*/
 
-		}catch (SocketException e){
-			throw new ConnectException();
 		}catch(IOException e){
+			connectionOkay.set(false);
 			e.printStackTrace();
+			return false;
 		}finally {
 			inputLock.unlock();
 			outputLock.unlock();
