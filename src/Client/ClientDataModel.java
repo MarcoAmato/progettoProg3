@@ -49,7 +49,7 @@ public class ClientDataModel {
 	 * Creates a Connector thread that connects to database
 	 */
 	public void startConnection(){
-		new Connector().run();
+		new Connector().start();
 	}
 
 	/**

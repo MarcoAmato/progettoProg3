@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 public class MainClient extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         ClientDataModel model = new ClientDataModel();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
         Parent root = fxmlLoader.load();
