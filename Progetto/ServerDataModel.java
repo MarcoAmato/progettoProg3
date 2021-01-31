@@ -29,7 +29,7 @@ public class ServerDataModel{
 		database = new Database(new File(pathToDatabase));
 		log("Database created");
 		ClientAcceptor clientAcceptor = new ClientAcceptor();
-		clientAcceptor.start();//start thread
+		clientAcceptor.start();
 	}
 
 	public static void addClientHandlerToHashMap(String email, ClientHandler clientHandler){
@@ -358,7 +358,6 @@ public class ServerDataModel{
                 System.out.println(emailsReceived);*/
 			}catch (IOException e){
 				log("Error in client login");
-				System.out.println("It was not possible to establish connection with client");
 				e.printStackTrace();
 				return false;
 			}finally {

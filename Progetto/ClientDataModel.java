@@ -278,8 +278,11 @@ public class ClientDataModel {
 	 * This thread reads input from server and updates client variables according to such input
 	 */
 	private class ServerInputReader extends Thread{
-		public void run(){
+		public ServerInputReader(){
 			setDaemon(true);
+		}
+
+		public void run(){
 			while(connectionOkay.get()) {
 				try { //here client waits for server input which for the moment will be only a new email that the client has received
 					int command = Common.getInputOfClass(inStream, Integer.class);
