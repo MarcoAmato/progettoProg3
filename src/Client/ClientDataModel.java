@@ -1,6 +1,7 @@
 package Client;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -8,10 +9,8 @@ import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -19,15 +18,14 @@ import java.util.concurrent.locks.ReentrantLock;
 import static java.lang.Thread.sleep;
 
 public class ClientDataModel {
-	public BooleanProperty connectionOkay;
+	public BooleanProperty connectionOkay = new SimpleBooleanProperty();
 
 	private String emailAddress;
 	private List<Email> emailsReceived;
 	private List<Email> emailsSent;
 	private ObjectInputStream inStream;
 	private ObjectOutputStream outStream;
-	private final Lock inputLock = new ReentrantLock();
-	private final Lock outputLock = new ReentrantLock();
+	private final Lock streamLock = new ReentrantLock();
 
 	public ClientDataModel(){
 		this.connectionOkay.set(false);
@@ -134,8 +132,7 @@ public class ClientDataModel {
 
 	public boolean getAccessFromServer(String emailInserted){
 		try {
-			inputLock.lock();
-			outputLock.lock();
+			streamLock.lock();
 
 			outStream.writeObject(emailInserted);
 			boolean emailIsOkay = getBooleanFromServer();
@@ -159,8 +156,7 @@ public class ClientDataModel {
 			e.printStackTrace();
 			return false;
 		}finally {
-			inputLock.unlock();
-			outputLock.unlock();
+			streamLock.unlock();
 		}
 	}
 
@@ -170,7 +166,6 @@ public class ClientDataModel {
 			try { //here client waits for server input which for the moment will be only a new email that the client has received
 				int command = Common.getInputOfClass(inStream, Integer.class);
 				inputLock.lock();
-				outputLock.lock();
 				switch (command) {
 					case CSMex.NEW_EMAIL_RECEIVED -> {
 						Email newEmail = ClientUtil.getEmailFromServer();
@@ -188,7 +183,6 @@ public class ClientDataModel {
 				connectionOkay.set(false);
 			}finally {
 				inputLock.unlock();
-				outputLock.unlock();
 			}
 		}
 	}*/
@@ -196,7 +190,6 @@ public class ClientDataModel {
 	/*public void sendEmail(Email emailToSend){ //la view chiama questo metodo quando vuole inviare la mail
 		try{
 			inputLock.lock();
-			outputLock.lock();
 
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
@@ -216,7 +209,6 @@ public class ClientDataModel {
 			e.printStackTrace();
 		}finally {
 			inputLock.unlock();
-			outputLock.unlock();
 		}
 	}*/
 
@@ -234,7 +226,6 @@ public class ClientDataModel {
 	/*public boolean emailAddressExists(String emailAddress){
 		try{
 			inputLock.lock();
-			outputLock.lock();
 
 			outStream.writeObject(CSMex.CHECK_EMAIL_ADDRESS_EXISTS);
 			outStream.writeObject(emailAddress);
@@ -246,7 +237,6 @@ public class ClientDataModel {
 			//continua lato server e integra lato client con quello che c è già
 		}finally {
 			inputLock.unlock();
-			outputLock.unlock();
 		}
 	}*/
 
