@@ -14,7 +14,6 @@ public class MainServer extends Application {
 		Parent root = fxmlLoader.load();
 		ServerController serverController = fxmlLoader.getController(); //connects to ServerController
 		ServerDataModel serverModel = new ServerDataModel("src/database"); //creates ServerDataModel
-		serverModel.start();
 		serverController.initModel(serverModel);
 		serverController.createLogList();
 		primaryStage.setTitle("Mail Server");

@@ -17,44 +17,19 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class ServerDataModel extends Thread{
+public class ServerDataModel{
 	private static final int NUM_THREAD = 100;
 
 	private static final ExecutorService clientHandlerExecutor = Executors.newFixedThreadPool(NUM_THREAD);
 	private static final Map<String, ClientHandler> currentClientsMap = Collections.synchronizedMap(new HashMap<>());
 	private static Database database;
 	private static final ObservableList<String> logList = FXCollections.observableArrayList();
-	private static ObjectOutputStream logOutputStream;
-	private static final Lock logOutPutStreamLock = new ReentrantLock();
-	private static ObjectInputStream logInputStream;
-	/*private static Logger logger = new Logger();*/
 
 	public ServerDataModel(String pathToDatabase){
-		boolean logStreamCreated = false;
-		try{
-			PipedOutputStream pipedOutputStream = new PipedOutputStream();
-			PipedInputStream pipedInputStream = new PipedInputStream(pipedOutputStream);
-			logOutputStream = new ObjectOutputStream(pipedOutputStream);
-			logInputStream = new ObjectInputStream(pipedInputStream);
-			logStreamCreated = true;
-		}catch (IOException e){
-			System.out.println("It was not possible to create the logStream");
-			e.printStackTrace();
-		}
-		if(logStreamCreated){
-			database = new Database(new File(pathToDatabase));
-			log("Database created");
-			ClientAcceptor clientAcceptor = new ClientAcceptor();
-			clientAcceptor.start();//start thread
-		}
-	}
-
-	@SuppressWarnings("InfiniteLoopStatement")
-	@Override
-	public synchronized void run() {
-		while (true) {
-			receiveLog();
-		}
+		database = new Database(new File(pathToDatabase));
+		log("Database created");
+		ClientAcceptor clientAcceptor = new ClientAcceptor();
+		clientAcceptor.start();//start thread
 	}
 
 	public static void addClientHandlerToHashMap(String email, ClientHandler clientHandler){
@@ -79,27 +54,11 @@ public class ServerDataModel extends Thread{
 		}
 	}
 
-	public static void receiveLog(){
-		try{
-			Object logReceived = logInputStream.readObject();
-			if(logReceived == null || logReceived.getClass()!=String.class){
-				throw new ClassNotFoundException();
-			}
-			log((String) logReceived);
-		}catch (ClassNotFoundException e){
-			System.out.println("Unexpected class received in logStream");
-			e.printStackTrace();
-		}catch (IOException e){
-			System.out.println("Log reading failed");
-			e.printStackTrace();
-		}
-	}
-
 	public ObservableList<String> logList(){
 		return logList;
 	}
 
-	public static void writeLogToLogStream(String log){
+	/*public static void writeLogToLogStream(String log){
 		logOutPutStreamLock.lock();
 		try {
 			logOutputStream.writeObject(log);
@@ -109,7 +68,7 @@ public class ServerDataModel extends Thread{
 		}finally {
 			logOutPutStreamLock.unlock();
 		}
-	}
+	}*/
 
 	/*private static class Logger extends Thread{
 		private PipedOutputStream pipedOutputStream;
@@ -132,7 +91,7 @@ public class ServerDataModel extends Thread{
 		public void run() {
 			try{
 				ServerSocket server = new ServerSocket(5000);
-				writeLogToLogStream("Socket created");
+				log("Socket created");
 				while(true){
 					Socket client = server.accept();
 					log("New client connected to server");
@@ -140,7 +99,7 @@ public class ServerDataModel extends Thread{
 					clientHandlerExecutor.execute(handler);
 				}
 			}catch(IOException e){
-				writeLogToLogStream("Error: exception in accepting Client");
+				log("Error: exception in accepting Client");
 				e.printStackTrace();
 			}
 		}
@@ -190,7 +149,7 @@ public class ServerDataModel extends Thread{
 							try {
 								sendingDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(innerScanner.next());
 							} catch (ParseException e) {
-								writeLogToLogStream("Error, incorrect date format detected in database");
+								log("Error, incorrect date format detected in database");
 								e.printStackTrace();
 							}
 							emailsArray.add(new Email(sender, receivers, subject, body, sendingDate));
@@ -198,7 +157,7 @@ public class ServerDataModel extends Thread{
 						//La riga è un indirizzo di posta
 						case '-' -> emailAddressesArray.add(line.substring(1));
 						default -> {
-							writeLogToLogStream("Error in parsing database, unexpected line starting character: " + line.charAt(0));
+							log("Error in parsing database, unexpected line starting character: " + line.charAt(0));
 							System.out.println("Error in parsing database. The read line starts with unexpected character: " + line.charAt(0));
 						}
 					}
@@ -254,7 +213,7 @@ public class ServerDataModel extends Thread{
 			}finally {
 				writeLock.unlock();
 			}
-			writeLogToLogStream("New email inserted in database");
+			log("New email inserted in database");
 		}
 
 		public void printDatabase(){
@@ -337,24 +296,24 @@ public class ServerDataModel extends Thread{
 							saveEmail(newEmailToSend);
 							outStream.writeObject(true);
 
-							writeLogToLogStream("Email from " + emailAddress + " sent correctly");
+							log("Email from " + emailAddress + " sent correctly");
 						} else {
 							outStream.writeObject(false);
-							writeLogToLogStream("Error, email from " + emailAddress + " contains an incorrect receiver address");
+							log("Error, email from " + emailAddress + " contains an incorrect receiver address");
 						}
 					}
 					case CSMex.DISCONNECTION -> {
-						writeLogToLogStream("Client " + emailAddress + " disconnected");
+						log("Client " + emailAddress + " disconnected");
 						return true;
 					}
 					case CSMex.CHECK_EMAIL_ADDRESS_EXISTS -> {
 						String emailAddress = Common.getInputOfClass(inStream, String.class);
 						outStream.writeObject(database.emailIsRegistered(emailAddress));
 					}
-					default -> writeLogToLogStream("Error, unexpected command from client: #" + command);
+					default -> log("Error, unexpected command from client: #" + command);
 				}
 			} catch (IOException e) {
-				writeLogToLogStream("Error in handling client message #"+command);
+				log("Error in handling client message #"+command);
 				e.printStackTrace();
 				return true;
 			}finally {
@@ -379,7 +338,7 @@ public class ServerDataModel extends Thread{
 						outStream.writeObject(false);
 					}
 				}
-				writeLogToLogStream(userEmail+" logged in");
+				log(userEmail+" logged in");
 				//fills variables based on email
 				emailAddress = userEmail;
 				emailsSent = Collections.synchronizedList(database.getEmailsSent(emailAddress));
@@ -398,7 +357,7 @@ public class ServerDataModel extends Thread{
                 /*System.out.println(emailsSent);
                 System.out.println(emailsReceived);*/
 			}catch (IOException e){
-				writeLogToLogStream("Error in client login");
+				log("Error in client login");
 				System.out.println("It was not possible to establish connection with client");
 				e.printStackTrace();
 				return false;
@@ -419,13 +378,13 @@ public class ServerDataModel extends Thread{
 		private void sendEmail(Email email, String receiver){
 			ClientHandler activeClientHandler = getClientHandlerFromEmail(receiver);
 			if(activeClientHandler != null){
-				writeLogToLogStream("Sending email to Client Handler of "+activeClientHandler.emailAddress);
+				log("Sending email to Client Handler of "+activeClientHandler.emailAddress);
 				activeClientHandler.receiveEmail(email);
 			}
 		}
 
 		private void receiveEmail(Email email){
-			writeLogToLogStream(emailAddress+" received new email");
+			log(emailAddress+" received new email");
 			emailsReceived.add(email);
 			try{
 				//needs synchro because multiple emails could be received in a row and this could lead to errors
