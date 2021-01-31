@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.Thread.sleep;
 
-public class Client extends Application {
+public class TestClient extends Application {
 	private static String emailAddress;
 	private static List<Email> emailsReceived;
 	private static List<Email> emailsSent;
