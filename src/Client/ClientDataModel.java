@@ -63,6 +63,10 @@ public class ClientDataModel {
 		connectionOkay.set(false);
 	}*/
 
+	public BooleanProperty connectionStatusProperty(){
+		return connectionOkay;
+	}
+
 	/*public static void main(String[] args) {
 
 		boolean connectionSuccess = false;
@@ -264,4 +268,6 @@ public class ClientDataModel {
 	public boolean getBooleanFromServer() throws ConnectException{
 		return Common.getInputOfClass(inStream, Boolean.class);
 	}
+
+
 }

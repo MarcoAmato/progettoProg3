@@ -1,10 +1,13 @@
 package Client;
 
 import javafx.animation.PauseTransition;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -18,6 +21,7 @@ public class LoginController {
     @FXML private GridPane loginInterface;
     @FXML private Text feedbackLabel;
     @FXML private TextField emailInput;
+    @FXML private Button sendLoginMail;
 
     private ClientDataModel model;
 
@@ -29,6 +33,16 @@ public class LoginController {
 
         this.model = model;
         model.startConnection();
+        model.connectionStatusProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
+                if(t1 == false){
+                    feedbackLabel.setText("Connessione persa, attendere per la riconnessione");
+                    sendLoginMail.setDisable(true);
+                    emailInput.setDisable(true);
+                }
+            }
+        });
     }
 
     @FXML

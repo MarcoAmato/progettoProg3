@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a89603af-d90a-41b2-ac78-496329dd0130" name="Default Changelist" comment="" />
+    <list default="true" id="042431e3-bec1-42f6-8a21-5307b0281879" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/out/production/progetto/Client/login.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/progetto/Client/login.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/ClientDataModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/ClientDataModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/LoginController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/login.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/login.fxml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

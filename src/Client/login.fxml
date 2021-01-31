@@ -11,7 +11,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<GridPane fx:id="InterfacciaLogin" alignment="CENTER" hgap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" vgap="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Client.LoginController">
+<GridPane fx:id="loginInterface" alignment="CENTER" hgap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" vgap="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Client.LoginController">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -44,7 +44,7 @@
         </font>
     </Label>
     <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-        <Button alignment="CENTER" disable="true" mnemonicParsing="false" onAction="#handleButtonAction" prefHeight="34.0" prefWidth="90.0" text="Invia" textFill="RED">
+        <Button fx:id="sendLoginMail" alignment="CENTER" disable="true" mnemonicParsing="false" onAction="#handleLogin" prefHeight="34.0" prefWidth="90.0" text="Invia" textFill="RED">
             <font>
                 <Font name="Arial" size="18.0" />
             </font>
@@ -55,9 +55,12 @@
           <Font name="Arial" size="18.0" />
         </font>
     </Text>
-   <Text fx:id="feedbackLabel" fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" text="Connessione al server in corso, attendere..." textAlignment="CENTER" wrappingWidth="276.36498260498047" GridPane.columnIndex="1" GridPane.rowIndex="2">
+   <Text fx:id="feedbackLabel" fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" text="Connessione al server in corso, attendere..." textAlignment="CENTER" wrappingWidth="260.36498260498047" GridPane.columnIndex="1" GridPane.rowIndex="2">
       <font>
          <Font name="Arial" size="15.0" />
       </font>
+      <GridPane.margin>
+         <Insets right="10.0" />
+      </GridPane.margin>
    </Text>
 </GridPane>
