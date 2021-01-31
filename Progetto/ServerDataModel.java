@@ -135,6 +135,7 @@ public class ServerDataModel extends Thread{
 				writeLogToLogStream("Socket created");
 				while(true){
 					Socket client = server.accept();
+					log("New client connected to server");
 					Runnable handler = new ClientHandler(client);
 					clientHandlerExecutor.execute(handler);
 				}

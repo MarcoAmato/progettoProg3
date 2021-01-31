@@ -46,145 +46,6 @@ public class ClientDataModel {
 	}
 
 	/**
-	 * Creates a Connector thread that connects to database
-	 */
-	private void startConnection(){
-		new Connector().start();
-	}
-
-	/**
-	 * This class is a Thread that connects to server and handles input from server
-	 */
-	private class Connector extends Thread{
-		public Connector(){
-			setDaemon(true);
-		}
-
-		@Override
-		public void run() {
-			while(!connectionOkay.get()){
-				try{
-					InetAddress localhost = InetAddress.getLocalHost();
-					Socket serverSocket = new Socket(localhost, 5000);
-
-					outStream = new ObjectOutputStream(serverSocket.getOutputStream());
-					inStream = new ObjectInputStream(serverSocket.getInputStream());
-
-					connectionOkay.set(true);
-				}catch (IOException e){
-					System.out.println("Connection failed, trying to connect again...");
-					try {
-						//noinspection BusyWait
-						sleep(5000);
-					}catch (InterruptedException interruptedException){
-						interruptedException.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * This thread reads input from server and updates client variables according to such input
-	 */
-	private class ServerInputReader extends Thread{
-		public void run(){
-			setDaemon(true);
-			while(connectionOkay.get()) {
-				try { //here client waits for server input which for the moment will be only a new email that the client has received
-					int command = Common.getInputOfClass(inStream, Integer.class);
-					streamLock.lock();
-					switch (command) {
-						case CSMex.NEW_EMAIL_RECEIVED -> {
-							Email newEmail = getEmailFromServer();
-							emailsReceived.add(newEmail);
-						}
-						default -> System.out.println("Error, unexpected server command: " + command);
-					}
-				} catch (IOException e) {
-					System.out.println("Exception during getInputFromServerLoop");
-					e.printStackTrace();
-					startConnection();
-				}finally {
-					streamLock.unlock();
-				}
-			}
-		}
-	}
-
-	private void restartConnection(){
-		connectionOkay.set(false);
-		startConnection();
-	}
-
-	/*public static void main(String[] args) {
-
-		boolean connectionSuccess = false;
-
-		try{
-			InetAddress localhost = InetAddress.getLocalHost();
-			Socket serverSocket = new Socket(localhost, 5000);
-
-			outStream = new ObjectOutputStream(serverSocket.getOutputStream());
-			inStream = new ObjectInputStream(serverSocket.getInputStream());
-
-			connectionSuccess = true;
-		}catch (IOException e){
-			System.out.println("Server unreachable, try again later");
-			e.printStackTrace();
-			//dai messaggio di connessione non possibile alla view
-		}
-
-		if(connectionSuccess){
-			boolean terminated = false;
-			while(!terminated){
-				try {
-					getAccessFromServer();
-					try{
-						sleep(5000);
-					}catch (InterruptedException e){
-						e.printStackTrace();
-					}
-					//test///////////////////
-					String sender = emailAddress;
-					ArrayList<String> receivers = new ArrayList<>();
-					receivers.add("ciao@nigga.it");
-					receivers.add("bubu@bubu.bubu");
-					String subject = "subject";
-					String body = "body";
-					Date date = new Date();
-
-					boolean correctAddresses = true;
-
-					for(String receiver: receivers){
-						correctAddresses = emailAddressExists(receiver);
-						if(!correctAddresses) break;
-					}
-
-					if(correctAddresses){
-						sendEmail(new Email(sender, receivers, subject, body, date));
-						System.out.println("Yes");
-					}else{
-						System.out.println("No");
-					}
-
-					//test///////////////////
-
-					getInputFromServerLoop();
-					terminated = true;
-				}catch (IOException e){
-					System.out.println("Connection interrupted. Trying to connect again...");
-					try {
-						sleep(5000);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
-				}
-			}
-		}
-	}*/
-
-	/**
 	 * Send the email the user inserted and tries to authenticate. On authentication
 	 * a ServerInputReader thread is started to keep variables updated
 	 * @param emailInserted Email inserted by user
@@ -277,6 +138,85 @@ public class ClientDataModel {
 	}
 
 	/**
+	 * Creates a Connector thread that connects to database
+	 */
+	private void startConnection(){
+		new Connector().start();
+	}
+
+	private void restartConnection(){
+		connectionOkay.set(false);
+		startConnection();
+	}
+
+	/*public static void main(String[] args) {
+
+		boolean connectionSuccess = false;
+
+		try{
+			InetAddress localhost = InetAddress.getLocalHost();
+			Socket serverSocket = new Socket(localhost, 5000);
+
+			outStream = new ObjectOutputStream(serverSocket.getOutputStream());
+			inStream = new ObjectInputStream(serverSocket.getInputStream());
+
+			connectionSuccess = true;
+		}catch (IOException e){
+			System.out.println("Server unreachable, try again later");
+			e.printStackTrace();
+			//dai messaggio di connessione non possibile alla view
+		}
+
+		if(connectionSuccess){
+			boolean terminated = false;
+			while(!terminated){
+				try {
+					getAccessFromServer();
+					try{
+						sleep(5000);
+					}catch (InterruptedException e){
+						e.printStackTrace();
+					}
+					//test///////////////////
+					String sender = emailAddress;
+					ArrayList<String> receivers = new ArrayList<>();
+					receivers.add("ciao@nigga.it");
+					receivers.add("bubu@bubu.bubu");
+					String subject = "subject";
+					String body = "body";
+					Date date = new Date();
+
+					boolean correctAddresses = true;
+
+					for(String receiver: receivers){
+						correctAddresses = emailAddressExists(receiver);
+						if(!correctAddresses) break;
+					}
+
+					if(correctAddresses){
+						sendEmail(new Email(sender, receivers, subject, body, date));
+						System.out.println("Yes");
+					}else{
+						System.out.println("No");
+					}
+
+					//test///////////////////
+
+					getInputFromServerLoop();
+					terminated = true;
+				}catch (IOException e){
+					System.out.println("Connection interrupted. Trying to connect again...");
+					try {
+						sleep(5000);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		}
+	}*/
+
+	/**
 	 * @return a List<Email> object that contains syncArraylist sent from server
 	 * @throws ConnectException when arraylist is not correctly received
 	 */
@@ -302,4 +242,63 @@ public class ClientDataModel {
 	}
 
 
+	/**
+	 * This class is a Thread that connects to server and handles input from server
+	 */
+	private class Connector extends Thread{
+		public Connector(){
+			setDaemon(true);
+		}
+
+		@Override
+		public void run() {
+			while(!connectionOkay.get()){
+				try{
+					InetAddress localhost = InetAddress.getLocalHost();
+					Socket serverSocket = new Socket(localhost, 5000);
+
+					outStream = new ObjectOutputStream(serverSocket.getOutputStream());
+					inStream = new ObjectInputStream(serverSocket.getInputStream());
+
+					connectionOkay.set(true);
+				}catch (IOException e){
+					System.out.println("Connection failed, trying to connect again...");
+					try {
+						//noinspection BusyWait
+						sleep(5000);
+					}catch (InterruptedException interruptedException){
+						interruptedException.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * This thread reads input from server and updates client variables according to such input
+	 */
+	private class ServerInputReader extends Thread{
+		public void run(){
+			setDaemon(true);
+			while(connectionOkay.get()) {
+				try { //here client waits for server input which for the moment will be only a new email that the client has received
+					int command = Common.getInputOfClass(inStream, Integer.class);
+					streamLock.lock();
+					switch (command) {
+						case CSMex.NEW_EMAIL_RECEIVED -> {
+							Email newEmail = getEmailFromServer();
+							emailsReceived.add(newEmail);
+						}
+						default -> System.out.println("Error, unexpected server command: " + command);
+					}
+				} catch (IOException e) {
+					System.out.println("Exception during getInputFromServerLoop");
+					e.printStackTrace();
+					startConnection();
+				}finally {
+					streamLock.unlock();
+				}
+			}
+		}
+	}
 }
