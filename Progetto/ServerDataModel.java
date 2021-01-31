@@ -374,6 +374,7 @@ public class ServerDataModel extends Thread{
 					if(emailIsOkay){
 						outStream.writeObject(true);
 					}else{
+						log("Failed login for email: " + userEmail);
 						outStream.writeObject(false);
 					}
 				}
@@ -389,6 +390,8 @@ public class ServerDataModel extends Thread{
 				outStream.writeObject(emailsSent);
 				outStream.writeObject(emailsReceived);
 
+				log("Client " + userEmail + " connected");
+
 				return true;
 
                 /*System.out.println(emailsSent);
@@ -396,6 +399,7 @@ public class ServerDataModel extends Thread{
 			}catch (IOException e){
 				writeLogToLogStream("Error in client login");
 				System.out.println("It was not possible to establish connection with client");
+				e.printStackTrace();
 				return false;
 			}finally {
 				streamLock.unlock();

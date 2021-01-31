@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-class ServerCommon {
+class Common {
     public static <E> E getInputOfClass(ObjectInputStream inputStream, Class<E> expectedInputClass) throws ConnectException{
         E sanitizedInput = null;
 
@@ -58,7 +58,7 @@ class ServerCommon {
     }
 }
 
-class ServerCSMex {
+class CSMex {
     //Here are found all the constants that client and server use to know what the next objects will be
 
     //Server sent constants
@@ -70,7 +70,7 @@ class ServerCSMex {
     public static final int CHECK_EMAIL_ADDRESS_EXISTS = 2;
 }
 
-class ServerEmail implements Serializable {
+class Email implements Serializable {
     private final String sender;
     private final ArrayList<String> receivers;
     private final String subject;
@@ -79,7 +79,7 @@ class ServerEmail implements Serializable {
 
     public static final String FIELDS_DELIMITER = ";#;";
 
-    public ServerEmail(String sender, ArrayList<String> receivers, String subject, String body, Date sendingDate) {
+    public Email(String sender, ArrayList<String> receivers, String subject, String body, Date sendingDate) {
         this.sender = sender;
         this.receivers = receivers;
         this.subject = subject;
@@ -134,12 +134,12 @@ class ServerEmail implements Serializable {
          */
     }
 
-    public static boolean isArrayListOfEmails(ArrayList<ServerEmail> emails){
+    public static boolean isArrayListOfEmails(ArrayList<Email> emails){
         for(Object o: emails){
             if(o == null){
                 System.out.println("Error: a null object was found in email arraylist");
                 return false;
-            }else if(o.getClass() != ServerEmail.class){
+            }else if(o.getClass() != Email.class){
                 System.out.println("Error: a non-email object was found in email arraylist");
                 return false;
             }

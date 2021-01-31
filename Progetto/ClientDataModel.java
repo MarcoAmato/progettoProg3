@@ -1,8 +1,5 @@
 package Progetto;
 
-import Client.CSMex;
-import Client.Common;
-import Client.Email;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -77,6 +74,7 @@ public class ClientDataModel {
 				}catch (IOException e){
 					System.out.println("Connection failed, trying to connect again...");
 					try {
+						//noinspection BusyWait
 						sleep(5000);
 					}catch (InterruptedException interruptedException){
 						interruptedException.printStackTrace();
@@ -101,9 +99,7 @@ public class ClientDataModel {
 							Email newEmail = getEmailFromServer();
 							emailsReceived.add(newEmail);
 						}
-						default -> {
-							System.out.println("Error, unexpected server command: " + command);
-						}
+						default -> System.out.println("Error, unexpected server command: " + command);
 					}
 				} catch (IOException e) {
 					System.out.println("Exception during getInputFromServerLoop");
@@ -214,10 +210,8 @@ public class ClientDataModel {
 			new ServerInputReader().start();
 
 			return true;
-		}catch (ConnectException e){
-			restartConnection();
-			return false;
 		}catch(IOException e){
+			restartConnection();
 			e.printStackTrace();
 			return false;
 		}finally {
@@ -262,12 +256,13 @@ public class ClientDataModel {
 	}*/
 
 	/**
+	 * Asks server if emailAddress is registered and get response back
 	 * @param emailAddress the email we want to verify is in database
-	 * @return true if it is contained in database, false otherwise
+	 * @return true if emailAddress is contained in database, false otherwise
 	 */
-	/*public boolean emailAddressExists(String emailAddress){
+	private boolean emailAddressExists(String emailAddress){
 		try{
-			inputLock.lock();
+			streamLock.lock();
 
 			outStream.writeObject(CSMex.CHECK_EMAIL_ADDRESS_EXISTS);
 			outStream.writeObject(emailAddress);
@@ -276,17 +271,16 @@ public class ClientDataModel {
 			System.out.println("Email checking failed");
 			e.printStackTrace();
 			return false;
-			//continua lato server e integra lato client con quello che c è già
 		}finally {
-			inputLock.unlock();
+			streamLock.unlock();
 		}
-	}*/
+	}
 
 	/**
 	 * @return a List<Email> object that contains syncArraylist sent from server
 	 * @throws ConnectException when arraylist is not correctly received
 	 */
-	public List<Email> getSynchronizedListOfEmailsFromServer() throws ConnectException {
+	private List<Email> getSynchronizedListOfEmailsFromServer() throws ConnectException {
 		final List<Email> syncArrayList =  Collections.synchronizedList(new ArrayList<>());
 		return Common.ConvertToSyncArrayList(Common.getInputOfClass(inStream, syncArrayList.getClass()), Email.class);
 	}
@@ -295,7 +289,7 @@ public class ClientDataModel {
 	 * @return an Email sent from server
 	 * @throws ConnectException when Email is not correctly received
 	 */
-	public Email getEmailFromServer() throws ConnectException{
+	private Email getEmailFromServer() throws ConnectException{
 		return Common.getInputOfClass(inStream, Email.class);
 	}
 
@@ -303,7 +297,7 @@ public class ClientDataModel {
 	 * @return an boolean sent from server
 	 * @throws ConnectException when boolean is not correctly received
 	 */
-	public boolean getBooleanFromServer() throws ConnectException{
+	private boolean getBooleanFromServer() throws ConnectException{
 		return Common.getInputOfClass(inStream, Boolean.class);
 	}
 
