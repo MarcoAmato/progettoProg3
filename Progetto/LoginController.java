@@ -1,8 +1,6 @@
 package Progetto;
 
 import javafx.animation.PauseTransition;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -36,14 +34,11 @@ public class LoginController {
         if(model.getConnectionOkay()){
             showLogin();
         }
-        model.connectionStatusProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
-                if(!newValue){
-                    hideLogin();
-                }else if(newValue){
-                    showLogin();
-                }
+        model.connectionStatusProperty().addListener((observableValue, oldValue, newValue) -> {
+            if(newValue){
+                showLogin();
+            }else {
+                hideLogin();
             }
         });
     }
