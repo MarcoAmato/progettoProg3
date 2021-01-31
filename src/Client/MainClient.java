@@ -10,7 +10,7 @@ public class MainClient extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        ClientModel model = new ClientModel();
+        ClientDataModel model = new ClientDataModel();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
         Parent root = fxmlLoader.load();
         LoginController loginController = fxmlLoader.getController();

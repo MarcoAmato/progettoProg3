@@ -19,9 +19,9 @@ public class LoginController {
     @FXML private Text feedbackLabel;
     @FXML private TextField emailInput;
 
-    private ClientModel model;
+    private ClientDataModel model;
 
-    public void initModel(ClientModel model) {
+    public void initModel(ClientDataModel model) {
         // ensure model is only set once:
         if (this.model != null) {
             throw new IllegalStateException("Model can only be initialized once");
@@ -33,7 +33,6 @@ public class LoginController {
 
     @FXML
     public void handleLogin() {
-
         String insertedMail = emailInput.getText();
         boolean authorization = model.getAccessFromServer(insertedMail);
         if (authorization) {
