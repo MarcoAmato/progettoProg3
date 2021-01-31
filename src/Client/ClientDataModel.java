@@ -15,10 +15,8 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.lang.Thread.sleep;
-
 public class ClientDataModel {
-	public BooleanProperty connectionOkay = new SimpleBooleanProperty();
+	private final BooleanProperty connectionOkay = new SimpleBooleanProperty();
 
 	private String emailAddress;
 	private List<Email> emailsReceived;
@@ -31,10 +29,32 @@ public class ClientDataModel {
 		this.connectionOkay.set(false);
 	}
 
+	/**
+	 *
+	 * @return connectionOkay value
+	 */
+	public boolean getConnectionOkay(){
+		return connectionOkay.get();
+	}
+
+	/**
+	 *
+	 * @return connectionOkay property
+	 */
+	public BooleanProperty connectionStatusProperty(){
+		return connectionOkay;
+	}
+
+	/**
+	 * Creates a Connector thread that connects to database
+	 */
 	public void startConnection(){
 		new Connector().run();
 	}
 
+	/**
+	 * This class is a Thread that connects to server and handles input from server
+	 */
 	private class Connector extends Thread{
 		public Connector(){
 			setDaemon(true);
@@ -63,17 +83,39 @@ public class ClientDataModel {
 		}
 	}
 
+	/**
+	 * This thread reads input from server and updates client variables according to such input
+	 */
+	private class ServerInputReader extends Thread{
+		public void run(){
+			setDaemon(true);
+			while(connectionOkay.get()) {
+				try { //here client waits for server input which for the moment will be only a new email that the client has received
+					int command = Common.getInputOfClass(inStream, Integer.class);
+					streamLock.lock();
+					switch (command) {
+						case CSMex.NEW_EMAIL_RECEIVED -> {
+							Email newEmail = getEmailFromServer();
+							emailsReceived.add(newEmail);
+						}
+						default -> {
+							System.out.println("Error, unexpected server command: " + command);
+						}
+					}
+				} catch (IOException e) {
+					System.out.println("Exception during getInputFromServerLoop");
+					e.printStackTrace();
+					connectionOkay.set(false);
+				}finally {
+					streamLock.unlock();
+				}
+			}
+		}
+	}
+
 	private void restartConnection(){
 		connectionOkay.set(false);
 		startConnection();
-	}
-
-	/*private static void closeConnection(){
-		connectionOkay.set(false);
-	}*/
-
-	public BooleanProperty connectionStatusProperty(){
-		return connectionOkay;
 	}
 
 	/*public static void main(String[] args) {
@@ -143,6 +185,12 @@ public class ClientDataModel {
 		}
 	}*/
 
+	/**
+	 * Send the email the user inserted and tries to authenticate. On authentication
+	 * a ServerInputReader thread is started to keep variables updated
+	 * @param emailInserted Email inserted by user
+	 * @return true on access success, false on wrong email or error
+	 */
 	public boolean getAccessFromServer(String emailInserted){
 		try {
 			streamLock.lock();
@@ -160,8 +208,9 @@ public class ClientDataModel {
 			emailsReceived = emailsReceivedInput;
 			emailsSent = emailsSentInput;
 
-			return true;
+			new ServerInputReader().start();
 
+			return true;
 		}catch (ConnectException e){
 			restartConnection();
 			return false;
@@ -173,57 +222,34 @@ public class ClientDataModel {
 		}
 	}
 
-	/*public static void getInputFromServerLoop(){
-		boolean inputFromServerOkay = true;
-		while(inputFromServerOkay) {
-			try { //here client waits for server input which for the moment will be only a new email that the client has received
-				int command = Common.getInputOfClass(inStream, Integer.class);
-				inputLock.lock();
-				switch (command) {
-					case CSMex.NEW_EMAIL_RECEIVED -> {
-						Email newEmail = ClientUtil.getEmailFromServer();
-						emailsReceived.add(newEmail);
-					}
-					default -> {
-						System.out.println("Error, unexpected server command: " + command);
-						inputFromServerOkay = false;
-					}
-				}
-			} catch (IOException e) {
-				System.out.println("Exception during getInputFromServerLoop");
-				e.printStackTrace();
-				inputFromServerOkay = false;
-				connectionOkay.set(false);
-			}finally {
-				inputLock.unlock();
-			}
-		}
-	}*/
-
-	/*public void sendEmail(Email emailToSend){ //la view chiama questo metodo quando vuole inviare la mail
+	/**
+	 * Controller calls this method to send an email
+	 * @param emailToSend email to be sent
+	 * @return true on email sent correctly, false on error
+	 */
+	public boolean sendEmail(Email emailToSend){
 		try{
-			inputLock.lock();
+			streamLock.lock();
 
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
 
-			boolean emailSentCorrectly = ClientUtil.getBooleanFromServer();
+			boolean emailSentCorrectly = getBooleanFromServer();
 
 			if(emailSentCorrectly){
-				//tutto corretto, si da feedback alla view
-				System.out.println("Email sent correctly");
 				emailsSent.add(emailToSend);
+				return true;
 			}else{
-				System.out.println("Error, server didn't send the email");
+				return false;
 			}
 		}catch (IOException e){
-			//dare feedback di impossibilità di inviare mail alla view
-			System.out.println("Could not send email");
+			connectionOkay.set(false);
 			e.printStackTrace();
+			return false;
 		}finally {
-			inputLock.unlock();
+			streamLock.unlock();
 		}
-	}*/
+	}
 
 	/*public boolean replyEmail(Email emailToReply, String replyMessage){
 		ArrayList<String> senderArrayList = new ArrayList<>();
@@ -266,9 +292,9 @@ public class ClientDataModel {
 	 * @return an Email sent from server
 	 * @throws ConnectException when Email is not correctly received
 	 */
-	/*public Email getEmailFromServer() throws ConnectException{
+	public Email getEmailFromServer() throws ConnectException{
 		return Common.getInputOfClass(inStream, Email.class);
-	}*/
+	}
 
 	/**
 	 * @return an boolean sent from server
