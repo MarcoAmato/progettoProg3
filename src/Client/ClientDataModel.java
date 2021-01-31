@@ -26,7 +26,7 @@ public class ClientDataModel {
 	private final Lock streamLock = new ReentrantLock();
 
 	public ClientDataModel(){
-		this.connectionOkay.set(false);
+		restartConnection();
 	}
 
 	/**
@@ -48,8 +48,8 @@ public class ClientDataModel {
 	/**
 	 * Creates a Connector thread that connects to database
 	 */
-	public void startConnection(){
-		new Connector().run();
+	private void startConnection(){
+		new Connector().start();
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class ClientDataModel {
 				} catch (IOException e) {
 					System.out.println("Exception during getInputFromServerLoop");
 					e.printStackTrace();
-					connectionOkay.set(false);
+					startConnection();
 				}finally {
 					streamLock.unlock();
 				}

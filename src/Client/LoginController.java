@@ -32,14 +32,16 @@ public class LoginController {
         }
 
         this.model = model;
-        model.startConnection();
         model.connectionStatusProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
-                if(t1 == false){
+                if(!t1){
                     feedbackLabel.setText("Connessione persa, attendere per la riconnessione");
                     sendLoginMail.setDisable(true);
                     emailInput.setDisable(true);
+                }else if(t1){
+                    sendLoginMail.setDisable(false);
+                    emailInput.setDisable(false);
                 }
             }
         });
@@ -68,7 +70,9 @@ public class LoginController {
                 e.printStackTrace();
             }
         } else {
-            feedbackLabel.setText("L’email inserita non è valida");
+            if(model.getConnectionOkay()){
+                feedbackLabel.setText("L’email inserita non è valida");
+            }
         }
     }
 
