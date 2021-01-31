@@ -32,7 +32,16 @@ public class ClientDataModel {
 	}
 
 	public void startConnection(){
-		new Thread(() -> {
+		new Connector().run();
+	}
+
+	private class Connector extends Thread{
+		public Connector(){
+			setDaemon(true);
+		}
+
+		@Override
+		public void run() {
 			while(!connectionOkay.get()){
 				try{
 					InetAddress localhost = InetAddress.getLocalHost();
@@ -51,7 +60,7 @@ public class ClientDataModel {
 					}
 				}
 			}
-		}).start();
+		}
 	}
 
 	private void restartConnection(){
