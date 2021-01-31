@@ -1,6 +1,7 @@
 package Client;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -19,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static java.lang.Thread.sleep;
 
 public class ClientDataModel {
-	public BooleanProperty connectionOkay;
+	public BooleanProperty connectionOkay = new SimpleBooleanProperty();
 
 	private String emailAddress;
 	private List<Email> emailsReceived;
