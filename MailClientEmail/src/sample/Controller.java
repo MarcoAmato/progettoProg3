@@ -27,7 +27,6 @@ public class Controller implements Initializable {
     private LoginModel model;
 
     public void initModel(LoginModel model) {
-        // ensure model is only set once:
         if (this.model != null) {
             throw new IllegalStateException("Model can only be initialized once");
         }
@@ -50,6 +49,8 @@ public class Controller implements Initializable {
                         try {
                             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailClient.fxml"));
                             Parent root1 = fxmlLoader.load();
+                            MailController controller = fxmlLoader.getController();
+                            controller.initModel(model);
                             Stage stage = new Stage();
                             stage.setTitle("Client E-mail");
                             stage.setScene(new Scene(root1, 1280, 800));

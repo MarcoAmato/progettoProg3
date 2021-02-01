@@ -6,9 +6,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 public class NewMailController {
@@ -16,27 +20,25 @@ public class NewMailController {
     @FXML private Text Controllo;
     @FXML private TextField Receivers;
     @FXML private ListView<String> ReceiversList;
-    @FXML private Text DeleteText;
+    @FXML private TextField sender;
+    @FXML private TextField subject;
 
     private DataMail model;
-    boolean Selected = false;
 
     public void HandleSentMail(ActionEvent actionEvent) {
-        String luca = MailText.getText();
-        if(luca.contains("s")) {
-            Controllo.setText("Luca contiene s");
-            PauseTransition delay = new PauseTransition(Duration.seconds(5));
-            delay.setOnFinished( event -> Controllo.setText("") );
-            delay.play();
-        } else {
-            Controllo.setText("Luca non contiene s");
-            PauseTransition delay = new PauseTransition(Duration.seconds(5));
-            delay.setOnFinished( event -> Controllo.setText("") );
-            delay.play();
-        }
+        Email luca = new Email(sender.getText(), new ArrayList<>(ReceiversList.getItems()), subject.getText(), MailText.getText(), new Date());
+        Controllo.setText("Mail inviata!");
+        System.out.println(luca);
+        MailText.setText("");
+        //Receivers.setText("");
+        subject.setText("");
+        ReceiversList.getItems().clear();
+        PauseTransition delay = new PauseTransition(Duration.seconds(5));
+        delay.setOnFinished( event -> Controllo.setText("") );
     }
 
     public void handleAddReceiver(ActionEvent actionEvent) {
+        ReceiversList.setDisable(false);
         model.ritornaCandidates().add(Receivers.getText());
         Receivers.setText("");
     }
@@ -52,13 +54,15 @@ public class NewMailController {
     }
 
     public void DeleteReceiversHandler(ActionEvent actionEvent) {
-        if (Selected) {
-            final int val = ReceiversList.getSelectionModel().getSelectedIndex();
-            ReceiversList.getItems().remove(val);
+        if (!ReceiversList.isDisable()) {
+            if(ReceiversList.getSelectionModel().getSelectedIndex() != -1) {
+                final int val = ReceiversList.getSelectionModel().getSelectedIndex();
+                model.ritornaCandidates().remove(val);
+                if (model.ritornaCandidates().size() == 0) {
+                    ReceiversList.setDisable(true);
+                }
+            }
         }
     }
 
-    public void ReceiverSelected(MouseEvent mouseEvent) {
-        Selected = true;
-    }
 }

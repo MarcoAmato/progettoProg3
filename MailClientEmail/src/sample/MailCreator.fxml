@@ -46,12 +46,12 @@
             <Font name="Arial" size="12.0" />
          </font>
       </Label>
-      <TextField fx:id="Sender" editable="false" text="Trabacca.matteo@virgilio.it" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+      <TextField fx:id="sender" editable="false" text="Trabacca.matteo@virgilio.it" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
          <font>
             <Font name="Arial" size="12.0" />
          </font>
       </TextField>
-      <TextField GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
+      <TextField fx:id="subject" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
       <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <opaqueInsets>
             <Insets top="10.0" />
@@ -83,11 +83,6 @@
          <Font name="Arial" size="12.0" />
       </font>
    </Button>
-   <ListView fx:id="ReceiversList" layoutX="541.0" layoutY="14.0" onMouseClicked="#ReceiverSelected" prefHeight="176.0" prefWidth="200.0" />
+   <ListView fx:id="ReceiversList" disable="true" layoutX="541.0" layoutY="14.0" prefHeight="176.0" prefWidth="200.0" />
    <Text fx:id="Controllo" layoutX="51.0" layoutY="556.0" strokeType="OUTSIDE" strokeWidth="0.0" />
-   <Text fx:id="DeleteText" layoutX="541.0" layoutY="254.0" strokeType="OUTSIDE" strokeWidth="0.0">
-      <font>
-         <Font name="Arial" size="12.0" />
-      </font>
-   </Text>
 </AnchorPane>
