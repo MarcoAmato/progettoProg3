@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -82,10 +83,13 @@ public class ClientDataModel {
 
 	/**
 	 * Controller calls this method to send an email
-	 * @param emailToSend email to be sent
+	 * @param receivers List of email addresses of receivers
+	 * @param subject Subject of email
+	 * @param body Body of email
 	 * @return true on email sent correctly, false on error
 	 */
-	public boolean sendEmail(Email emailToSend){
+	public boolean sendEmail(ArrayList<String> receivers, String subject, String body){
+		Email emailToSend = new Email(this.emailAddress, receivers, subject, body, new Date());
 		try{
 			streamLock.lock();
 
