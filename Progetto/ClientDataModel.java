@@ -116,6 +116,34 @@ public class ClientDataModel {
 		}
 	}
 
+	/**
+	 * Replies to the emailToReply Email using body as reply content
+	 * @param emailToReply Email to be replied
+	 * @param body Body of reply
+	 * @return true on replied correctly, false otherwise
+	 */
+	public boolean replyEmail(Email emailToReply, String body){
+		String receiverOfReply = emailToReply.getSender();
+		ArrayList<String> receiverToArrayList = new ArrayList<>();
+		receiverToArrayList.add(receiverOfReply);
+		String subjectOfReply = emailToReply.getSubject();
+		return sendEmail(receiverToArrayList, subjectOfReply, body);
+	}
+
+	/**
+	 * Replies to all emailToReply receivers using body as reply content
+	 * @param emailToReply Email whose receivers are to be replied
+	 * @param body Body of reply
+	 * @return true on replied all correctly, false otherwise
+	 */
+	public boolean replyAllEmail(Email emailToReply, String body){
+		ArrayList<String> receiversOfReply = emailToReply.getReceivers();
+		receiversOfReply.remove(emailAddress);
+		receiversOfReply.add(emailToReply.getSender());
+		String subjectOfReply = emailToReply.getSubject();
+		return sendEmail(receiversOfReply, subjectOfReply, body);
+	}
+
 	/*public boolean replyEmail(Email emailToReply, String replyMessage){
 		ArrayList<String> senderArrayList = new ArrayList<>();
 		senderArrayList.add(emailToReply.getSender());
@@ -128,7 +156,7 @@ public class ClientDataModel {
 	 * @param emailAddress the email we want to verify is in database
 	 * @return true if emailAddress is contained in database, false otherwise
 	 */
-	private boolean emailAddressExists(String emailAddress){
+	public boolean emailAddressExists(String emailAddress){
 		try{
 			streamLock.lock();
 

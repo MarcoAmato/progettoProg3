@@ -260,6 +260,7 @@ public class ServerDataModel{
 			}catch (IOException e){
 				e.printStackTrace();
 			}
+			log(emailAddress+" disconnected");
 			System.out.println("Client disconnected, bye bye");
 		}
 
