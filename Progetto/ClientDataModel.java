@@ -76,8 +76,8 @@ public class ClientDataModel {
 
 			return true;
 		}catch(IOException e){
-			restartConnection();
 			e.printStackTrace();
+			restartConnection();
 			return false;
 		}finally {
 			streamLock.unlock();
@@ -108,8 +108,8 @@ public class ClientDataModel {
 				return false;
 			}
 		}catch (IOException e){
-			connectionOkay.set(false);
 			e.printStackTrace();
+			restartConnection();
 			return false;
 		}finally {
 			streamLock.unlock();
@@ -138,6 +138,7 @@ public class ClientDataModel {
 		}catch (IOException e){
 			System.out.println("Email checking failed");
 			e.printStackTrace();
+			restartConnection();
 			return false;
 		}finally {
 			streamLock.unlock();
@@ -153,6 +154,11 @@ public class ClientDataModel {
 
 	private void restartConnection(){
 		connectionOkay.set(false);
+		emailAddress=null;
+		emailsReceived=null;
+		emailsSent=null;
+		inStream=null;
+		outStream=null;
 		startConnection();
 	}
 
@@ -304,7 +310,7 @@ public class ClientDataModel {
 				} catch (IOException e) {
 					System.out.println("Exception during getInputFromServerLoop");
 					e.printStackTrace();
-					startConnection();
+					restartConnection();
 				}finally {
 					streamLock.unlock();
 				}
