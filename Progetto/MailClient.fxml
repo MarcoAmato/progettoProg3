@@ -68,7 +68,8 @@
                </font>
             </Label>
          </HBox>
-         <HBox fx:id="NewMail" onMouseClicked="#handleNewMail" onMouseEntered="#HandleGlowMail" onMouseExited="#MouseOutNewMail" prefHeight="66.0" prefWidth="200.0">
+         <HBox fx:id="NewMail"  onMouseEntered="#HandleGlowMail" onMouseExited="#MouseOutNewMail" prefHeight="66.0" prefWidth="200.0">
+            <!--onMouseClicked="#&lt;!&ndash;handleNewMail&ndash;&gt;"-->
             <ImageView fitHeight="62.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
                <HBox.margin>
                   <Insets left="5.0" top="5.0" />
