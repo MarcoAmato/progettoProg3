@@ -69,7 +69,8 @@ public class MailController {
 
     }
 
-    public void handleNewMail(MouseEvent mouseEvent) {
+    //Dobbiamo gestire questa funzione importando il file giusto
+    /*public void handleNewMail(MouseEvent mouseEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailCreator.fxml"));
             Parent root2 = fxmlLoader.load();
@@ -85,7 +86,7 @@ public class MailController {
         catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void handleDeleteMail(MouseEvent mouseEvent) {
         DeleteHandler.setText("Seleziona la mail da eliminare");
