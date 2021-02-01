@@ -70,7 +70,7 @@ class CSMex {
     public static final int CHECK_EMAIL_ADDRESS_EXISTS = 2;
 }
 
-class Email implements Serializable {
+class Email implements Serializable, Comparable<Email> {
     private final String sender;
     private final ArrayList<String> receivers;
     private final String subject;
@@ -132,6 +132,19 @@ class Email implements Serializable {
             ;*;corpo della mail
             ;*;dd/MM/yyyy HH:mm:ss(Data https://docs.oracle.com/javase/8/docs/api/java/util/Date.html)
          */
+    }
+
+    @Override
+    public int compareTo(Email emailCompared) {
+        Date thisSendingDate = this.sendingDate;
+        Date emailComparedSendingDate = this.sendingDate;
+        if(thisSendingDate.before(emailComparedSendingDate)){
+            return 1;
+        }else if(thisSendingDate.after(emailComparedSendingDate)){
+            return -1;
+        }else{
+            return 0;
+        }
     }
 
     public static boolean isArrayListOfEmails(ArrayList<Email> emails){
