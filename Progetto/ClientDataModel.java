@@ -256,7 +256,7 @@ public class ClientDataModel {
 
 
 	/**
-	 * This class is a Thread that connects to server and handles input from server
+	 * This Thread connects to server and handles input from server
 	 */
 	private class Connector extends Thread{
 		public Connector(){
@@ -288,7 +288,7 @@ public class ClientDataModel {
 	}
 
 	/**
-	 * This thread reads input from server and updates client variables according to such input
+	 * This Thread reads input from server and updates client variables according to such input
 	 */
 	private class ServerInputReader extends Thread{
 		public ServerInputReader(){
