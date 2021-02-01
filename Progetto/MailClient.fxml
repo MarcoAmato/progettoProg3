@@ -73,7 +73,7 @@
                <HBox.margin>
                   <Insets left="5.0" top="5.0" />
                </HBox.margin>
-               <Image url="@../png/png-transparent-computer-icons-email-information-send-email-button-miscellaneous-angle-triangle-removebg-preview.png" />
+               <Image url="@../png/paper-plane.png" />
             </ImageView>
             <Label prefHeight="68.0" prefWidth="86.0" text="Nuova mail">
                <HBox.margin>
