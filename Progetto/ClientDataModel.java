@@ -2,6 +2,8 @@ package Progetto;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -20,8 +22,8 @@ public class ClientDataModel {
 	private final BooleanProperty connectionOkay = new SimpleBooleanProperty();
 
 	private String emailAddress;
-	private List<Email> emailsReceived;
-	private List<Email> emailsSent;
+	private ObservableList<Email> emailsReceived;
+	private ObservableList<Email> emailsSent;
 	private ObjectInputStream inStream;
 	private ObjectOutputStream outStream;
 	private final Lock streamLock = new ReentrantLock();
@@ -62,8 +64,9 @@ public class ClientDataModel {
 				return false;
 			}
 
-			List<Email> emailsReceivedInput = getSynchronizedListOfEmailsFromServer();
-			List<Email> emailsSentInput = getSynchronizedListOfEmailsFromServer();
+			//Converts synchronized arraylist to observable list
+			ObservableList<Email> emailsReceivedInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
+			ObservableList<Email> emailsSentInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
 
 			emailAddress = emailInserted;
 			emailsReceived = emailsReceivedInput;
