@@ -117,6 +117,36 @@ public class ClientDataModel {
 	}
 
 	/**
+	 * Controller calls this method to delete an email
+	 * @param emailToDelete Email to be deleted
+	 * @return true on email deleted correctly, false on error
+	 */
+	public boolean deleteEmail(Email emailToDelete){
+		try{
+			streamLock.lock();
+
+			outStream.writeObject(CSMex.DELETE_EMAIL);
+			outStream.writeObject(emailToDelete);
+
+			boolean emailDeletedCorrectly = getBooleanFromServer();
+
+			if(emailDeletedCorrectly){
+				emailsSent.remove(emailToDelete);
+				emailsReceived.remove(emailToDelete);
+				return true;
+			}else{
+				return false;
+			}
+		}catch (IOException e){
+			e.printStackTrace();
+			restartConnection();
+			return false;
+		}finally {
+			streamLock.unlock();
+		}
+	}
+
+	/**
 	 * Replies to the emailToReply Email using body as reply content
 	 * @param emailToReply Email to be replied
 	 * @param body Body of reply

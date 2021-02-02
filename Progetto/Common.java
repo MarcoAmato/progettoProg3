@@ -68,6 +68,7 @@ class CSMex {
     public static final int NEW_EMAIL_TO_SEND = 0;
     public static final int DISCONNECTION = 1;
     public static final int CHECK_EMAIL_ADDRESS_EXISTS = 2;
+    public static final int DELETE_EMAIL = 3;
 }
 
 class Email implements Serializable, Comparable<Email> {

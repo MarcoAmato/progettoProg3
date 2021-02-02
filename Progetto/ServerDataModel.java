@@ -250,10 +250,10 @@ public class ServerDataModel{
 
 				if(connectionEstablished){ //allora è stata trovata una email associata
 					//vai in attesa di input utente fino a richiesta di chiusura connessione
-					boolean clientWantsToDisconnect = false;
-					while(!clientWantsToDisconnect){
+					boolean clientDisconnected = false;
+					while(!clientDisconnected){
 						int command = Common.getInputOfClass(inStream, Integer.class);
-						clientWantsToDisconnect = answerMessageWithFeedback(command);
+						clientDisconnected = !answerMessage(command);
 					}
 					endConnection();
 				}
@@ -264,64 +264,152 @@ public class ServerDataModel{
 			System.out.println("Client disconnected, bye bye");
 		}
 
-		/*
-		Handles the client request based on the command that was received.
-		It returns true if the client wants to disconnect or an error makes
-		closing connection the best option, if the client is not reachable
-		or if an unexpected message is received.
-		Otherwise returns false
+		/**
+		 * Handles the client request according to command.
+		 * @param command
+		 * @return true when connection should be kept alive, false on close request or error
 		 */
-		public boolean answerMessageWithFeedback(int command){
+		public boolean answerMessage(int command){
 			try{
 				streamLock.lock();
 				switch (command) {
 					case CSMex.NEW_EMAIL_TO_SEND -> {
 						Email newEmailToSend = Common.getInputOfClass(inStream, Email.class);
-						ArrayList<String> receivers = newEmailToSend.getReceivers();
-						boolean allReceiversExist = true;
-						for (String receiver : receivers) {
-							if (!allReceiversExist) break;
-							if (!database.emailIsRegistered(receiver)) {
-
-								allReceiversExist = false;
-							}
-						}
-						if (allReceiversExist) {
-							synchronized (currentClientsMap) {
-								//The HashMap is locked so while we send the emails no client logs. Otherwise he could not receive the new emails
-								for (String receiver : receivers) {
-									sendEmail(newEmailToSend, receiver);
-								}
-							}
-							emailsSent.add(newEmailToSend);
-							saveEmail(newEmailToSend);
-							outStream.writeObject(true);
-
-							log("Email from " + emailAddress + " sent correctly");
-						} else {
-							outStream.writeObject(false);
-							log("Error, email from " + emailAddress + " contains an incorrect receiver address");
-						}
+						boolean emailSentCorrectly = sendEmail(newEmailToSend);
+						return emailSentCorrectly;
+					}
+					case CSMex.DELETE_EMAIL -> {
+						Email emailToDelete = Common.getInputOfClass(inStream, Email.class);
+						boolean emailDeletedCorrectly = deleteEmail(emailToDelete);
+						return emailDeletedCorrectly;
 					}
 					case CSMex.DISCONNECTION -> {
 						log("Client " + emailAddress + " disconnected");
-						return true;
+						return false;
 					}
 					case CSMex.CHECK_EMAIL_ADDRESS_EXISTS -> {
 						String emailAddress = Common.getInputOfClass(inStream, String.class);
 						outStream.writeObject(database.emailIsRegistered(emailAddress));
+						return true;
 					}
-					default -> log("Error, unexpected command from client: #" + command);
+					default -> {
+						log("Error, unexpected command from client: #" + command);
+						return false;
+					}
 				}
 			} catch (IOException e) {
 				log("Error in handling client message #"+command);
 				e.printStackTrace();
-				return true;
+				return false;
 			}finally {
 				streamLock.unlock();
 			}
-			return false;
 		}
+
+		/**
+		 * Handles the request to send emailToSend to the ClientHandlers of receivers, if present,
+		 * and then saves the email to database
+		 * @param emailToSend Email to be sent
+		 * @return true on success, false on failure
+		 * @throws IOException When client communication fails
+		 */
+		public boolean sendEmail(Email emailToSend) throws IOException{
+			ArrayList<String> receivers = emailToSend.getReceivers();
+			boolean allReceiversExist = true;
+			for (String receiver : receivers) {
+				if (!allReceiversExist) break;
+				if (!database.emailIsRegistered(receiver)) {
+					allReceiversExist = false;
+				}
+			}
+			if (allReceiversExist) {
+				synchronized (currentClientsMap) {
+					//The HashMap is locked so while we send the emails no client logs. Otherwise he could not receive the new emails
+					for (String receiver : receivers) {
+						sendEmailToClientHandler(emailToSend, receiver);
+					}
+				}
+				emailsSent.add(emailToSend);
+				saveEmail(emailToSend);
+				outStream.writeObject(true);
+				log("Email from " + emailAddress + " sent correctly");
+
+				return true;
+			} else {
+				outStream.writeObject(false);
+				log("Error, email from " + emailAddress + " contains an incorrect receiver address");
+				return false;
+			}
+		}
+
+		/**
+		 * If there is a ClientHandler active for receiver then it informs the clientDataModel that email
+		 * was received, otherwise does nothing.
+		 * @param email Email received from another user
+		 * @param receiver email address of receiver
+		 */
+		private void sendEmailToClientHandler(Email email, String receiver){
+			ClientHandler activeClientHandler = getClientHandlerFromEmail(receiver);
+			if(activeClientHandler != null){
+				log("Sending email to Client Handler of "+activeClientHandler.emailAddress);
+				activeClientHandler.receiveEmail(email);
+			}
+		}
+
+		/**
+		 * ClientHandler saves email then informs clientDataModel giving it email
+		 * @param email new Email received from another user
+		 */
+		private void receiveEmail(Email email){
+			log(emailAddress+" received new email");
+			emailsReceived.add(email);
+			try{
+				//needs synchro because multiple emails could be received in a row and this could lead to errors
+				streamLock.lock();
+				outStream.writeObject(CSMex.NEW_EMAIL_RECEIVED);
+				outStream.writeObject(email);
+			}catch (IOException e){
+				System.out.println("Error, server can't write new mail to client");
+				e.printStackTrace();
+			}finally {
+				streamLock.unlock();
+			}
+		}
+
+
+		/**
+		 * Deletes emailToBeDeleted, first on ClientHandles involved, then on database
+		 * @param emailToBeDeleted Email to be deleted
+		 * @return true on success, false on failure
+		 * @throws IOException When client communication fails
+		 */
+		private boolean deleteEmail(Email emailToBeDeleted) throws IOException{
+			synchronized (currentClientsMap){
+				//The HashMap is locked so while we delete the emails no client logs. Otherwise he could read deleted emails
+				for (String receiver : emailToBeDeleted.getReceivers()) {
+					removeEmailFromClientHandler(emailToBeDeleted, receiver);
+				}
+			}
+
+			for(Email email: emailsSent){
+				if(email.toString().equals(emailToBeDeleted.toString())){
+					emailsSent.remove(email);
+				}
+			}
+
+			for(Email email: emailsReceived){
+				if(email.toString().equals(emailToBeDeleted.toString())){
+					emailsSent.remove(email);
+				}
+			}
+
+			deleteEmailFromDatabase(emailToBeDeleted);
+			outStream.writeObject(true);
+			log("Email from " + emailToBeDeleted.getSender() + " deleted");
+
+			return true;
+		}
+
 
 		private boolean startConnection(){
 			try{
@@ -373,30 +461,6 @@ public class ServerDataModel{
 		 */
 		private void endConnection(){
 			removeClientHandlerFromHashMap(emailAddress);
-		}
-
-		private void sendEmail(Email email, String receiver){
-			ClientHandler activeClientHandler = getClientHandlerFromEmail(receiver);
-			if(activeClientHandler != null){
-				log("Sending email to Client Handler of "+activeClientHandler.emailAddress);
-				activeClientHandler.receiveEmail(email);
-			}
-		}
-
-		private void receiveEmail(Email email){
-			log(emailAddress+" received new email");
-			emailsReceived.add(email);
-			try{
-				//needs synchro because multiple emails could be received in a row and this could lead to errors
-				streamLock.lock();
-				outStream.writeObject(CSMex.NEW_EMAIL_RECEIVED);
-				outStream.writeObject(email);
-			}catch (IOException e){
-				System.out.println("Error, server can't write new mail to client");
-				e.printStackTrace();
-			}finally {
-				streamLock.unlock();
-			}
 		}
 	}
 }
