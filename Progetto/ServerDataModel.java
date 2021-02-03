@@ -369,7 +369,7 @@ public class ServerDataModel{
 				outStream.writeObject(CSMex.NEW_EMAIL_RECEIVED);
 				outStream.writeObject(email);
 			}catch (IOException e){
-				System.out.println("Error, server can't write new mail to client");
+				log("Error, server can't write new mail to client");
 				e.printStackTrace();
 			}finally {
 				streamLock.unlock();
@@ -391,17 +391,9 @@ public class ServerDataModel{
 				}
 			}
 
-			for(Email email: emailsSent){
-				if(email.toString().equals(emailToBeDeleted.toString())){
-					emailsSent.remove(email);
-				}
-			}
+			emailsSent.removeIf(email -> email.toString().equals(emailToBeDeleted.toString()));
 
-			for(Email email: emailsReceived){
-				if(email.toString().equals(emailToBeDeleted.toString())){
-					emailsSent.remove(email);
-				}
-			}
+			emailsReceived.removeIf(email -> email.toString().equals(emailToBeDeleted.toString()));
 
 			deleteEmailFromDatabase(emailToBeDeleted);
 			outStream.writeObject(true);
@@ -410,6 +402,41 @@ public class ServerDataModel{
 			return true;
 		}
 
+		/**
+		 * If clientEmail is active removes email from his handler, otherwise
+		 * does nothing
+		 * @param emailToDelete Email to delete from clientHandler
+		 * @param clientEmail email address checked if active
+		 */
+		private void removeEmailFromClientHandler(Email emailToDelete, String clientEmail){
+			ClientHandler activeClientHandler = getClientHandlerFromEmail(clientEmail);
+			if(activeClientHandler != null){
+				log("Removed email from ClientHandler of "+activeClientHandler.emailAddress);
+				activeClientHandler.removeEmail(emailToDelete);
+			}
+		}
+
+		/**
+		 * Removes emailToRemove both on ClientHandler and on ClientDataModel
+		 * side
+		 * @param emailToRemove Email to be removed
+		 */
+		private void removeEmail(Email emailToRemove){
+			log(emailAddress + " removing an email");
+
+			emailsReceived.removeIf(email -> email.toString().equals(emailToRemove.toString()));
+			emailsSent.removeIf(email -> email.toString().equals(emailToRemove.toString()));
+			try{
+				streamLock.lock();
+				outStream.writeObject(CSMex.EMAIL_DELETED);
+				outStream.writeObject(emailToRemove);
+			}catch (IOException e){
+				log("Error, server can't remove email from client" + emailAddress);
+				e.printStackTrace();
+			}finally {
+				streamLock.unlock();
+			}
+		}
 
 		private boolean startConnection(){
 			try{

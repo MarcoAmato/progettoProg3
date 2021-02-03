@@ -63,6 +63,7 @@ class CSMex {
 
     //Server sent constants
     public static final int NEW_EMAIL_RECEIVED = 0;
+    public static final int EMAIL_DELETED = 1;
 
     //Client sent constants
     public static final int NEW_EMAIL_TO_SEND = 0;
