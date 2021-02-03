@@ -294,6 +294,8 @@ public class ServerDataModel{
 				inStream = new ObjectInputStream(socket.getInputStream());
 				outStream = new ObjectOutputStream(socket.getOutputStream());
 
+				System.out.println(inStream);
+
 				boolean connectionEstablished = startConnection();
 
 				if(connectionEstablished){ //allora è stata trovata una email associata

@@ -19,6 +19,15 @@ public class Test {
 			}
 		}
 		testGetAccessFromServer(clientDataModel, true);
+
+		try{
+			sleep(3000);
+		} catch (InterruptedException interruptedException) {
+			interruptedException.printStackTrace();
+		}
+
+		System.out.println("Ciao");
+
 		testSendEmail(clientDataModel, true);
 	}
 

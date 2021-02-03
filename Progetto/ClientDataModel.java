@@ -24,7 +24,7 @@ public class ClientDataModel {
 	private ObservableList<Email> emailsSent;
 	private ObjectInputStream inStream;
 	private ObjectOutputStream outStream;
-	private final Lock streamLock = new ReentrantLock();
+	private final Lock serverRequestLock = new ReentrantLock();
 	private ObjectOutputStream serverOutputWriterStream;
 	private ObjectInputStream serverOutputReaderStream;
 
@@ -33,8 +33,8 @@ public class ClientDataModel {
 		try {
 			PipedOutputStream serverOutputOutputPipe = new PipedOutputStream();
 			PipedInputStream serverOutputInputPipe = new PipedInputStream(serverOutputOutputPipe);
-			serverOutputReaderStream = new ObjectInputStream(serverOutputInputPipe);
 			serverOutputWriterStream = new ObjectOutputStream(serverOutputOutputPipe);
+			serverOutputReaderStream = new ObjectInputStream(serverOutputInputPipe);
 		} catch (IOException e) {
 			System.out.println("Could not initialize serverOutputStreams");
 			e.printStackTrace();
@@ -65,9 +65,11 @@ public class ClientDataModel {
 	 */
 	public boolean getAccessFromServer(String emailInserted){
 		try {
-			streamLock.lock();
+			serverRequestLock.lock();
 
 			outStream.writeObject(emailInserted);
+			outStream.flush();
+
 			boolean emailIsOkay = getBooleanFromServer();
 			if(!emailIsOkay){
 				return false;
@@ -89,7 +91,7 @@ public class ClientDataModel {
 			restartConnection();
 			return false;
 		}finally {
-			streamLock.unlock();
+			serverRequestLock.unlock();
 		}
 	}
 
@@ -104,7 +106,7 @@ public class ClientDataModel {
 		if(emailAddress == null || receivers.contains(this.emailAddress)) return false;
 		Email emailToSend = new Email(this.emailAddress, receivers, subject, body, new Date());
 		try{
-			streamLock.lock();
+			serverRequestLock.lock();
 
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
@@ -124,7 +126,7 @@ public class ClientDataModel {
 			restartConnection();
 			return false;
 		}finally {
-			streamLock.unlock();
+			serverRequestLock.unlock();
 		}
 	}
 
@@ -135,7 +137,7 @@ public class ClientDataModel {
 	 */
 	public boolean deleteEmail(Email emailToDelete){
 		try{
-			streamLock.lock();
+			serverRequestLock.lock();
 
 			outStream.writeObject(CSMex.DELETE_EMAIL);
 			outStream.writeObject(emailToDelete);
@@ -154,7 +156,7 @@ public class ClientDataModel {
 			restartConnection();
 			return false;
 		}finally {
-			streamLock.unlock();
+			serverRequestLock.unlock();
 		}
 	}
 
@@ -200,7 +202,7 @@ public class ClientDataModel {
 	 */
 	public boolean emailAddressExists(String emailAddress){
 		try{
-			streamLock.lock();
+			serverRequestLock.lock();
 
 			outStream.writeObject(CSMex.CHECK_EMAIL_ADDRESS_EXISTS);
 			outStream.writeObject(emailAddress);
@@ -211,7 +213,7 @@ public class ClientDataModel {
 			restartConnection();
 			return false;
 		}finally {
-			streamLock.unlock();
+			serverRequestLock.unlock();
 		}
 	}
 
@@ -229,6 +231,8 @@ public class ClientDataModel {
 		emailsSent=null;
 		inStream=null;
 		outStream=null;
+		serverOutputReaderStream=null;
+		serverOutputWriterStream=null;
 		startConnection();
 	}
 
@@ -305,7 +309,7 @@ public class ClientDataModel {
 	 */
 	private List<Email> getSynchronizedListOfEmailsFromServer() throws ConnectException {
 		final List<Email> syncArrayList =  Collections.synchronizedList(new ArrayList<>());
-		return Common.ConvertToSyncArrayList(Common.getInputOfClass(inStream, syncArrayList.getClass()), Email.class);
+		return Common.ConvertToSyncArrayList(Common.getInputOfClass(serverOutputReaderStream, syncArrayList.getClass()), Email.class);
 	}
 
 	/**
@@ -313,7 +317,7 @@ public class ClientDataModel {
 	 * @throws ConnectException when Email is not correctly received
 	 */
 	private Email getEmailFromServer() throws ConnectException{
-		return Common.getInputOfClass(inStream, Email.class);
+		return Common.getInputOfClass(serverOutputReaderStream, Email.class);
 	}
 
 	/**
@@ -321,7 +325,7 @@ public class ClientDataModel {
 	 * @throws ConnectException when boolean is not correctly received
 	 */
 	private boolean getBooleanFromServer() throws ConnectException{
-		return Common.getInputOfClass(inStream, Boolean.class);
+		return Common.getInputOfClass(serverOutputReaderStream, Boolean.class);
 	}
 
 
@@ -368,12 +372,12 @@ public class ClientDataModel {
 		public void run(){
 			while(connectionOkay.get()) {
 				boolean inputIsCommand = false;
-				int command;
+				int command = CSMex.FORCE_DISCONNECTION;
 				try { //here client waits for server input
 					while(!inputIsCommand){
 						Object input = inStream.readObject();
 						if(input.getClass() != Integer.class){
-
+							serverOutputWriterStream.writeObject(input);
 						}else{
 							inputIsCommand = true;
 							command = (Integer) input;
@@ -391,12 +395,15 @@ public class ClientDataModel {
 							emailsReceived.removeIf(email -> email.toString().equals(emailToDelete.toString()));
 							emailsSent.removeIf(email -> email.toString().equals(emailToDelete.toString()));
 						}
+						case CSMex.FORCE_DISCONNECTION -> System.out.println("Disconnecting from server...");
 						default -> System.out.println("Error, unexpected server command: " + command);
 					}
 				} catch (IOException | ClassNotFoundException e) {
 					System.out.println("Exception during getInputFromServerLoop");
 					e.printStackTrace();
 					restartConnection();
+				}finally {
+					serverRequestLock.unlock();
 				}
 			}
 		}
