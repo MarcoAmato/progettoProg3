@@ -92,6 +92,7 @@ public class ClientDataModel {
 	 * @return true on email sent correctly, false on error
 	 */
 	public boolean sendEmail(ArrayList<String> receivers, String subject, String body){
+		if(emailAddress == null || receivers.contains(this.emailAddress)) return false;
 		Email emailToSend = new Email(this.emailAddress, receivers, subject, body, new Date());
 		try{
 			streamLock.lock();
@@ -99,8 +100,10 @@ public class ClientDataModel {
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
 
+			System.out.println("chiamo");
 			boolean emailSentCorrectly = getBooleanFromServer();
 
+			System.out.println("pippo");
 			if(emailSentCorrectly){
 				emailsSent.add(emailToSend);
 				return true;
@@ -355,13 +358,20 @@ public class ClientDataModel {
 
 		public void run(){
 			while(connectionOkay.get()) {
-				try { //here client waits for server input which for the moment will be only a new email that the client has received
+				boolean locked = false;
+				try { //here client waits for server input
 					int command = Common.getInputOfClass(inStream, Integer.class);
 					streamLock.lock();
+					locked = true;
 					switch (command) {
 						case CSMex.NEW_EMAIL_RECEIVED -> {
 							Email newEmail = getEmailFromServer();
 							emailsReceived.add(newEmail);
+						}
+						case CSMex.EMAIL_DELETED -> {
+							Email emailToDelete = getEmailFromServer();
+							emailsReceived.removeIf(email -> email.toString().equals(emailToDelete.toString()));
+							emailsSent.removeIf(email -> email.toString().equals(emailToDelete.toString()));
 						}
 						default -> System.out.println("Error, unexpected server command: " + command);
 					}
@@ -370,7 +380,8 @@ public class ClientDataModel {
 					e.printStackTrace();
 					restartConnection();
 				}finally {
-					streamLock.unlock();
+					if(locked)
+						streamLock.unlock();
 				}
 			}
 		}

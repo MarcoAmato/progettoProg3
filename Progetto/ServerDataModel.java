@@ -48,9 +48,14 @@ public class ServerDataModel{
 		database.saveEmail(email);
 	}
 
+	public static boolean deleteEmailFromDatabase(Email email){
+		return database.deleteEmail(email);
+	}
+
 	private static void log(String logMessage){ // lo devono fare gli handler
 		synchronized (logList){
-			Platform.runLater(() -> logList.add(logMessage));
+			//Platform.runLater(() -> logList.add(logMessage));
+			System.out.println(logMessage);
 		}
 	}
 
@@ -208,12 +213,55 @@ public class ServerDataModel{
 				out.append(email.toString()).append("\n");
 				out.close();
 			}catch (IOException e){
-				System.out.println("Could not save new email to database");
+				log("Could not save new email to database");
 				e.printStackTrace();
 			}finally {
 				writeLock.unlock();
 			}
 			log("New email inserted in database");
+		}
+
+		/**
+		 * Deletes email line from database. It does so copying every line except
+		 * the one with emailToBeDeleted as string in another file. Finally this
+		 * file replaces databaseFile
+		 * @param emailToBeDeleted Email to be deleted
+		 * @return true on success, false on failure
+		 */
+		public boolean deleteEmail(Email emailToBeDeleted){
+			writeLock.lock();
+			emailsArray.removeIf(email -> email.toString().equals(emailToBeDeleted.toString()));
+			try{
+				File tempFile = new File("temp.txt");
+
+				BufferedReader reader = new BufferedReader(new FileReader(databaseFile));
+				BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+				String lineToRemove = emailToBeDeleted.toString();
+				String currentLine;
+
+				while((currentLine = reader.readLine()) != null) {
+					// trim newline when comparing with lineToRemove
+					String trimmedLine = currentLine.trim();
+					if(trimmedLine.equals(lineToRemove)) continue;
+					writer.write(currentLine + System.getProperty("line.separator"));
+				}
+				writer.close();
+				reader.close();
+				boolean successfullyRenamed = tempFile.renameTo(databaseFile);
+				if(successfullyRenamed){
+					log("Email deleted successfully from database");
+				}else{
+					log("Error: renaming file failed");
+				}
+				return successfullyRenamed;
+			}catch (IOException e) {
+				log("Could not delete email from database");
+				e.printStackTrace();
+				return false;
+			}finally {
+				writeLock.unlock();
+			}
 		}
 
 		public void printDatabase(){
@@ -266,7 +314,7 @@ public class ServerDataModel{
 
 		/**
 		 * Handles the client request according to command.
-		 * @param command
+		 * @param command CSMex command sent by client
 		 * @return true when connection should be kept alive, false on close request or error
 		 */
 		public boolean answerMessage(int command){
@@ -275,13 +323,16 @@ public class ServerDataModel{
 				switch (command) {
 					case CSMex.NEW_EMAIL_TO_SEND -> {
 						Email newEmailToSend = Common.getInputOfClass(inStream, Email.class);
-						boolean emailSentCorrectly = sendEmail(newEmailToSend);
-						return emailSentCorrectly;
+						boolean result = sendEmail(newEmailToSend);
+						System.out.println("qui");
+						outStream.writeObject(result);
+						return true;
 					}
 					case CSMex.DELETE_EMAIL -> {
 						Email emailToDelete = Common.getInputOfClass(inStream, Email.class);
-						boolean emailDeletedCorrectly = deleteEmail(emailToDelete);
-						return emailDeletedCorrectly;
+						boolean result = deleteEmail(emailToDelete);
+						outStream.writeObject(result);
+						return true;
 					}
 					case CSMex.DISCONNECTION -> {
 						log("Client " + emailAddress + " disconnected");
@@ -331,12 +382,9 @@ public class ServerDataModel{
 				}
 				emailsSent.add(emailToSend);
 				saveEmail(emailToSend);
-				outStream.writeObject(true);
 				log("Email from " + emailAddress + " sent correctly");
-
 				return true;
 			} else {
-				outStream.writeObject(false);
 				log("Error, email from " + emailAddress + " contains an incorrect receiver address");
 				return false;
 			}
@@ -395,11 +443,15 @@ public class ServerDataModel{
 
 			emailsReceived.removeIf(email -> email.toString().equals(emailToBeDeleted.toString()));
 
-			deleteEmailFromDatabase(emailToBeDeleted);
-			outStream.writeObject(true);
-			log("Email from " + emailToBeDeleted.getSender() + " deleted");
-
-			return true;
+			if(deleteEmailFromDatabase(emailToBeDeleted)){
+				outStream.writeObject(true);
+				log("Email from " + emailToBeDeleted.getSender() + " deleted");
+				return true;
+			}else{
+				outStream.writeObject(false);
+				log("Error: Email from " + emailToBeDeleted.getSender() + " failed to be deleted");
+				return false;
+			}
 		}
 
 		/**
