@@ -5,9 +5,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -27,9 +25,20 @@ public class ClientDataModel {
 	private ObjectInputStream inStream;
 	private ObjectOutputStream outStream;
 	private final Lock streamLock = new ReentrantLock();
+	private ObjectOutputStream serverOutputWriterStream;
+	private ObjectInputStream serverOutputReaderStream;
 
 	public ClientDataModel(){
 		restartConnection();
+		try {
+			PipedOutputStream serverOutputOutputPipe = new PipedOutputStream();
+			PipedInputStream serverOutputInputPipe = new PipedInputStream(serverOutputOutputPipe);
+			serverOutputReaderStream = new ObjectInputStream(serverOutputInputPipe);
+			serverOutputWriterStream = new ObjectOutputStream(serverOutputOutputPipe);
+		} catch (IOException e) {
+			System.out.println("Could not initialize serverOutputStreams");
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -358,11 +367,20 @@ public class ClientDataModel {
 
 		public void run(){
 			while(connectionOkay.get()) {
-				boolean locked = false;
+				boolean inputIsCommand = false;
+				int command;
 				try { //here client waits for server input
-					int command = Common.getInputOfClass(inStream, Integer.class);
-					streamLock.lock();
-					locked = true;
+					while(!inputIsCommand){
+						Object input = inStream.readObject();
+						if(input.getClass() != Integer.class){
+
+						}else{
+							inputIsCommand = true;
+							command = (Integer) input;
+						}
+					}
+					//int command = Common.getInputOfClass(inStream, Integer.class);
+					//locked = true;
 					switch (command) {
 						case CSMex.NEW_EMAIL_RECEIVED -> {
 							Email newEmail = getEmailFromServer();
@@ -375,13 +393,10 @@ public class ClientDataModel {
 						}
 						default -> System.out.println("Error, unexpected server command: " + command);
 					}
-				} catch (IOException e) {
+				} catch (IOException | ClassNotFoundException e) {
 					System.out.println("Exception during getInputFromServerLoop");
 					e.printStackTrace();
 					restartConnection();
-				}finally {
-					if(locked)
-						streamLock.unlock();
 				}
 			}
 		}
