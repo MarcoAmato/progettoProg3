@@ -46,7 +46,7 @@
             <Font name="Arial" size="12.0" />
          </font>
       </Label>
-      <TextField fx:id="Sender" editable="false" text="Trabacca.matteo@virgilio.it" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+      <TextField fx:id="sender" editable="false" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
          <font>
             <Font name="Arial" size="12.0" />
          </font>

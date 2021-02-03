@@ -1,6 +1,7 @@
 package Progetto;
 
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -57,10 +58,15 @@ public class LoginController {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailClient.fxml"));
                 Parent root1 = fxmlLoader.load();
+                MailController controller = fxmlLoader.getController();
+                ClientDataModel model = new ClientDataModel();
+                controller.initClientDataModel(model);
                 Stage stage = new Stage();
                 stage.setTitle("Client E-mail");
-                stage.setScene(new Scene(root1, 1280, 800));
+                stage.setScene(new Scene(root1, 950, 600));
+                stage.setResizable(false);
                 stage.show();
+                stage.setOnCloseRequest(event -> Platform.exit());
             }
             catch (IOException e) {
                 e.printStackTrace();

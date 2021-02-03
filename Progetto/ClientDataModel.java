@@ -32,6 +32,10 @@ public class ClientDataModel {
 		restartConnection();
 	}
 
+	public String getEmailAddress() {
+		return emailAddress;
+	}
+
 	/**
 	 *
 	 * @return connectionOkay value
@@ -71,6 +75,10 @@ public class ClientDataModel {
 			emailAddress = emailInserted;
 			emailsReceived = emailsReceivedInput;
 			emailsSent = emailsSentInput;
+			System.out.println(emailAddress);
+			System.out.println(emailsReceived);
+			System.out.println(emailsSent);
+
 
 			new ServerInputReader().start();
 
