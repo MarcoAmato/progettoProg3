@@ -326,7 +326,6 @@ public class ServerDataModel{
 					case CSMex.NEW_EMAIL_TO_SEND -> {
 						Email newEmailToSend = Common.getInputOfClass(inStream, Email.class);
 						boolean result = sendEmail(newEmailToSend);
-						System.out.println("qui");
 						outStream.writeObject(result);
 						return true;
 					}

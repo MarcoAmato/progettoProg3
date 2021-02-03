@@ -309,7 +309,7 @@ public class ClientDataModel {
 	 */
 	private List<Email> getSynchronizedListOfEmailsFromServer() throws ConnectException {
 		final List<Email> syncArrayList =  Collections.synchronizedList(new ArrayList<>());
-		return Common.ConvertToSyncArrayList(Common.getInputOfClass(serverOutputReaderStream, syncArrayList.getClass()), Email.class);
+		return Common.ConvertToSyncArrayList(Common.getInputOfClass(inStream, syncArrayList.getClass()), Email.class);
 	}
 
 	/**

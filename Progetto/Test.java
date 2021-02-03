@@ -26,8 +26,6 @@ public class Test {
 			interruptedException.printStackTrace();
 		}
 
-		System.out.println("Ciao");
-
 		testSendEmail(clientDataModel, true);
 	}
 
