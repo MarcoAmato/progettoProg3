@@ -66,11 +66,9 @@ public class ClientDataModel {
 	public boolean getAccessFromServer(String emailInserted){
 		try {
 			serverRequestLock.lock();
-
 			outStream.writeObject(emailInserted);
-			outStream.flush();
 
-			boolean emailIsOkay = getBooleanFromServer();
+			boolean emailIsOkay = Common.getInputOfClass(inStream, Boolean.class);
 			if(!emailIsOkay){
 				return false;
 			}
@@ -83,6 +81,8 @@ public class ClientDataModel {
 			emailsReceived = emailsReceivedInput;
 			emailsSent = emailsSentInput;
 
+
+			System.out.println("prova");
 			new ServerInputReader().start();
 
 			return true;
