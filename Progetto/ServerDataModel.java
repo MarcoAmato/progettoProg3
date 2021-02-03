@@ -55,7 +55,7 @@ public class ServerDataModel{
 	private static void log(String logMessage){ // lo devono fare gli handler
 		synchronized (logList){
 			//Platform.runLater(() -> logList.add(logMessage));
-			System.out.println(logMessage);
+			//System.out.println(logMessage);
 		}
 	}
 
@@ -293,8 +293,6 @@ public class ServerDataModel{
 			try{
 				inStream = new ObjectInputStream(socket.getInputStream());
 				outStream = new ObjectOutputStream(socket.getOutputStream());
-
-				System.out.println(inStream);
 
 				boolean connectionEstablished = startConnection();
 

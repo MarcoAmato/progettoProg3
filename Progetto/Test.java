@@ -31,7 +31,7 @@ public class Test {
 
 	public static void testSendEmail(ClientDataModel clientDataModel, boolean printResult){
 		ArrayList<String> receivers = new ArrayList<>();
-			receivers.add("ciao@prova.vincya");
+			receivers.add("ciao@prova.vincy");
 			receivers.add("prova@prova.vincy");
 		String subject = "test";
 		String body = "test test test";

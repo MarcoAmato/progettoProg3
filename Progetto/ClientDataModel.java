@@ -81,8 +81,6 @@ public class ClientDataModel {
 			emailsReceived = emailsReceivedInput;
 			emailsSent = emailsSentInput;
 
-
-			System.out.println("prova");
 			new ServerInputReader().start();
 
 			return true;
@@ -111,10 +109,8 @@ public class ClientDataModel {
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
 
-			System.out.println("chiamo");
 			boolean emailSentCorrectly = getBooleanFromServer();
 
-			System.out.println("pippo");
 			if(emailSentCorrectly){
 				emailsSent.add(emailToSend);
 				return true;
