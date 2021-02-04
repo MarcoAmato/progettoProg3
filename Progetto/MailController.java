@@ -1,11 +1,14 @@
 package Progetto;
 
-import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -14,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Date;
 
 public class MailController {
     @FXML private HBox AllEmail;
@@ -21,9 +25,14 @@ public class MailController {
     @FXML private HBox ReceivedEmail;
     @FXML private HBox NewMail;
     @FXML private HBox DeleteMail;
-    @FXML private Text DeleteHandler;
-    @FXML private TableView<String> mailList;
+    @FXML private Text deleteHandler;
+    @FXML private TableView<EmailPreview> mailList;
     @FXML private BorderPane mailView;
+    @FXML private Button doDelete;
+    @FXML private Button doNotDelete;
+    @FXML private TableColumn<EmailPreview, String> Mittente;
+    @FXML private TableColumn<EmailPreview, String> Oggetto;
+    @FXML private TableColumn<EmailPreview, String> Data;
 
     private ClientDataModel model;
 
@@ -80,8 +89,16 @@ public class MailController {
         }
     }
 
-    public void handleDeleteMail(MouseEvent mouseEvent) {
-        DeleteHandler.setText("Seleziona la mail da eliminare");
+    public void handleDeleteSelectedMail(MouseEvent mouseEvent) {
+        if(mailList.getSelectionModel().getSelectedIndex() != -1) {
+            deleteHandler.setText("Sei sicuro di voler eliminare questa mail?");
+            doDelete.setDisable(false);
+            doNotDelete.setDisable(false);
+            doDelete.setVisible(true);
+            doNotDelete.setVisible(true);
+        } else {
+            deleteHandler.setText("Nessuna mail selezionata");
+        }
     }
 
 
@@ -91,7 +108,10 @@ public class MailController {
             throw new IllegalStateException("Model can only be initialized once");
         }
         this.model = model;
-        mailList.getItems().add(mailList.getId());
+        Mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
+        Oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
+        Data.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
+        mailList.setItems(model.ritornaMailList());
     }
 
     public void HandleShowMail(MouseEvent mouseEvent) {
@@ -110,4 +130,14 @@ public class MailController {
             }
         }
     }
+
+    public void handleRestoreDelete(ActionEvent actionEvent) {
+        deleteHandler.setText("");
+        doDelete.setDisable(true);
+        doNotDelete.setDisable(true);
+        doDelete.setVisible(false);
+        doNotDelete.setVisible(false);
+    }
+
+    public void Deselection(MouseEvent mouseEvent) { mailList.getSelectionModel().clearSelection(); }
 }
