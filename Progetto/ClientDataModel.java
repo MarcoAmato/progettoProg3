@@ -216,13 +216,6 @@ public class ClientDataModel {
 		return sendEmail(receiversOfReply, subjectOfReply, body);
 	}
 
-	/*public boolean replyEmail(Email emailToReply, String replyMessage){
-		ArrayList<String> senderArrayList = new ArrayList<>();
-		senderArrayList.add(emailToReply.getSender());
-		Email emailReply = new Email(this.emailAddress, senderArrayList, emailToReply.getSubject(), replyMessage, new Date());
-		sendEmail(emailReply);
-	}*/
-
 	/**
 	 * Asks server if emailAddress is registered and get response back
 	 * @param emailAddress the email we want to verify is in database
@@ -263,73 +256,6 @@ public class ClientDataModel {
 			outStream=null;
 		startConnection();
 	}
-
-	/*public static void main(String[] args) {
-
-		boolean connectionSuccess = false;
-
-		try{
-			InetAddress localhost = InetAddress.getLocalHost();
-			Socket serverSocket = new Socket(localhost, 5000);
-
-			outStream = new ObjectOutputStream(serverSocket.getOutputStream());
-			inStream = new ObjectInputStream(serverSocket.getInputStream());
-
-			connectionSuccess = true;
-		}catch (IOException e){
-			System.out.println("Server unreachable, try again later");
-			e.printStackTrace();
-			//dai messaggio di connessione non possibile alla view
-		}
-
-		if(connectionSuccess){
-			boolean terminated = false;
-			while(!terminated){
-				try {
-					getAccessFromServer();
-					try{
-						sleep(5000);
-					}catch (InterruptedException e){
-						e.printStackTrace();
-					}
-					//test///////////////////
-					String sender = emailAddress;
-					ArrayList<String> receivers = new ArrayList<>();
-					receivers.add("ciao@nigga.it");
-					receivers.add("bubu@bubu.bubu");
-					String subject = "subject";
-					String body = "body";
-					Date date = new Date();
-
-					boolean correctAddresses = true;
-
-					for(String receiver: receivers){
-						correctAddresses = emailAddressExists(receiver);
-						if(!correctAddresses) break;
-					}
-
-					if(correctAddresses){
-						sendEmail(new Email(sender, receivers, subject, body, date));
-						System.out.println("Yes");
-					}else{
-						System.out.println("No");
-					}
-
-					//test///////////////////
-
-					getInputFromServerLoop();
-					terminated = true;
-				}catch (IOException e){
-					System.out.println("Connection interrupted. Trying to connect again...");
-					try {
-						sleep(5000);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
-				}
-			}
-		}
-	}*/
 
 	/**
 	 * @return a List<Email> object that contains syncArraylist sent from server

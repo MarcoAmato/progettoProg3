@@ -489,8 +489,6 @@ public class ServerDataModel{
 				outStream.writeObject(emailsSent);
 				outStream.writeObject(emailsReceived);
 
-				log("Client " + userEmail + " connected");
-
 				return true;
 
                 /*System.out.println(emailsSent);

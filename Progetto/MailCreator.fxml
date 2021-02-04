@@ -84,7 +84,7 @@
       </font>
    </Button>
    <ListView fx:id="receiversList" layoutX="541.0" layoutY="14.0" onMouseClicked="#ReceiverSelected" prefHeight="176.0" prefWidth="200.0" />
-   <Text fx:id="Controllo" layoutX="51.0" layoutY="556.0" strokeType="OUTSIDE" strokeWidth="0.0" />
+   <Text fx:id="controllo" layoutX="51.0" layoutY="556.0" strokeType="OUTSIDE" strokeWidth="0.0" />
    <Text fx:id="DeleteText" layoutX="541.0" layoutY="254.0" strokeType="OUTSIDE" strokeWidth="0.0">
       <font>
          <Font name="Arial" size="12.0" />

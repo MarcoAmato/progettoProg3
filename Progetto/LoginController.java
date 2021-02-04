@@ -23,15 +23,15 @@ public class LoginController {
     @FXML private TextField emailInput;
     @FXML private Button sendLoginMail;
 
-    private ClientDataModel model;
+    private ClientDataModel clientDataModel;
 
     public void initModel(ClientDataModel model) {
         // ensure model is only set once:
-        if (this.model != null) {
+        if (this.clientDataModel != null) {
             throw new IllegalStateException("Model can only be initialized once");
         }
 
-        this.model = model;
+        this.clientDataModel = model;
         if(model.getConnectionOkay()){
             showLogin();
         }
@@ -47,7 +47,7 @@ public class LoginController {
     @FXML
     public void handleLogin() {
         String insertedMail = emailInput.getText();
-        boolean authorization = model.getAccessFromServer(insertedMail);
+        boolean authorization = clientDataModel.getAccessFromServer(insertedMail);
         if (authorization) {
             feedbackLabel.setText("Login Riuscito!");
             feedbackLabel.setFill(Color.GREEN);
@@ -58,9 +58,8 @@ public class LoginController {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailClient.fxml"));
                 Parent root1 = fxmlLoader.load();
-                MailController controller = fxmlLoader.getController();
-                ClientDataModel model = new ClientDataModel();
-                controller.initClientDataModel(model);
+                MailController mailController = fxmlLoader.getController();
+                mailController.initClientDataModel(this.clientDataModel);
                 Stage stage = new Stage();
                 stage.setTitle("Client E-mail");
                 stage.setScene(new Scene(root1, 950, 600));
@@ -72,7 +71,7 @@ public class LoginController {
                 e.printStackTrace();
             }
         } else {
-            if(model.getConnectionOkay()){
+            if(clientDataModel.getConnectionOkay()){
                 feedbackLabel.setText("L’email inserita non è valida");
             }
         }

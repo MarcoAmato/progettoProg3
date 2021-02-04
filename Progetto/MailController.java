@@ -8,7 +8,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -17,7 +16,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Date;
 
 public class MailController {
     @FXML private HBox AllEmail;
@@ -34,7 +32,7 @@ public class MailController {
     @FXML private TableColumn<EmailPreview, String> Oggetto;
     @FXML private TableColumn<EmailPreview, String> Data;
 
-    private ClientDataModel model;
+    private ClientDataModel clientDataModel;
 
     public void MouseOutShowMail(MouseEvent mouseEvent) {
         AllEmail.setEffect(new Glow(0));
@@ -76,8 +74,7 @@ public class MailController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailCreator.fxml"));
             Parent root2 = fxmlLoader.load();
             NewMailController controller = fxmlLoader.getController();
-            ClientDataModel model = new ClientDataModel();
-            controller.initClientDataModel(model);
+            controller.initClientDataModel(this.clientDataModel);
             Stage stage = new Stage();
             stage.setTitle("Crea nuova mail");
             stage.setScene(new Scene(root2, 800, 600));
@@ -104,10 +101,10 @@ public class MailController {
 
     public void initClientDataModel(ClientDataModel model) {
         // assicura che il modello viene impostato una volta sola
-        if (this.model != null) {
+        if (this.clientDataModel != null) {
             throw new IllegalStateException("Model can only be initialized once");
         }
-        this.model = model;
+        this.clientDataModel = model;
         Mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
         Oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
         Data.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
