@@ -1,7 +1,6 @@
 package Progetto;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -19,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ClientDataModel {
 	private final BooleanProperty connectionOkay = new SimpleBooleanProperty();
 
-	private String emailAddress;
+	private StringProperty emailAddress;
 	private ObservableList<Email> emailsReceived;
 	private ObservableList<Email> emailsSent;
 	private ObjectInputStream inStream;
@@ -42,7 +41,34 @@ public class ClientDataModel {
 	}
 
 	/**
-	 *
+	 * @return emailAddress value
+	 */
+	public String getEmailAddress(){
+		return emailAddress.get();
+	}
+
+	/**
+	 * @return emailAddress property
+	 */
+	public StringProperty emailAddressProperty(){
+		return emailAddress;
+	}
+
+	/**
+	 * @return emailsReceived property
+	 */
+	public ObservableList<Email> emailsReceivedProperty(){
+		return emailsReceived;
+	}
+
+	/**
+	 * @return emailsSent property
+	 */
+	public ObservableList<Email> emailsSentProperty(){
+		return emailsSent;
+	}
+
+	/**
 	 * @return connectionOkay value
 	 */
 	public boolean getConnectionOkay(){
@@ -50,10 +76,9 @@ public class ClientDataModel {
 	}
 
 	/**
-	 *
 	 * @return connectionOkay property
 	 */
-	public BooleanProperty connectionStatusProperty(){
+	public BooleanProperty connectionOkayProperty(){
 		return connectionOkay;
 	}
 
@@ -77,7 +102,7 @@ public class ClientDataModel {
 			ObservableList<Email> emailsReceivedInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
 			ObservableList<Email> emailsSentInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
 
-			emailAddress = emailInserted;
+			emailAddress.set(emailInserted);
 			emailsReceived = emailsReceivedInput;
 			emailsSent = emailsSentInput;
 
@@ -101,8 +126,8 @@ public class ClientDataModel {
 	 * @return true on email sent correctly, false on error
 	 */
 	public boolean sendEmail(ArrayList<String> receivers, String subject, String body){
-		if(emailAddress == null || receivers.contains(this.emailAddress)) return false;
-		Email emailToSend = new Email(this.emailAddress, receivers, subject, body, new Date());
+		if(emailAddress == null || receivers.contains(this.emailAddress.get())) return false;
+		Email emailToSend = new Email(emailAddress.get(), receivers, subject, body, new Date());
 		try{
 			serverRequestLock.lock();
 
@@ -178,7 +203,7 @@ public class ClientDataModel {
 	 */
 	public boolean replyAllEmail(Email emailToReply, String body){
 		ArrayList<String> receiversOfReply = emailToReply.getReceivers();
-		receiversOfReply.remove(emailAddress);
+		receiversOfReply.remove(emailAddress.get());
 		receiversOfReply.add(emailToReply.getSender());
 		String subjectOfReply = emailToReply.getSubject();
 		return sendEmail(receiversOfReply, subjectOfReply, body);
@@ -222,13 +247,13 @@ public class ClientDataModel {
 
 	private void restartConnection(){
 		connectionOkay.set(false);
-		emailAddress=null;
-		emailsReceived=null;
-		emailsSent=null;
-		inStream=null;
-		outStream=null;
-		serverOutputReaderStream=null;
-		serverOutputWriterStream=null;
+		emailAddress = new SimpleStringProperty();
+		//emailsReceived and emailsSent get initialized in getAccessFromServer()
+			emailsReceived = null;
+			emailsSent = null;
+		//inStream and outStream get initialized in Connector run()
+			inStream = null;
+			outStream=null;
 		startConnection();
 	}
 
@@ -348,7 +373,7 @@ public class ClientDataModel {
 					System.out.println("Connection failed, trying to connect again...");
 					try {
 						//noinspection BusyWait
-						sleep(5000);
+						sleep(3000);
 					}catch (InterruptedException interruptedException){
 						interruptedException.printStackTrace();
 					}
@@ -379,8 +404,6 @@ public class ClientDataModel {
 							command = (Integer) input;
 						}
 					}
-					//int command = Common.getInputOfClass(inStream, Integer.class);
-					//locked = true;
 					switch (command) {
 						case CSMex.NEW_EMAIL_RECEIVED -> {
 							Email newEmail = getEmailFromServer();
