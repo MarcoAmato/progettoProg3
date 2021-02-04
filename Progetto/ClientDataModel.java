@@ -5,6 +5,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -105,6 +108,10 @@ public class ClientDataModel {
 			emailAddress.set(emailInserted);
 			emailsReceived = emailsReceivedInput;
 			emailsSent = emailsSentInput;
+			System.out.println(emailAddress);
+			System.out.println(emailsReceived);
+			System.out.println(emailsSent);
+
 
 			new ServerInputReader().start();
 
@@ -456,4 +463,23 @@ public class ClientDataModel {
 			}
 		}
 	}
+
+	final ObservableList<EmailPreview> mailPreviews = FXCollections.observableArrayList(new EmailPreview("Jacob", "Smith", new Date()),
+			new EmailPreview("Isabella", "Johnson",new Date()),
+			new EmailPreview("Ethan", "Williams", new Date()),
+			new EmailPreview("Emma", "Jones", new Date()),
+			new EmailPreview("Michael", "Brown", new Date()));
+
+	public ObservableList<EmailPreview> ritornaMailList() {
+		return mailPreviews;
+	}
+
+	public EmailPreview getMailPreviews(int index) {
+		return mailPreviews.get(index);
+	}
+
+	public EmailPreview setMailPreviews(int index, EmailPreview element) {
+		return mailPreviews.set(index, element);
+	}
+
 }

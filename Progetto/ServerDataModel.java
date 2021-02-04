@@ -19,7 +19,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static java.nio.file.Files.move;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ServerDataModel{
@@ -59,8 +58,7 @@ public class ServerDataModel{
 
 	private static void log(String logMessage){ // lo devono fare gli handler
 		synchronized (logList){
-			//Platform.runLater(() -> logList.add(logMessage));
-			//System.out.println(logMessage);
+			Platform.runLater(() -> logList.add(logMessage));
 		}
 	}
 

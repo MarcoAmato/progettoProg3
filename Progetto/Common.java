@@ -1,10 +1,16 @@
 package Progetto;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -161,5 +167,54 @@ class Email implements Serializable, Comparable<Email> {
             }
         }
         return true;
+    }
+}
+
+class EmailPreview implements Serializable, Comparable<EmailPreview> {
+    private SimpleStringProperty sender;
+    private SimpleStringProperty body;
+    private SimpleStringProperty sendingDate;
+
+    public EmailPreview (String sender, String body, Date sendingDate) {
+        this.sender = new SimpleStringProperty(sender);
+        this.body = new SimpleStringProperty(body);
+        this.sendingDate = new SimpleStringProperty(sendingDate.toString());
+    }
+
+    public String getMittente() { return sender.get(); }
+
+    public StringProperty senderProperty() { return sender; }
+
+    public void setMittente(String sender) { this.sender.set(sender); }
+
+    public String getOggetto() {
+        return body.get();
+    }
+
+    public StringProperty bodyProperty() { return body; }
+
+    public void setOggetto(String body) { this.body.set(body); }
+
+    public String getData() {
+        return sendingDate.toString();
+    }
+
+    public StringProperty dateProperty() { return sendingDate; }
+
+    public void setData(String trial) throws ParseException {}
+
+
+    @Override
+    public int compareTo(EmailPreview emailPreviewCompared) {
+       /* Date thisSendingDate = this.sendingDate;
+        Date emailComparedSendingDate = this.sendingDate;
+        if(thisSendingDate.before(emailComparedSendingDate)){
+            return 1;
+        }else if(thisSendingDate.after(emailComparedSendingDate)){
+            return -1;
+        }else {
+            return 0;
+        }*/
+        return 1;
     }
 }
