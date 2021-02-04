@@ -408,30 +408,16 @@ public class ClientDataModel {
 						if(input.getClass() != Integer.class){
 							serverOutputWriterStream.writeObject(input);
 						}else{
+							serverRequestLock.lock();
 							inputIsCommand = true;
 							command = (Integer) input;
 						}
 					}
-					serverRequestLock.lock();
-					switch (command) {
-						case CSMex.NEW_EMAIL_RECEIVED -> {
-							Email newEmail = getEmailFromServer();
-							emailsReceived.add(newEmail);
-						}
-						case CSMex.EMAIL_DELETED -> {
-							Email emailToDelete = getEmailFromServer();
-							emailsReceived.removeIf(email -> email.toString().equals(emailToDelete.toString()));
-							emailsSent.removeIf(email -> email.toString().equals(emailToDelete.toString()));
-						}
-						case CSMex.FORCE_DISCONNECTION -> System.out.println("Disconnecting from server...");
-						default -> System.out.println("Error, unexpected server command: " + command);
-					}
+					new CommandExecutor(command).start();
 				} catch (IOException | ClassNotFoundException e) {
 					System.out.println("Exception during getInputFromServerLoop");
 					e.printStackTrace();
 					restartConnection();
-				}finally {
-					serverRequestLock.unlock();
 				}
 			}
 		}
@@ -446,7 +432,6 @@ public class ClientDataModel {
 
 		@Override
 		public void run() {
-			serverRequestLock.lock();
 			try{
 				switch (command) {
 					case CSMex.NEW_EMAIL_RECEIVED -> {

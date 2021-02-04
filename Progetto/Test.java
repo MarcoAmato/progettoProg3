@@ -31,14 +31,14 @@ public class Test {
 		testGetAccessFromServer(clientDataModel, false);
 		//String emailAddressValue = testGetEmailAddress(clientDataModel, true);
 		//StringProperty emailAddressProperty = testEmailAddressProperty(clientDataModel, true);
-		ObservableList<Email> emailsReceived = testEmailsReceivedProperty(clientDataModel, true);
-		//ObservableList<Email> emailsSent = testEmailsSentProperty(clientDataModel, true);
+		//ObservableList<Email> emailsReceived = testEmailsReceivedProperty(clientDataModel, true);
+		ObservableList<Email> emailsSent = testEmailsSentProperty(clientDataModel, true);
 
 		//testSendEmail(clientDataModel, true);
 
-		testDeleteEmail(clientDataModel, emailsReceived.get(0), true);
+		testDeleteEmail(clientDataModel, emailsSent.get(0), true);
 
-		printObservableList(emailsReceived);
+		printObservableList(emailsSent);
 	}
 
 	//tests getEmailAddress
