@@ -99,8 +99,8 @@ public class ClientDataModel {
 			}
 
 			//Converts synchronized arraylist to observable list
-			ObservableList<Email> emailsReceivedInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
 			ObservableList<Email> emailsSentInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
+			ObservableList<Email> emailsReceivedInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
 
 			emailAddress.set(emailInserted);
 			emailsReceived = emailsReceivedInput;
@@ -134,7 +134,7 @@ public class ClientDataModel {
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
 
-			boolean emailSentCorrectly = getBooleanFromServer();
+			boolean emailSentCorrectly = getBooleanFromInputReader();
 
 			if(emailSentCorrectly){
 				emailsSent.add(emailToSend);
@@ -163,7 +163,7 @@ public class ClientDataModel {
 			outStream.writeObject(CSMex.DELETE_EMAIL);
 			outStream.writeObject(emailToDelete);
 
-			boolean emailDeletedCorrectly = getBooleanFromServer();
+			boolean emailDeletedCorrectly = getBooleanFromInputReader();
 
 			if(emailDeletedCorrectly){
 				emailsSent.remove(emailToDelete);
@@ -227,7 +227,7 @@ public class ClientDataModel {
 
 			outStream.writeObject(CSMex.CHECK_EMAIL_ADDRESS_EXISTS);
 			outStream.writeObject(emailAddress);
-			return getBooleanFromServer();
+			return getBooleanFromInputReader();
 		}catch (IOException e){
 			System.out.println("Email checking failed");
 			e.printStackTrace();
@@ -334,18 +334,26 @@ public class ClientDataModel {
 	}
 
 	/**
-	 * @return an Email sent from server
+	 * @return an Email sent from serverInputReader
 	 * @throws ConnectException when Email is not correctly received
 	 */
-	private Email getEmailFromServer() throws ConnectException{
+	private Email getEmailFromServerInputReader() throws ConnectException{
 		return Common.getInputOfClass(serverOutputReaderStream, Email.class);
 	}
 
 	/**
-	 * @return an boolean sent from server
+	 * @return an Email sent from server
+	 * @throws ConnectException when Email is not correctly received
+	 */
+	private Email getEmailFromServer() throws ConnectException{
+		return Common.getInputOfClass(inStream, Email.class);
+	}
+
+	/**
+	 * @return an boolean sent from serverInputReader
 	 * @throws ConnectException when boolean is not correctly received
 	 */
-	private boolean getBooleanFromServer() throws ConnectException{
+	private boolean getBooleanFromInputReader() throws ConnectException{
 		return Common.getInputOfClass(serverOutputReaderStream, Boolean.class);
 	}
 
@@ -404,6 +412,7 @@ public class ClientDataModel {
 							command = (Integer) input;
 						}
 					}
+					serverRequestLock.lock();
 					switch (command) {
 						case CSMex.NEW_EMAIL_RECEIVED -> {
 							Email newEmail = getEmailFromServer();
@@ -424,6 +433,40 @@ public class ClientDataModel {
 				}finally {
 					serverRequestLock.unlock();
 				}
+			}
+		}
+	}
+
+	private class CommandExecutor extends Thread{
+		private final int command;
+
+		public CommandExecutor(int command){
+			this.command=command;
+		}
+
+		@Override
+		public void run() {
+			serverRequestLock.lock();
+			try{
+				switch (command) {
+					case CSMex.NEW_EMAIL_RECEIVED -> {
+						Email newEmail = getEmailFromServer();
+						emailsReceived.add(newEmail);
+					}
+					case CSMex.EMAIL_DELETED -> {
+						Email emailToDelete = getEmailFromServer();
+						emailsReceived.removeIf(email -> email.toString().equals(emailToDelete.toString()));
+						emailsSent.removeIf(email -> email.toString().equals(emailToDelete.toString()));
+					}
+					case CSMex.FORCE_DISCONNECTION -> System.out.println("Disconnecting from server...");
+					default -> System.out.println("Error, unexpected server command: " + command);
+				}
+			}catch (IOException e) {
+				System.out.println("Exception in Command #"+command);
+				e.printStackTrace();
+				restartConnection();
+			}finally {
+				serverRequestLock.unlock();
 			}
 		}
 	}

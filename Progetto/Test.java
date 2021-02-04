@@ -26,15 +26,19 @@ public class Test {
 			}
 		}
 
-		BooleanProperty connectionOkay = testConnectionOkayProperty(clientDataModel, true);
+		BooleanProperty connectionOkay = testConnectionOkayProperty(clientDataModel, false);
 			/*System.out.println(connectionOkay.get());*/
-		testGetAccessFromServer(clientDataModel, true);
-		String emailAddressValue = testGetEmailAddress(clientDataModel, true);
-		StringProperty emailAddressProperty = testEmailAddressProperty(clientDataModel, true);
+		testGetAccessFromServer(clientDataModel, false);
+		//String emailAddressValue = testGetEmailAddress(clientDataModel, true);
+		//StringProperty emailAddressProperty = testEmailAddressProperty(clientDataModel, true);
+		ObservableList<Email> emailsReceived = testEmailsReceivedProperty(clientDataModel, true);
+		//ObservableList<Email> emailsSent = testEmailsSentProperty(clientDataModel, true);
 
 		//testSendEmail(clientDataModel, true);
 
-		//testDeleteEmail();
+		testDeleteEmail(clientDataModel, emailsReceived.get(0), true);
+
+		printObservableList(emailsReceived);
 	}
 
 	//tests getEmailAddress
@@ -59,7 +63,7 @@ public class Test {
 		return emailAddress;
 	}
 
-	//
+	//test emailsReceivedProperty
 	public static ObservableList<Email> testEmailsReceivedProperty(ClientDataModel clientDataModel, boolean printResult){
 		ObservableList<Email> emailsReceivedProperty = clientDataModel.emailsReceivedProperty();
 		if(printResult){
@@ -67,10 +71,24 @@ public class Test {
 				System.out.println("testEmailsReceivedProperty: null");
 			}else{
 				System.out.println("testEmailsReceivedProperty: value = ");
-				emailsReceivedProperty.forEach(System.out::println);
+				printObservableList(emailsReceivedProperty);
 			}
 		}
 		return emailsReceivedProperty;
+	}
+
+	//test emailsSentProperty
+	public static ObservableList<Email> testEmailsSentProperty(ClientDataModel clientDataModel, boolean printResult){
+		ObservableList<Email> emailsSentProperty = clientDataModel.emailsSentProperty();
+		if(printResult){
+			if(emailsSentProperty == null){
+				System.out.println("testEmailsSentProperty: null");
+			}else{
+				System.out.println("testEmailsSentProperty: value = ");
+				printObservableList(emailsSentProperty);
+			}
+		}
+		return emailsSentProperty;
 	}
 
 	//tests connectionOkayProperty
@@ -116,4 +134,8 @@ public class Test {
 		}
 	}
 
+	//prints an observableList
+	private static <T> void printObservableList(ObservableList<T> observableList){
+		observableList.forEach(System.out::println);
+	}
 }

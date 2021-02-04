@@ -7,6 +7,8 @@ import javafx.collections.ObservableList;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,6 +18,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static java.nio.file.Files.move;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ServerDataModel{
 	private static final int NUM_THREAD = 100;
@@ -129,12 +134,10 @@ public class ServerDataModel{
 		private void loadDatabase(){
 			//scanner = new Scanner(new File("src/database"));
 			writeLock.lock();
-			Scanner scanner;
 
-			try{
-				scanner = new Scanner(databaseFile);
+			try (Scanner scanner = new Scanner(databaseFile)) {
 
-				while(scanner.hasNextLine()){
+				while (scanner.hasNextLine()) {
 					String line = scanner.nextLine();
 					//La riga è una mail
 					switch (line.charAt(0)) {
@@ -167,9 +170,9 @@ public class ServerDataModel{
 						}
 					}
 				}
-			}catch (IOException e){
+			} catch (IOException e) {
 				e.printStackTrace();
-			}finally {
+			} finally {
 				writeLock.unlock();
 			}
 		}
@@ -248,13 +251,13 @@ public class ServerDataModel{
 				}
 				writer.close();
 				reader.close();
-				boolean successfullyRenamed = tempFile.renameTo(databaseFile);
-				if(successfullyRenamed){
-					log("Email deleted successfully from database");
-				}else{
-					log("Error: renaming file failed");
+				Path tempSource = tempFile.toPath();
+				Path databaseSource = databaseFile.toPath();
+				synchronized (databaseFile){
+					Files.move(tempSource, databaseSource, REPLACE_EXISTING);
 				}
-				return successfullyRenamed;
+				log("Email deleted successfully from database");
+				return true;
 			}catch (IOException e) {
 				log("Could not delete email from database");
 				e.printStackTrace();
@@ -443,11 +446,9 @@ public class ServerDataModel{
 			emailsReceived.removeIf(email -> email.toString().equals(emailToBeDeleted.toString()));
 
 			if(deleteEmailFromDatabase(emailToBeDeleted)){
-				outStream.writeObject(true);
 				log("Email from " + emailToBeDeleted.getSender() + " deleted");
 				return true;
 			}else{
-				outStream.writeObject(false);
 				log("Error: Email from " + emailToBeDeleted.getSender() + " failed to be deleted");
 				return false;
 			}
