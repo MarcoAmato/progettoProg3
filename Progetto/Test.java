@@ -30,15 +30,18 @@ public class Test {
 			/*System.out.println(connectionOkay.get());*/
 		testGetAccessFromServer(clientDataModel, false);
 		//String emailAddressValue = testGetEmailAddress(clientDataModel, true);
-		//StringProperty emailAddressProperty = testEmailAddressProperty(clientDataModel, true);
-		//ObservableList<Email> emailsReceived = testEmailsReceivedProperty(clientDataModel, true);
-		ObservableList<Email> emailsSent = testEmailsSentProperty(clientDataModel, true);
+		StringProperty emailAddressProperty = testEmailAddressProperty(clientDataModel, false);
+		ObservableList<Email> emailsReceived = testEmailsReceivedProperty(clientDataModel, false);
+		ObservableList<Email> emailsSent = testEmailsSentProperty(clientDataModel, false);
 
 		//testSendEmail(clientDataModel, true);
 
-		testDeleteEmail(clientDataModel, emailsSent.get(0), true);
+		//testReplyEmail(clientDataModel, emailsReceived.get(0),true);
+		//testReplyAllEmail(clientDataModel, emailsReceived.get(0),true);
+		//testEmailAddressExist(clientDataModel, "bubu@bubu.bubu", true);
 
-		printObservableList(emailsSent);
+		//testDeleteEmail(clientDataModel, emailsSent.get(0), true);
+		//printObservableList(emailsSent);
 	}
 
 	//tests getEmailAddress
@@ -131,6 +134,29 @@ public class Test {
 		boolean okay = clientDataModel.deleteEmail(emailToDelete);
 		if(printResult){
 			System.out.println("testDeleteEmail: "+okay);
+		}
+	}
+
+	//test replyEmail
+	public static void testReplyEmail(ClientDataModel clientDataModel, Email emailToReply, boolean printResult){
+		boolean okay = clientDataModel.replyEmail(emailToReply, "test reply");
+		if(printResult){
+			System.out.println("testReplyEmail: "+okay);
+		}
+	}
+
+	//test replyAllEmail
+	public static void testReplyAllEmail(ClientDataModel clientDataModel, Email emailToReply, boolean printResult){
+		boolean okay = clientDataModel.replyAllEmail(emailToReply, "test reply all");
+		if(printResult){
+			System.out.println("testReplyAllEmail: " + okay);
+		}
+	}
+
+	public static void testEmailAddressExist(ClientDataModel clientDataModel, String emailAddressToCheck, boolean printResult){
+		boolean okay = clientDataModel.emailAddressExists(emailAddressToCheck);
+		if(printResult){
+			System.out.println("testEmailAddressExist: " + okay);
 		}
 	}
 

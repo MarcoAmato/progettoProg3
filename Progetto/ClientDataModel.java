@@ -126,7 +126,7 @@ public class ClientDataModel {
 	 * @return true on email sent correctly, false on error
 	 */
 	public boolean sendEmail(ArrayList<String> receivers, String subject, String body){
-		if(emailAddress == null || receivers.contains(this.emailAddress.get())) return false;
+		if(emailAddress.get() == null || receivers.contains(this.emailAddress.get())) return false;
 		Email emailToSend = new Email(emailAddress.get(), receivers, subject, body, new Date());
 		try{
 			serverRequestLock.lock();
@@ -427,6 +427,7 @@ public class ClientDataModel {
 		private final int command;
 
 		public CommandExecutor(int command){
+			setDaemon(true);
 			this.command=command;
 		}
 

@@ -68,33 +68,6 @@ public class ServerDataModel{
 		return logList;
 	}
 
-	/*public static void writeLogToLogStream(String log){
-		logOutPutStreamLock.lock();
-		try {
-			logOutputStream.writeObject(log);
-		} catch (IOException e) {
-			System.out.println("Error in writing to logPipe");
-			e.printStackTrace();
-		}finally {
-			logOutPutStreamLock.unlock();
-		}
-	}*/
-
-	/*private static class Logger extends Thread{
-		private PipedOutputStream pipedOutputStream;
-
-		public Logger(PipedOutputStream pipedOutputStream){
-			this.pipedOutputStream = pipedOutputStream;
-		}
-
-		@Override
-		public void run() {
-			setDaemon(true);
-
-		}
-
-	}*/
-
 	private static class ClientAcceptor extends Thread{
 		@SuppressWarnings("InfiniteLoopStatement")
 		@Override
