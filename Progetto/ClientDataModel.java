@@ -1,11 +1,10 @@
 package Progetto;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.io.File;
+import java.io.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,23 +21,57 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ClientDataModel {
 	private final BooleanProperty connectionOkay = new SimpleBooleanProperty();
 
-	private String emailAddress;
+	private StringProperty emailAddress;
 	private ObservableList<Email> emailsReceived;
 	private ObservableList<Email> emailsSent;
 	private ObjectInputStream inStream;
 	private ObjectOutputStream outStream;
-	private final Lock streamLock = new ReentrantLock();
+	private final Lock serverRequestLock = new ReentrantLock();
+	private ObjectOutputStream serverOutputWriterStream;
+	private ObjectInputStream serverOutputReaderStream;
 
 	public ClientDataModel(){
 		restartConnection();
+		try {
+			PipedOutputStream serverOutputOutputPipe = new PipedOutputStream();
+			PipedInputStream serverOutputInputPipe = new PipedInputStream(serverOutputOutputPipe);
+			serverOutputWriterStream = new ObjectOutputStream(serverOutputOutputPipe);
+			serverOutputReaderStream = new ObjectInputStream(serverOutputInputPipe);
+		} catch (IOException e) {
+			System.out.println("Could not initialize serverOutputStreams");
+			e.printStackTrace();
+		}
 	}
 
-	public String getEmailAddress() {
+	/**
+	 * @return emailAddress value
+	 */
+	public String getEmailAddress(){
+		return emailAddress.get();
+	}
+
+	/**
+	 * @return emailAddress property
+	 */
+	public StringProperty emailAddressProperty(){
 		return emailAddress;
 	}
 
 	/**
-	 *
+	 * @return emailsReceived property
+	 */
+	public ObservableList<Email> emailsReceivedProperty(){
+		return emailsReceived;
+	}
+
+	/**
+	 * @return emailsSent property
+	 */
+	public ObservableList<Email> emailsSentProperty(){
+		return emailsSent;
+	}
+
+	/**
 	 * @return connectionOkay value
 	 */
 	public boolean getConnectionOkay(){
@@ -46,10 +79,9 @@ public class ClientDataModel {
 	}
 
 	/**
-	 *
 	 * @return connectionOkay property
 	 */
-	public BooleanProperty connectionStatusProperty(){
+	public BooleanProperty connectionOkayProperty(){
 		return connectionOkay;
 	}
 
@@ -61,19 +93,19 @@ public class ClientDataModel {
 	 */
 	public boolean getAccessFromServer(String emailInserted){
 		try {
-			streamLock.lock();
-
+			serverRequestLock.lock();
 			outStream.writeObject(emailInserted);
-			boolean emailIsOkay = getBooleanFromServer();
+
+			boolean emailIsOkay = Common.getInputOfClass(inStream, Boolean.class);
 			if(!emailIsOkay){
 				return false;
 			}
 
 			//Converts synchronized arraylist to observable list
-			ObservableList<Email> emailsReceivedInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
 			ObservableList<Email> emailsSentInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
+			ObservableList<Email> emailsReceivedInput = FXCollections.observableArrayList(getSynchronizedListOfEmailsFromServer());
 
-			emailAddress = emailInserted;
+			emailAddress.set(emailInserted);
 			emailsReceived = emailsReceivedInput;
 			emailsSent = emailsSentInput;
 			System.out.println(emailAddress);
@@ -89,7 +121,7 @@ public class ClientDataModel {
 			restartConnection();
 			return false;
 		}finally {
-			streamLock.unlock();
+			serverRequestLock.unlock();
 		}
 	}
 
@@ -101,14 +133,15 @@ public class ClientDataModel {
 	 * @return true on email sent correctly, false on error
 	 */
 	public boolean sendEmail(ArrayList<String> receivers, String subject, String body){
-		Email emailToSend = new Email(this.emailAddress, receivers, subject, body, new Date());
+		if(emailAddress.get() == null || receivers.contains(this.emailAddress.get())) return false;
+		Email emailToSend = new Email(emailAddress.get(), receivers, subject, body, new Date());
 		try{
-			streamLock.lock();
+			serverRequestLock.lock();
 
 			outStream.writeObject(CSMex.NEW_EMAIL_TO_SEND);
 			outStream.writeObject(emailToSend);
 
-			boolean emailSentCorrectly = getBooleanFromServer();
+			boolean emailSentCorrectly = getBooleanFromInputReader();
 
 			if(emailSentCorrectly){
 				emailsSent.add(emailToSend);
@@ -121,7 +154,37 @@ public class ClientDataModel {
 			restartConnection();
 			return false;
 		}finally {
-			streamLock.unlock();
+			serverRequestLock.unlock();
+		}
+	}
+
+	/**
+	 * Controller calls this method to delete an email
+	 * @param emailToDelete Email to be deleted
+	 * @return true on email deleted correctly, false on error
+	 */
+	public boolean deleteEmail(Email emailToDelete){
+		try{
+			serverRequestLock.lock();
+
+			outStream.writeObject(CSMex.DELETE_EMAIL);
+			outStream.writeObject(emailToDelete);
+
+			boolean emailDeletedCorrectly = getBooleanFromInputReader();
+
+			if(emailDeletedCorrectly){
+				emailsSent.remove(emailToDelete);
+				emailsReceived.remove(emailToDelete);
+				return true;
+			}else{
+				return false;
+			}
+		}catch (IOException e){
+			e.printStackTrace();
+			restartConnection();
+			return false;
+		}finally {
+			serverRequestLock.unlock();
 		}
 	}
 
@@ -147,7 +210,7 @@ public class ClientDataModel {
 	 */
 	public boolean replyAllEmail(Email emailToReply, String body){
 		ArrayList<String> receiversOfReply = emailToReply.getReceivers();
-		receiversOfReply.remove(emailAddress);
+		receiversOfReply.remove(emailAddress.get());
 		receiversOfReply.add(emailToReply.getSender());
 		String subjectOfReply = emailToReply.getSubject();
 		return sendEmail(receiversOfReply, subjectOfReply, body);
@@ -167,18 +230,18 @@ public class ClientDataModel {
 	 */
 	public boolean emailAddressExists(String emailAddress){
 		try{
-			streamLock.lock();
+			serverRequestLock.lock();
 
 			outStream.writeObject(CSMex.CHECK_EMAIL_ADDRESS_EXISTS);
 			outStream.writeObject(emailAddress);
-			return getBooleanFromServer();
+			return getBooleanFromInputReader();
 		}catch (IOException e){
 			System.out.println("Email checking failed");
 			e.printStackTrace();
 			restartConnection();
 			return false;
 		}finally {
-			streamLock.unlock();
+			serverRequestLock.unlock();
 		}
 	}
 
@@ -191,11 +254,13 @@ public class ClientDataModel {
 
 	private void restartConnection(){
 		connectionOkay.set(false);
-		emailAddress=null;
-		emailsReceived=null;
-		emailsSent=null;
-		inStream=null;
-		outStream=null;
+		emailAddress = new SimpleStringProperty();
+		//emailsReceived and emailsSent get initialized in getAccessFromServer()
+			emailsReceived = null;
+			emailsSent = null;
+		//inStream and outStream get initialized in Connector run()
+			inStream = null;
+			outStream=null;
 		startConnection();
 	}
 
@@ -276,6 +341,14 @@ public class ClientDataModel {
 	}
 
 	/**
+	 * @return an Email sent from serverInputReader
+	 * @throws ConnectException when Email is not correctly received
+	 */
+	private Email getEmailFromServerInputReader() throws ConnectException{
+		return Common.getInputOfClass(serverOutputReaderStream, Email.class);
+	}
+
+	/**
 	 * @return an Email sent from server
 	 * @throws ConnectException when Email is not correctly received
 	 */
@@ -284,11 +357,11 @@ public class ClientDataModel {
 	}
 
 	/**
-	 * @return an boolean sent from server
+	 * @return an boolean sent from serverInputReader
 	 * @throws ConnectException when boolean is not correctly received
 	 */
-	private boolean getBooleanFromServer() throws ConnectException{
-		return Common.getInputOfClass(inStream, Boolean.class);
+	private boolean getBooleanFromInputReader() throws ConnectException{
+		return Common.getInputOfClass(serverOutputReaderStream, Boolean.class);
 	}
 
 
@@ -315,7 +388,7 @@ public class ClientDataModel {
 					System.out.println("Connection failed, trying to connect again...");
 					try {
 						//noinspection BusyWait
-						sleep(5000);
+						sleep(3000);
 					}catch (InterruptedException interruptedException){
 						interruptedException.printStackTrace();
 					}
@@ -334,23 +407,59 @@ public class ClientDataModel {
 
 		public void run(){
 			while(connectionOkay.get()) {
-				try { //here client waits for server input which for the moment will be only a new email that the client has received
-					int command = Common.getInputOfClass(inStream, Integer.class);
-					streamLock.lock();
-					switch (command) {
-						case CSMex.NEW_EMAIL_RECEIVED -> {
-							Email newEmail = getEmailFromServer();
-							emailsReceived.add(newEmail);
+				boolean inputIsCommand = false;
+				int command = CSMex.FORCE_DISCONNECTION;
+				try { //here client waits for server input
+					while(!inputIsCommand){
+						Object input = inStream.readObject();
+						if(input.getClass() != Integer.class){
+							serverOutputWriterStream.writeObject(input);
+						}else{
+							serverRequestLock.lock();
+							inputIsCommand = true;
+							command = (Integer) input;
 						}
-						default -> System.out.println("Error, unexpected server command: " + command);
 					}
-				} catch (IOException e) {
+					new CommandExecutor(command).start();
+				} catch (IOException | ClassNotFoundException e) {
 					System.out.println("Exception during getInputFromServerLoop");
 					e.printStackTrace();
 					restartConnection();
-				}finally {
-					streamLock.unlock();
 				}
+			}
+		}
+	}
+
+	private class CommandExecutor extends Thread{
+		private final int command;
+
+		public CommandExecutor(int command){
+			setDaemon(true);
+			this.command=command;
+		}
+
+		@Override
+		public void run() {
+			try{
+				switch (command) {
+					case CSMex.NEW_EMAIL_RECEIVED -> {
+						Email newEmail = getEmailFromServer();
+						emailsReceived.add(newEmail);
+					}
+					case CSMex.EMAIL_DELETED -> {
+						Email emailToDelete = getEmailFromServer();
+						emailsReceived.removeIf(email -> email.toString().equals(emailToDelete.toString()));
+						emailsSent.removeIf(email -> email.toString().equals(emailToDelete.toString()));
+					}
+					case CSMex.FORCE_DISCONNECTION -> System.out.println("Disconnecting from server...");
+					default -> System.out.println("Error, unexpected server command: " + command);
+				}
+			}catch (IOException e) {
+				System.out.println("Exception in Command #"+command);
+				e.printStackTrace();
+				restartConnection();
+			}finally {
+				serverRequestLock.unlock();
 			}
 		}
 	}

@@ -35,7 +35,7 @@ public class LoginController {
         if(model.getConnectionOkay()){
             showLogin();
         }
-        model.connectionStatusProperty().addListener((observableValue, oldValue, newValue) -> {
+        model.connectionOkayProperty().addListener((observableValue, oldValue, newValue) -> {
             if(newValue){
                 showLogin();
             }else {
