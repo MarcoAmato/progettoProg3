@@ -214,4 +214,13 @@ class EmailPreview implements Serializable, Comparable<EmailPreview> {
         }*/
         return 1;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder returnString = new StringBuilder("");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        String dateString = formatter.format(sendingDate);
+        returnString.append(dateString);
+        return returnString.toString();
+    }
 }

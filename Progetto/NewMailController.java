@@ -64,9 +64,7 @@ public class NewMailController {
         }
 
         this.model = model;
-        System.out.println(model.getEmailAddress());
         sender.setText("model.getEmailAddress()");
-        //receiversList.setItems(model.ritornaCandidates());
     }
 
     public void DeleteReceiversHandler(ActionEvent actionEvent) {
