@@ -169,35 +169,5 @@ class Email implements Serializable, Comparable<Email> {
     }
 }
 
-class EmailPreview implements Serializable {
-    private SimpleStringProperty sender;
-    private SimpleStringProperty body;
-    private SimpleStringProperty sendingDate;
-    private Email emailConnected;
 
-    public EmailPreview(Email emailToCopy){
-        this.sender = new SimpleStringProperty(emailToCopy.getSender());
-        this.body = new SimpleStringProperty(emailToCopy.getBody());
-            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            String emailToCopyDateToString = formatter.format(emailToCopy.getSendingDate());
-        this.sendingDate = new SimpleStringProperty(emailToCopyDateToString);
-        this.emailConnected = emailToCopy;
-    }
-
-    public String getSender() { return sender.get(); }
-
-    public StringProperty senderProperty() { return sender; }
-
-    public String getBody() { return body.get(); }
-
-    public StringProperty bodyProperty() { return body; }
-
-    public String getSendingDate() { return sendingDate.toString(); }
-
-    public StringProperty sendingDateProperty() { return sendingDate; }
-
-    public Email getEmailConnected(){
-        return emailConnected;
-    }
-}
 

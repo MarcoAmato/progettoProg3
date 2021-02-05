@@ -1,5 +1,7 @@
 package Progetto;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -18,6 +20,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,11 +40,8 @@ public class MailController {
     @FXML private TableColumn<EmailPreview, String> data;
 
     private ClientDataModel clientDataModel;
-    final ObservableList<EmailPreview> mailSentPreviews = FXCollections.observableArrayList();
-    ArrayList<String> luca = new ArrayList<String>(Arrays.asList("Gianluca"));
-    Email gino = new Email("Bini", luca, "Dnd", "Errore Generico", new Date());
-    EmailPreview gina = new EmailPreview(gino);
-    final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList(gina);
+    private final ObservableList<EmailPreview> mailSentPreviews = FXCollections.observableArrayList(new ArrayList<>());
+    private final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList(new ArrayList<>());
 
     public void HandleGlowSentMail() { sentEmail.setEffect(new Glow(0.8)); }
 
@@ -93,16 +94,21 @@ public class MailController {
     }
 
 
-    public void initClientDataModel(ClientDataModel model) {
+    public void initClientDataModel(ClientDataModel clientDataModel) {
         // assicura che il modello viene impostato una volta sola
         if (this.clientDataModel != null) {
             throw new IllegalStateException("Model can only be initialized once");
         }
-        this.clientDataModel = model;
+        this.clientDataModel = clientDataModel;
         mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
         oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
         data.setCellValueFactory(cellData -> cellData.getValue().sendingDateProperty());
-        mailList.setItems(mailReceivedPreviewsProperty());
+
+        fillEmailPreviewsWithEmails(mailSentPreviews, this.clientDataModel.emailsSentProperty());
+        this.clientDataModel.emailsSentProperty().addListener(new EmailPreviewUpdater(this.mailSentPreviews));
+
+        fillEmailPreviewsWithEmails(mailReceivedPreviews, this.clientDataModel.emailsReceivedProperty());
+        this.clientDataModel.emailsSentProperty().addListener(new EmailPreviewUpdater(this.mailReceivedPreviews));
     }
 
     public void handleShowMail(MouseEvent mouseEvent) {
@@ -156,6 +162,12 @@ public class MailController {
 
     public void deselection(MouseEvent mouseEvent) { mailList.getSelectionModel().clearSelection(); }
 
+    private void fillEmailPreviewsWithEmails(ObservableList<EmailPreview> emailPreviews, ObservableList<Email> emails){
+        for(Email email: emails){
+            emailPreviews.add(new EmailPreview(email));
+        }
+    }
+
     private class EmailPreviewUpdater implements ListChangeListener<Email> {
         private final ObservableList<EmailPreview> emailsPreviewToUpdate;
 
@@ -174,6 +186,38 @@ public class MailController {
                     emailsPreviewToUpdate.removeIf(preview -> email == preview.getEmailConnected());
                 }
             }
+        }
+    }
+
+    private static class EmailPreview implements Serializable {
+        private SimpleStringProperty sender;
+        private SimpleStringProperty body;
+        private SimpleStringProperty sendingDate;
+        private Email emailConnected;
+
+        public EmailPreview(Email emailToCopy){
+            this.sender = new SimpleStringProperty(emailToCopy.getSender());
+            this.body = new SimpleStringProperty(emailToCopy.getBody());
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            String emailToCopyDateToString = formatter.format(emailToCopy.getSendingDate());
+            this.sendingDate = new SimpleStringProperty(emailToCopyDateToString);
+            this.emailConnected = emailToCopy;
+        }
+
+        public String getSender() { return sender.get(); }
+
+        public StringProperty senderProperty() { return sender; }
+
+        public String getBody() { return body.get(); }
+
+        public StringProperty bodyProperty() { return body; }
+
+        public String getSendingDate() { return sendingDate.toString(); }
+
+        public StringProperty sendingDateProperty() { return sendingDate; }
+
+        public Email getEmailConnected(){
+            return emailConnected;
         }
     }
 }
