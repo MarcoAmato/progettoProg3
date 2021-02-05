@@ -19,7 +19,7 @@ import java.util.Date;
 
 public class NewMailController {
     @FXML private TextArea mailText;
-    @FXML private Text Controllo;
+    @FXML private Text controllo;
     @FXML private TextField receivers;
     @FXML private ListView<String> receiversList;
     @FXML private Text DeleteText;
@@ -33,14 +33,14 @@ public class NewMailController {
 
     public void HandleSentMail(ActionEvent actionEvent) {
         Email luca = new Email(sender.getText(), new ArrayList<>(receiversList.getItems()), subject.getText(), mailText.getText(), new Date());
-        Controllo.setText("Mail inviata!");
+        controllo.setText("Mail inviata!");
         System.out.println(luca);
         mailText.setText("");
         receivers.setText("");
         subject.setText("");
         receiversList.getItems().clear();
-        PauseTransition delay = new PauseTransition(Duration.seconds(5));
-        delay.setOnFinished( event -> Controllo.setText("") );
+        PauseTransition delay = new PauseTransition(Duration.seconds(0.5));
+        delay.setOnFinished( event -> controllo.setText("") );
         delay.play();
     }
 
@@ -60,7 +60,7 @@ public class NewMailController {
         }
 
         this.model = model;
-        sender.setText("model.getEmailAddress()");
+        sender.setText(model.getEmailAddress());
     }
 
     public void DeleteReceiversHandler(ActionEvent actionEvent) {
