@@ -171,7 +171,7 @@ public class MailController {
                 }
             }else if(change.wasRemoved()){
                 for(Email email: change.getRemoved()){
-
+                    emailsPreviewToUpdate.removeIf(preview -> email == preview.getEmailConnected());
                 }
             }
         }

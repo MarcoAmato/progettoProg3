@@ -196,5 +196,8 @@ class EmailPreview implements Serializable {
 
     public StringProperty sendingDateProperty() { return sendingDate; }
 
+    public Email getEmailConnected(){
+        return emailConnected;
+    }
 }
 
