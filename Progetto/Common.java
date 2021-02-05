@@ -8,8 +8,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -171,58 +169,32 @@ class Email implements Serializable, Comparable<Email> {
     }
 }
 
-class EmailPreview implements Serializable, Comparable<EmailPreview> {
+class EmailPreview implements Serializable {
     private SimpleStringProperty sender;
     private SimpleStringProperty body;
     private SimpleStringProperty sendingDate;
     private Email emailConnected;
 
-    public EmailPreview (String sender, String body, Date sendingDate, Email emailConnected) {
-        this.sender = new SimpleStringProperty(sender);
-        this.body = new SimpleStringProperty(body);
-        this.sendingDate = new SimpleStringProperty(sendingDate.toString());
-        this.emailConnected = emailConnected;
+    public EmailPreview(Email emailToCopy){
+        this.sender = new SimpleStringProperty(emailToCopy.getSender());
+        this.body = new SimpleStringProperty(emailToCopy.getBody());
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            String emailToCopyDateToString = formatter.format(emailToCopy.getSendingDate());
+        this.sendingDate = new SimpleStringProperty(emailToCopyDateToString);
+        this.emailConnected = emailToCopy;
     }
 
-    public String getMittente() { return sender.get(); }
+    public String getSender() { return sender.get(); }
 
     public StringProperty senderProperty() { return sender; }
 
-    public void setMittente(String sender) { this.sender.set(sender); }
-
-    public String getOggetto() { return body.get(); }
+    public String getBody() { return body.get(); }
 
     public StringProperty bodyProperty() { return body; }
 
-    public void setOggetto(String body) { this.body.set(body); }
+    public String getSendingDate() { return sendingDate.toString(); }
 
-    public String getData() { return sendingDate.toString(); }
+    public StringProperty sendingDateProperty() { return sendingDate; }
 
-    public StringProperty dateProperty() { return sendingDate; }
-
-    public void setData(String trial) throws ParseException {}
-
-
-    @Override
-    public int compareTo(EmailPreview emailPreviewCompared) {
-       /* Date thisSendingDate = this.sendingDate;
-        Date emailComparedSendingDate = this.sendingDate;
-        if(thisSendingDate.before(emailComparedSendingDate)){
-            return 1;
-        }else if(thisSendingDate.after(emailComparedSendingDate)){
-            return -1;
-        }else {
-            return 0;
-        }*/
-        return 1;
-    }
-
-    /*@Override
-    public String toString() {
-        StringBuilder returnString = new StringBuilder("");
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        String dateString = formatter.format(sendingDate);
-        returnString.append(dateString);
-        return returnString.toString();
-    }*/
 }
+

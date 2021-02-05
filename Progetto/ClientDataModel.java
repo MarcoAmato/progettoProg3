@@ -24,6 +24,7 @@ public class ClientDataModel {
 	private StringProperty emailAddress;
 	private ObservableList<Email> emailsReceived;
 	private ObservableList<Email> emailsSent;
+
 	private ObjectInputStream inStream;
 	private ObjectOutputStream outStream;
 	private final Lock serverRequestLock = new ReentrantLock();
