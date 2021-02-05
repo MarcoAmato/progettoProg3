@@ -10,7 +10,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -18,14 +17,12 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class MailController {
-    @FXML private HBox AllEmail;
     @FXML private HBox SentEmail;
     @FXML private HBox ReceivedEmail;
     @FXML private HBox NewMail;
     @FXML private HBox DeleteMail;
     @FXML private Text deleteHandler;
     @FXML private TableView<EmailPreview> mailList;
-    @FXML private BorderPane mailView;
     @FXML private Button doDelete;
     @FXML private Button doNotDelete;
     @FXML private TableColumn<EmailPreview, String> Mittente;
@@ -33,12 +30,6 @@ public class MailController {
     @FXML private TableColumn<EmailPreview, String> Data;
 
     private ClientDataModel clientDataModel;
-
-    public void MouseOutShowMail(MouseEvent mouseEvent) {
-        AllEmail.setEffect(new Glow(0));
-    }
-
-    public void HandleGlowAllMail() { AllEmail.setEffect(new Glow(0.8)); }
 
     public void HandleGlowSentMail() { SentEmail.setEffect(new Glow(0.8)); }
 
@@ -48,21 +39,13 @@ public class MailController {
 
     public void HandleGlowDeleteMail() { DeleteMail.setEffect(new Glow(0.8)); }
 
-    public void HandleOutGlowEmail(MouseEvent mouseEvent) {
-        SentEmail.setEffect(new Glow(0));
-    }
+    public void HandleOutGlowEmail(MouseEvent mouseEvent) { SentEmail.setEffect(new Glow(0)); }
 
-    public void MouseOutReceivedEmail(MouseEvent mouseEvent) {
-        ReceivedEmail.setEffect(new Glow(0));
-    }
+    public void MouseOutReceivedEmail(MouseEvent mouseEvent) { ReceivedEmail.setEffect(new Glow(0)); }
 
-    public void MouseOutNewMail(MouseEvent mouseEvent) {
-        NewMail.setEffect(new Glow(0));
-    }
+    public void MouseOutNewMail(MouseEvent mouseEvent) { NewMail.setEffect(new Glow(0)); }
 
-    public void MouseOutDeleteMail(MouseEvent mouseEvent) {
-        DeleteMail.setEffect(new Glow(0));
-    }
+    public void MouseOutDeleteMail(MouseEvent mouseEvent) { DeleteMail.setEffect(new Glow(0)); }
 
     public void handleShowSentMail(MouseEvent mouseEvent) { }
 

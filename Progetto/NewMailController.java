@@ -67,7 +67,6 @@ public class NewMailController {
     }
 
     public void initClientDataModel(ClientDataModel model) {
-        // assicura che il modello viene impostato una volta sola
         if (this.model != null) {
             throw new IllegalStateException("Model can only be initialized once");
         }

@@ -188,17 +188,13 @@ class EmailPreview implements Serializable, Comparable<EmailPreview> {
 
     public void setMittente(String sender) { this.sender.set(sender); }
 
-    public String getOggetto() {
-        return body.get();
-    }
+    public String getOggetto() { return body.get(); }
 
     public StringProperty bodyProperty() { return body; }
 
     public void setOggetto(String body) { this.body.set(body); }
 
-    public String getData() {
-        return sendingDate.toString();
-    }
+    public String getData() { return sendingDate.toString(); }
 
     public StringProperty dateProperty() { return sendingDate; }
 
@@ -219,12 +215,12 @@ class EmailPreview implements Serializable, Comparable<EmailPreview> {
         return 1;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         StringBuilder returnString = new StringBuilder("");
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         String dateString = formatter.format(sendingDate);
         returnString.append(dateString);
         return returnString.toString();
-    }
+    }*/
 }
