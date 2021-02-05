@@ -175,11 +175,13 @@ class EmailPreview implements Serializable, Comparable<EmailPreview> {
     private SimpleStringProperty sender;
     private SimpleStringProperty body;
     private SimpleStringProperty sendingDate;
+    private Email emailConnected;
 
-    public EmailPreview (String sender, String body, Date sendingDate) {
+    public EmailPreview (String sender, String body, Date sendingDate, Email emailConnected) {
         this.sender = new SimpleStringProperty(sender);
         this.body = new SimpleStringProperty(body);
         this.sendingDate = new SimpleStringProperty(sendingDate.toString());
+        this.emailConnected = emailConnected;
     }
 
     public String getMittente() { return sender.get(); }

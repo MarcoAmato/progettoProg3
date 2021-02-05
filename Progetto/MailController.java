@@ -1,5 +1,7 @@
 package Progetto;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Date;
 
 public class MailController {
     @FXML private HBox SentEmail;
@@ -30,6 +33,12 @@ public class MailController {
     @FXML private TableColumn<EmailPreview, String> Data;
 
     private ClientDataModel clientDataModel;
+    final ObservableList<EmailPreview> mailSentPreviews = FXCollections.observableArrayList();
+    final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList(new EmailPreview("Jacob", "Smith", new Date()),
+            new EmailPreview("Isabella", "Johnson",new Date()),
+            new EmailPreview("Ethan", "Williams", new Date()),
+            new EmailPreview("Emma", "Jones", new Date()),
+            new EmailPreview("Michael", "Brown", new Date()));
 
     public void HandleGlowSentMail() { SentEmail.setEffect(new Glow(0.8)); }
 
@@ -91,7 +100,7 @@ public class MailController {
         Mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
         Oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
         Data.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
-        mailList.setItems(model.ritornaMailList());
+        mailList.setItems(ritornaMailList());
     }
 
     public void HandleShowMail(MouseEvent mouseEvent) {
@@ -120,4 +129,29 @@ public class MailController {
     }
 
     public void Deselection(MouseEvent mouseEvent) { mailList.getSelectionModel().clearSelection(); }
+
+    public ObservableList<EmailPreview> ritornaMailSentList() {
+        return mailSentPreviews;
+    }
+
+    public EmailPreview getMailSentPreviews(int index) {
+        return mailSentPreviews.get(index);
+    }
+
+    public EmailPreview setMailSentPreviews(int index, EmailPreview element) {
+        return mailSentPreviews.set(index, element);
+    }
+
+    public ObservableList<EmailPreview> ritornaMailList() {
+        return mailReceivedPreviews;
+    }
+
+    public EmailPreview getMailPreviews(int index) {
+        return mailReceivedPreviews.get(index);
+    }
+
+    public EmailPreview setReceivedMails(int index, EmailPreview element) {
+        return mailReceivedPreviews.set(index, element);
+    }
+
 }

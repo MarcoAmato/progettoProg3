@@ -390,22 +390,4 @@ public class ClientDataModel {
 		}
 	}
 
-	final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList(new EmailPreview("Jacob", "Smith", new Date()),
-			new EmailPreview("Isabella", "Johnson",new Date()),
-			new EmailPreview("Ethan", "Williams", new Date()),
-			new EmailPreview("Emma", "Jones", new Date()),
-			new EmailPreview("Michael", "Brown", new Date()));
-
-	public ObservableList<EmailPreview> ritornaMailList() {
-		return mailReceivedPreviews;
-	}
-
-	public EmailPreview getMailPreviews(int index) {
-		return mailReceivedPreviews.get(index);
-	}
-
-	public EmailPreview setMailPreviews(int index, EmailPreview element) {
-		return mailReceivedPreviews.set(index, element);
-	}
-
 }
