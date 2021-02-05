@@ -24,7 +24,7 @@
                <Font name="Arial Bold" size="14.0" />
             </font>
          </Label>
-         <HBox fx:id="ReceivedEmail" onMouseClicked="#handleShowReceivedMail" onMouseEntered="#HandleGlowReceivedMail" onMouseExited="#MouseOutReceivedEmail" prefHeight="66.0" prefWidth="108.0">
+         <HBox fx:id="receivedEmail" onMouseClicked="#handleShowReceivedMail" onMouseEntered="#HandleGlowReceivedMail" onMouseExited="#MouseOutReceivedEmail" prefHeight="66.0" prefWidth="108.0">
             <ImageView fitHeight="60.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                <HBox.margin>
                   <Insets left="10.0" />
@@ -40,7 +40,7 @@
                </font>
             </Label>
          </HBox>
-         <HBox fx:id="SentEmail" onMouseClicked="#handleShowSentMail" onMouseEntered="#HandleGlowSentMail" onMouseExited="#HandleOutGlowEmail" prefHeight="66.0" prefWidth="108.0">
+         <HBox fx:id="sentEmail" onMouseClicked="#handleShowSentMail" onMouseEntered="#HandleGlowSentMail" onMouseExited="#HandleOutGlowEmail" prefHeight="66.0" prefWidth="108.0">
             <ImageView fitHeight="62.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                <Image url="@../png/download__1_-removebg-preview.png" />
             </ImageView>
@@ -53,7 +53,7 @@
                </font>
             </Label>
          </HBox>
-         <HBox fx:id="NewMail" onMouseClicked="#handleNewMail" onMouseEntered="#HandleGlowNewMail" onMouseExited="#MouseOutNewMail" prefHeight="66.0" prefWidth="200.0">
+         <HBox fx:id="newMail" onMouseClicked="#handleNewMail" onMouseEntered="#HandleGlowNewMail" onMouseExited="#MouseOutNewMail" prefHeight="66.0" prefWidth="200.0">
             <ImageView fitHeight="62.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
                <HBox.margin>
                   <Insets left="5.0" top="5.0" />
@@ -69,7 +69,7 @@
                </font>
             </Label>
          </HBox>
-         <HBox fx:id="DeleteMail" onMouseClicked="#handleDeleteSelectedMail" onMouseEntered="#HandleGlowDeleteMail" onMouseExited="#MouseOutDeleteMail" prefHeight="66.0" prefWidth="200.0">
+         <HBox fx:id="deleteMail" onMouseClicked="#handleDeleteSelectedMail" onMouseEntered="#HandleGlowDeleteMail" onMouseExited="#MouseOutDeleteMail" prefHeight="66.0" prefWidth="200.0">
             <ImageView fitHeight="60.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                <HBox.margin>
                   <Insets left="5.0" />
@@ -115,9 +115,9 @@
       <VBox prefHeight="600.0" prefWidth="593.0" BorderPane.alignment="CENTER">
          <TableView fx:id="mailList" onMouseClicked="#HandleShowMail" prefHeight="602.0" prefWidth="700.0">
             <columns>
-               <TableColumn fx:id="Mittente" prefWidth="179.19997251033783" text="Mittente"/>
-               <TableColumn fx:id="Oggetto" prefWidth="314.4000244140625" text="Oggetto"/>
-               <TableColumn fx:id="Data" prefWidth="205.59994506835938" text="Data"/>
+               <TableColumn fx:id="mittente" prefWidth="179.19997251033783" text="Mittente"/>
+               <TableColumn fx:id="oggetto" prefWidth="314.4000244140625" text="Oggetto"/>
+               <TableColumn fx:id="data" prefWidth="205.59994506835938" text="Data"/>
             </columns>
          </TableView>
       </VBox>

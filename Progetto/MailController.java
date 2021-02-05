@@ -17,35 +17,35 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class MailController {
-    @FXML private HBox SentEmail;
-    @FXML private HBox ReceivedEmail;
-    @FXML private HBox NewMail;
-    @FXML private HBox DeleteMail;
+    @FXML private HBox sentEmail;
+    @FXML private HBox receivedEmail;
+    @FXML private HBox newMail;
+    @FXML private HBox deleteMail;
     @FXML private Text deleteHandler;
     @FXML private TableView<EmailPreview> mailList;
     @FXML private Button doDelete;
     @FXML private Button doNotDelete;
-    @FXML private TableColumn<EmailPreview, String> Mittente;
-    @FXML private TableColumn<EmailPreview, String> Oggetto;
-    @FXML private TableColumn<EmailPreview, String> Data;
+    @FXML private TableColumn<EmailPreview, String> mittente;
+    @FXML private TableColumn<EmailPreview, String> oggetto;
+    @FXML private TableColumn<EmailPreview, String> data;
 
     private ClientDataModel clientDataModel;
 
-    public void HandleGlowSentMail() { SentEmail.setEffect(new Glow(0.8)); }
+    public void HandleGlowSentMail() { sentEmail.setEffect(new Glow(0.8)); }
 
-    public void HandleGlowReceivedMail() { ReceivedEmail.setEffect(new Glow(0.8)); }
+    public void HandleGlowReceivedMail() { receivedEmail.setEffect(new Glow(0.8)); }
 
-    public void HandleGlowNewMail() { NewMail.setEffect(new Glow(0.8)); }
+    public void HandleGlowNewMail() { newMail.setEffect(new Glow(0.8)); }
 
-    public void HandleGlowDeleteMail() { DeleteMail.setEffect(new Glow(0.8)); }
+    public void HandleGlowDeleteMail() { deleteMail.setEffect(new Glow(0.8)); }
 
-    public void HandleOutGlowEmail(MouseEvent mouseEvent) { SentEmail.setEffect(new Glow(0)); }
+    public void HandleOutGlowEmail(MouseEvent mouseEvent) { sentEmail.setEffect(new Glow(0)); }
 
-    public void MouseOutReceivedEmail(MouseEvent mouseEvent) { ReceivedEmail.setEffect(new Glow(0)); }
+    public void MouseOutReceivedEmail(MouseEvent mouseEvent) { receivedEmail.setEffect(new Glow(0)); }
 
-    public void MouseOutNewMail(MouseEvent mouseEvent) { NewMail.setEffect(new Glow(0)); }
+    public void MouseOutNewMail(MouseEvent mouseEvent) { newMail.setEffect(new Glow(0)); }
 
-    public void MouseOutDeleteMail(MouseEvent mouseEvent) { DeleteMail.setEffect(new Glow(0)); }
+    public void MouseOutDeleteMail(MouseEvent mouseEvent) { deleteMail.setEffect(new Glow(0)); }
 
     public void handleShowSentMail(MouseEvent mouseEvent) { }
 
@@ -56,8 +56,8 @@ public class MailController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailCreator.fxml"));
             Parent root2 = fxmlLoader.load();
-            NewMailController controller = fxmlLoader.getController();
-            controller.initClientDataModel(this.clientDataModel);
+            NewMailController newMailController = fxmlLoader.getController();
+            newMailController.initClientDataModel(this.clientDataModel);
             Stage stage = new Stage();
             stage.setTitle("Crea nuova mail");
             stage.setScene(new Scene(root2, 800, 600));
@@ -88,9 +88,9 @@ public class MailController {
             throw new IllegalStateException("Model can only be initialized once");
         }
         this.clientDataModel = model;
-        Mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
-        Oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
-        Data.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
+        mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
+        oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
+        data.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
         mailList.setItems(model.ritornaMailList());
     }
 
