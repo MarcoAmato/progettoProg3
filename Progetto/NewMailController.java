@@ -22,7 +22,7 @@ public class NewMailController {
     @FXML private Text controllo;
     @FXML private TextField receivers;
     @FXML private ListView<String> receiversList;
-    @FXML private Text DeleteText;
+    @FXML private Text deleteText;
     @FXML private TextField sender;
     @FXML private TextField subject;
 
@@ -32,20 +32,33 @@ public class NewMailController {
     private ObservableList<String> emailReceivers = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public void HandleSentMail(ActionEvent actionEvent) {
-        Email luca = new Email(sender.getText(), new ArrayList<>(receiversList.getItems()), subject.getText(), mailText.getText(), new Date());
-        controllo.setText("Mail inviata!");
-        System.out.println(luca);
-        mailText.setText("");
-        receivers.setText("");
-        subject.setText("");
-        receiversList.getItems().clear();
-        PauseTransition delay = new PauseTransition(Duration.seconds(0.5));
-        delay.setOnFinished( event -> controllo.setText("") );
-        delay.play();
+        ArrayList<String> listOfReceivers = new ArrayList<>(receiversList.getItems());
+        Email insertedMail = new Email(sender.getText(), listOfReceivers, subject.getText(), mailText.getText(), new Date());
+        if (listOfReceivers.isEmpty()) {
+            controllo.setText("Nessun destinatario inserito");
+        } else if (model.sendEmail(listOfReceivers, subject.getText(), mailText.getText())) {
+            controllo.setText("Mail inviata!");
+            mailText.setText("");
+            receivers.setText("");
+            subject.setText("");
+            receiversList.getItems().clear();
+            PauseTransition delay = new PauseTransition(Duration.seconds(5));
+            delay.setOnFinished( event -> controllo.setText("") );
+            delay.play();
+        } else {
+            controllo.setText("Errore nell'invio della mail");
+        }
     }
 
     public void handleAddReceiver(ActionEvent actionEvent) {
-        if(model.emailAddressExists(receivers.getText())){
+        if(!model.emailAddressExists(receivers.getText())) {
+            deleteText.setText("Email non presente nel database.");
+        } else if (receivers.getText().equals(model.getEmailAddress())){
+            deleteText.setText("Non è possibile inserire la propria mail tra i destinatari!");
+        } else if (receiversList.getItems().contains(receivers.getText())) {
+            deleteText.setText("L'Email richiesta è già stata inserita");
+        } else {
+            deleteText.setText("");
             receiversList.getItems().add(receivers.getText());
         }
 
