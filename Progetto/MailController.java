@@ -18,6 +18,9 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 
 public class MailController {
     @FXML private HBox sentEmail;
@@ -34,7 +37,10 @@ public class MailController {
 
     private ClientDataModel clientDataModel;
     final ObservableList<EmailPreview> mailSentPreviews = FXCollections.observableArrayList();
-    final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList();
+    ArrayList<String> luca = new ArrayList<String>(Arrays.asList("Gianluca"));
+    Email gino = new Email("Bini", luca, "Dnd", "Errore Generico", new Date());
+    EmailPreview gina = new EmailPreview(gino);
+    final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList(gina);
 
     public void HandleGlowSentMail() { sentEmail.setEffect(new Glow(0.8)); }
 
