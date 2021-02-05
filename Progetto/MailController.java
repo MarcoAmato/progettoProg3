@@ -1,5 +1,8 @@
 package Progetto;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,6 +33,8 @@ public class MailController {
     @FXML private TableColumn<EmailPreview, String> data;
 
     private ClientDataModel clientDataModel;
+    final ObservableList<EmailPreview> mailSentPreviews = FXCollections.observableArrayList();
+    final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList();
 
     public void HandleGlowSentMail() { sentEmail.setEffect(new Glow(0.8)); }
 
@@ -90,8 +95,8 @@ public class MailController {
         this.clientDataModel = model;
         mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
         oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
-        data.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
-        mailList.setItems(model.ritornaMailList());
+        data.setCellValueFactory(cellData -> cellData.getValue().sendingDateProperty());
+        mailList.setItems(mailReceivedPreviewsProperty());
     }
 
     public void handleShowMail(MouseEvent mouseEvent) {
@@ -119,5 +124,50 @@ public class MailController {
         doNotDelete.setVisible(false);
     }
 
+    public ObservableList<EmailPreview> ritornaMailSentList() {
+        return mailSentPreviews;
+    }
+
+    public EmailPreview getMailSentPreviews(int index) {
+        return mailSentPreviews.get(index);
+    }
+
+    public EmailPreview setMailSentPreviews(int index, EmailPreview element) {
+        return mailSentPreviews.set(index, element);
+    }
+
+    public ObservableList<EmailPreview> mailReceivedPreviewsProperty() {
+        return mailReceivedPreviews;
+    }
+
+    public EmailPreview getMailPreviews(int index) {
+        return mailReceivedPreviews.get(index);
+    }
+
+    public EmailPreview setReceivedMails(int index, EmailPreview element) {
+        return mailReceivedPreviews.set(index, element);
+    }
+
     public void deselection(MouseEvent mouseEvent) { mailList.getSelectionModel().clearSelection(); }
+
+    private class EmailPreviewUpdater implements ListChangeListener<Email> {
+        private final ObservableList<EmailPreview> emailsPreviewToUpdate;
+
+        public EmailPreviewUpdater (ObservableList<EmailPreview> emailsPreviewToUpdate) {
+            this.emailsPreviewToUpdate = emailsPreviewToUpdate;
+        }
+
+        @Override
+        public void onChanged(Change<? extends Email> change) {
+            if(change.wasAdded()){
+                for(Email email: change.getAddedSubList()){
+                    emailsPreviewToUpdate.add(new EmailPreview(email));
+                }
+            }else if(change.wasRemoved()){
+                for(Email email: change.getRemoved()){
+
+                }
+            }
+        }
+    }
 }
