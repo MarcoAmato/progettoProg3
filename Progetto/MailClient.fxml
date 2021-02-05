@@ -13,7 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane prefHeight="600.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Progetto.MailController" onMouseClicked="#Deselection">
+<BorderPane prefHeight="600.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Progetto.MailController" onMouseClicked="#deselection">
    <left>
       <VBox prefHeight="200.0" prefWidth="250.0" style="-fx-background-color: #00ffff;" BorderPane.alignment="CENTER">
          <Label prefHeight="63.0" prefWidth="255.0" text="E-Mail" textFill="RED">
@@ -113,7 +113,7 @@
    </left>
    <center>
       <VBox prefHeight="600.0" prefWidth="593.0" BorderPane.alignment="CENTER">
-         <TableView fx:id="mailList" onMouseClicked="#HandleShowMail" prefHeight="602.0" prefWidth="700.0">
+         <TableView fx:id="mailList" onMouseClicked="#handleShowMail" prefHeight="602.0" prefWidth="700.0">
             <columns>
                <TableColumn fx:id="mittente" prefWidth="179.19997251033783" text="Mittente"/>
                <TableColumn fx:id="oggetto" prefWidth="314.4000244140625" text="Oggetto"/>

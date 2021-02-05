@@ -94,7 +94,7 @@ public class MailController {
         mailList.setItems(model.ritornaMailList());
     }
 
-    public void HandleShowMail(MouseEvent mouseEvent) {
+    public void handleShowMail(MouseEvent mouseEvent) {
         if(mailList.getSelectionModel().getSelectedIndex() != -1 && mouseEvent.getClickCount() == 2) {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailShow.fxml"));
@@ -119,5 +119,5 @@ public class MailController {
         doNotDelete.setVisible(false);
     }
 
-    public void Deselection(MouseEvent mouseEvent) { mailList.getSelectionModel().clearSelection(); }
+    public void deselection(MouseEvent mouseEvent) { mailList.getSelectionModel().clearSelection(); }
 }
