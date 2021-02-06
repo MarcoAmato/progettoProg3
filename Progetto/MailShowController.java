@@ -28,22 +28,22 @@ public class MailShowController {
         this.email = email;
     }
 
-    public void HandleRespond(ActionEvent actionEvent) {
+    /*public void HandleRespond(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyMail.fxml"));
-            Parent rootReplyAll = fxmlLoader.load();
+            Parent rootReply = fxmlLoader.load();
             ReplyMailController replyMailController = fxmlLoader.getController();
             replyMailController.initClientDataModel(this.clientDataModel, this.email);
             Stage stage = new Stage();
-            stage.setTitle("Rispondi al mittente");
-            stage.setScene(new Scene(rootReplyAll, 550, 600));
+            stage.setTitle("Rispondi a "+this.email.getSender());
+            stage.setScene(new Scene(rootReply, 550, 600));
             stage.setResizable(false);
             stage.show();
         }
         catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void handleForwardTo(ActionEvent actionEvent) {
         try {

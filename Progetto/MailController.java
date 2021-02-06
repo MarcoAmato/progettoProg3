@@ -15,6 +15,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
@@ -53,7 +54,7 @@ public class MailController {
         }
         this.clientDataModel = clientDataModel;
         mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
-        oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
+        oggetto.setCellValueFactory(cellData -> cellData.getValue().subjectProperty());
         data.setCellValueFactory(cellData -> cellData.getValue().sendingDateProperty());
 
         //Binds mailSentPreviews to clientDataModel.emailsSent
@@ -69,36 +70,44 @@ public class MailController {
             (new ConnectionFailedHandler(this.borderPane, this.clientDataModel));
     }
 
-    /*private void goToLogin(ClientDataModel clientDataModel){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                Stage stage = (Stage) borderPane.getScene().getWindow();
-                stage.close();
-                try{
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
-                    Parent rootLogin = fxmlLoader.load();
-                    LoginController loginController = fxmlLoader.getController();
-                    loginController.initClientDataModel(clientDataModel);
-                    Stage stageLogin = new Stage();
-                    stageLogin.setTitle("Login");
-                    stageLogin.setScene(new Scene(rootLogin, 500, 275));
-                    stageLogin.setResizable(false);
-                    stageLogin.show();
-                    stageLogin.setOnCloseRequest(event -> Platform.exit());
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-            }
-        });
-    }*/
-
     public void handleShowSentMail() {
         mailList.setItems(mailSentPreviews);
+        setEmailPreviewTable(mailList);
     }
 
     public void handleShowReceivedMail() {
         mailList.setItems(mailReceivedPreviews);
+        setEmailPreviewTable(mailList);
+    }
+
+    public void setEmailPreviewTable(TableView<EmailPreview> emailPreviewTableView){
+        emailPreviewTableView.setRowFactory(tv -> {
+            TableRow<EmailPreview> row = new TableRow<>();
+            row.setOnMouseClicked(event->{
+                if(event.getClickCount() == 2 && (!row.isEmpty()) ){
+                    EmailPreview rowEmailPreview = row.getItem();
+                    goToMailShow(rowEmailPreview.getEmail());
+                }
+            });
+            return row;
+        });
+    }
+
+    private void goToMailShow(Email emailToShow){
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailShow.fxml"));
+            Parent parentRoot = fxmlLoader.load();
+            MailShowController mailShowController = fxmlLoader.getController();
+            mailShowController.initClientDataModel(this.clientDataModel, emailToShow);
+            Stage stage = new Stage();
+            stage.setTitle(emailToShow.getSubject());
+            stage.setScene(new Scene(parentRoot, 800, 600));
+            stage.setResizable(false);
+            stage.show();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //Dobbiamo gestire questa funzione importando il file giusto
@@ -231,7 +240,7 @@ public class MailController {
                     }
                 }else if(change.wasRemoved()){
                     for(Email email: change.getRemoved()){
-                        emailsPreviewToUpdate.removeIf(preview -> email == preview.getEmailConnected());
+                        emailsPreviewToUpdate.removeIf(preview -> email == preview.getEmail());
                     }
                 }
             }
@@ -240,13 +249,13 @@ public class MailController {
 
     private static class EmailPreview implements Serializable {
         private SimpleStringProperty sender;
-        private SimpleStringProperty body;
+        private SimpleStringProperty subject;
         private SimpleStringProperty sendingDate;
         private Email emailConnected;
 
         public EmailPreview(Email emailToCopy){
             this.sender = new SimpleStringProperty(emailToCopy.getSender());
-            this.body = new SimpleStringProperty(emailToCopy.getBody());
+            this.subject = new SimpleStringProperty(emailToCopy.getSubject());
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             String emailToCopyDateToString = formatter.format(emailToCopy.getSendingDate());
             this.sendingDate = new SimpleStringProperty(emailToCopyDateToString);
@@ -257,15 +266,15 @@ public class MailController {
 
         public StringProperty senderProperty() { return sender; }
 
-        public String getBody() { return body.get(); }
+        public String getSubject() { return subject.get(); }
 
-        public StringProperty bodyProperty() { return body; }
+        public StringProperty subjectProperty() { return subject; }
 
         public String getSendingDate() { return sendingDate.toString(); }
 
         public StringProperty sendingDateProperty() { return sendingDate; }
 
-        public Email getEmailConnected(){
+        public Email getEmail(){
             return emailConnected;
         }
     }
