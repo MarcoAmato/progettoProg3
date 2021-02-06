@@ -1,33 +1,39 @@
 package Progetto;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class MailShowController {
+    @FXML
+    private AnchorPane anchorPane;
 
     private ClientDataModel clientDataModel;
     private Email email;
 
     public void initClientDataModel(ClientDataModel clientDataModel, Email email) {
-        if (this.clientDataModel != null || this.email != null) {
+        if (this.clientDataModel != null) {
             throw new IllegalStateException("Model can only be initialized once");
         }
 
         this.clientDataModel = clientDataModel;
+        this.clientDataModel.connectionOkayProperty().addListener
+                (new CloseOnLostConnection(anchorPane, clientDataModel));
         this.email = email;
     }
 
-    public void handleReply(ActionEvent actionEvent) {
+    public void HandleRespond(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyMail.fxml"));
             Parent rootReply = fxmlLoader.load();
             ReplyMailController replyMailController = fxmlLoader.getController();
-            replyMailController.initClientDataModel(this.clientDataModel, this.email);
+            replyMailController.initClientDataModel(this.clientDataModel);
             Stage stage = new Stage();
             stage.setTitle("Rispondi a "+this.email.getSender());
             stage.setScene(new Scene(rootReply, 550, 600));

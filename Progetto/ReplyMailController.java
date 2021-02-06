@@ -5,6 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -14,6 +15,8 @@ import java.util.Arrays;
 
 public class ReplyMailController {
 
+    @FXML private VBox vBox;
+
     @FXML private TextArea mailText;
     @FXML private TextField subject;
     @FXML private TextField receiver;
@@ -21,6 +24,17 @@ public class ReplyMailController {
 
     private ClientDataModel clientDataModel;
     private Email emailToReply;
+
+    public void initClientDataModel(ClientDataModel clientDataModel, Email emailToReply) {
+        if (this.clientDataModel != null || this.emailToReply != null) {
+            throw new IllegalStateException("Model can only be initialized once");
+        }
+
+        this.clientDataModel = clientDataModel;
+        this.emailToReply = emailToReply;
+        this.clientDataModel.connectionOkayProperty().addListener(
+                new CloseOnLostConnection(this.vBox, this.clientDataModel));
+    }
 
     public void handleMailReply(ActionEvent actionEvent) {
         ArrayList<String> listOfReceivers = new ArrayList<>(Arrays.asList(receiver.getText()));
@@ -39,14 +53,5 @@ public class ReplyMailController {
             controllo.setFill(Color.RED);
             controllo.setText("Errore nell'invio della mail");
         }
-    }
-
-    public void initClientDataModel(ClientDataModel clientDataModel, Email emailToReply) {
-        if (this.clientDataModel != null || this.emailToReply != null) {
-            throw new IllegalStateException("Model can only be initialized once");
-        }
-
-        this.clientDataModel = clientDataModel;
-        this.emailToReply = emailToReply;
     }
 }
