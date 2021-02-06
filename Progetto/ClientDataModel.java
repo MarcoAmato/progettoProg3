@@ -109,10 +109,6 @@ public class ClientDataModel {
 			emailAddress.set(emailInserted);
 			emailsReceived = emailsReceivedInput;
 			emailsSent = emailsSentInput;
-			System.out.println(emailAddress);
-			System.out.println(emailsReceived);
-			System.out.println(emailsSent);
-
 
 			new ServerInputReader().start();
 

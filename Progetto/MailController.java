@@ -1,7 +1,10 @@
 package Progetto;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -15,6 +18,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -27,6 +31,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 public class MailController {
+    @FXML private BorderPane borderPane;
     @FXML private HBox sentEmail;
     @FXML private HBox receivedEmail;
     @FXML private HBox newMail;
@@ -43,21 +48,58 @@ public class MailController {
     private final ObservableList<EmailPreview> mailSentPreviews = FXCollections.observableArrayList(new ArrayList<>());
     private final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList(new ArrayList<>());
 
-    public void HandleGlowSentMail() { sentEmail.setEffect(new Glow(0.8)); }
+    public void initClientDataModel(ClientDataModel clientDataModel) {
+        // assicura che il modello viene impostato una volta sola
+        if (this.clientDataModel != null) {
+            throw new IllegalStateException("Model can only be initialized once");
+        }
+        this.clientDataModel = clientDataModel;
+        mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
+        oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
+        data.setCellValueFactory(cellData -> cellData.getValue().sendingDateProperty());
 
-    public void HandleGlowReceivedMail() { receivedEmail.setEffect(new Glow(0.8)); }
+        //Binds mailSentPreviews to clientDataModel.emailsSent
+        fillEmailPreviewsWithEmails(mailSentPreviews, this.clientDataModel.emailsSentProperty());
+        this.clientDataModel.emailsSentProperty().addListener(new EmailPreviewUpdater(this.mailSentPreviews));
 
-    public void HandleGlowNewMail() { newMail.setEffect(new Glow(0.8)); }
+        //Binds mailReceivedPreviews to clientDataModel.emailsReceived
+        fillEmailPreviewsWithEmails(mailReceivedPreviews, this.clientDataModel.emailsReceivedProperty());
+        this.clientDataModel.emailsSentProperty().addListener(new EmailPreviewUpdater(this.mailReceivedPreviews));
 
-    public void HandleGlowDeleteMail() { deleteMail.setEffect(new Glow(0.8)); }
+        //Client returns to login when connectionOkay becomes false
+        this.clientDataModel.connectionOkayProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
+                if(!newValue){
+                    goToLogin(clientDataModel);
+                }
+            }
+        });
+    }
 
-    public void HandleOutGlowEmail(MouseEvent mouseEvent) { sentEmail.setEffect(new Glow(0)); }
-
-    public void MouseOutReceivedEmail(MouseEvent mouseEvent) { receivedEmail.setEffect(new Glow(0)); }
-
-    public void MouseOutNewMail(MouseEvent mouseEvent) { newMail.setEffect(new Glow(0)); }
-
-    public void MouseOutDeleteMail(MouseEvent mouseEvent) { deleteMail.setEffect(new Glow(0)); }
+    private void goToLogin(ClientDataModel clientDataModel){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Stage stage = (Stage) borderPane.getScene().getWindow();
+                stage.close();
+                try{
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
+                    Parent rootLogin = fxmlLoader.load();
+                    LoginController loginController = fxmlLoader.getController();
+                    loginController.initClientDataModel(clientDataModel);
+                    Stage stageLogin = new Stage();
+                    stageLogin.setTitle("Login");
+                    stageLogin.setScene(new Scene(rootLogin, 500, 275));
+                    stage.setResizable(false);
+                    stageLogin.show();
+                    stageLogin.setOnCloseRequest(event -> Platform.exit());
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
     public void handleShowSentMail(MouseEvent mouseEvent) {
         mailList.setItems(mailSentPreviews);
@@ -97,24 +139,6 @@ public class MailController {
         }
     }
 
-
-    public void initClientDataModel(ClientDataModel clientDataModel) {
-        // assicura che il modello viene impostato una volta sola
-        if (this.clientDataModel != null) {
-            throw new IllegalStateException("Model can only be initialized once");
-        }
-        this.clientDataModel = clientDataModel;
-        mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
-        oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
-        data.setCellValueFactory(cellData -> cellData.getValue().sendingDateProperty());
-
-        fillEmailPreviewsWithEmails(mailSentPreviews, this.clientDataModel.emailsSentProperty());
-        this.clientDataModel.emailsSentProperty().addListener(new EmailPreviewUpdater(this.mailSentPreviews));
-
-        fillEmailPreviewsWithEmails(mailReceivedPreviews, this.clientDataModel.emailsReceivedProperty());
-        this.clientDataModel.emailsSentProperty().addListener(new EmailPreviewUpdater(this.mailReceivedPreviews));
-    }
-
     public void handleShowMail(MouseEvent mouseEvent) {
         if(mailList.getSelectionModel().getSelectedIndex() != -1 && mouseEvent.getClickCount() == 2) {
             try {
@@ -140,7 +164,7 @@ public class MailController {
         doNotDelete.setVisible(false);
     }
 
-    public ObservableList<EmailPreview> ritornaMailSentList() {
+    public ObservableList<EmailPreview> mailSentListProperty() {
         return mailSentPreviews;
     }
 
@@ -172,7 +196,24 @@ public class MailController {
         }
     }
 
-    private class EmailPreviewUpdater implements ListChangeListener<Email> {
+    public void HandleGlowSentMail() { sentEmail.setEffect(new Glow(0.8)); }
+
+    public void HandleGlowReceivedMail() { receivedEmail.setEffect(new Glow(0.8)); }
+
+    public void HandleGlowNewMail() { newMail.setEffect(new Glow(0.8)); }
+
+    public void HandleGlowDeleteMail() { deleteMail.setEffect(new Glow(0.8)); }
+
+    public void HandleOutGlowEmail(MouseEvent mouseEvent) { sentEmail.setEffect(new Glow(0)); }
+
+    public void MouseOutReceivedEmail(MouseEvent mouseEvent) { receivedEmail.setEffect(new Glow(0)); }
+
+    public void MouseOutNewMail(MouseEvent mouseEvent) { newMail.setEffect(new Glow(0)); }
+
+    public void MouseOutDeleteMail(MouseEvent mouseEvent) { deleteMail.setEffect(new Glow(0)); }
+
+
+    private static class EmailPreviewUpdater implements ListChangeListener<Email> {
         private final ObservableList<EmailPreview> emailsPreviewToUpdate;
 
         public EmailPreviewUpdater (ObservableList<EmailPreview> emailsPreviewToUpdate) {
