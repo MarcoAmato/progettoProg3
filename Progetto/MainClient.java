@@ -15,7 +15,7 @@ public class MainClient extends Application {
         Parent root = fxmlLoader.load();
         LoginController loginController = fxmlLoader.getController();
         primaryStage.setTitle("Login");
-        loginController.initModel(model);
+        loginController.initClientDataModel(model);
         primaryStage.setScene(new Scene(root, 500, 275));
         primaryStage.setResizable(false);
         primaryStage.show();

@@ -25,7 +25,7 @@ public class LoginController {
 
     private ClientDataModel clientDataModel;
 
-    public void initModel(ClientDataModel model) {
+    public void initClientDataModel(ClientDataModel model) {
         // ensure model is only set once:
         if (this.clientDataModel != null) {
             throw new IllegalStateException("Model can only be initialized once");
