@@ -343,6 +343,7 @@ public class ClientDataModel {
 							command = (Integer) input;
 						}
 					}
+					pino
 					new CommandExecutor(command).start();
 				} catch (IOException | ClassNotFoundException e) {
 					System.out.println("Exception during getInputFromServerLoop");
