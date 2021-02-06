@@ -59,9 +59,13 @@ public class MailController {
 
     public void MouseOutDeleteMail(MouseEvent mouseEvent) { deleteMail.setEffect(new Glow(0)); }
 
-    public void handleShowSentMail(MouseEvent mouseEvent) { }
+    public void handleShowSentMail(MouseEvent mouseEvent) {
+        mailList.setItems(mailSentPreviews);
+    }
 
-    public void handleShowReceivedMail(MouseEvent mouseEvent) { }
+    public void handleShowReceivedMail(MouseEvent mouseEvent) {
+        mailList.setItems(mailReceivedPreviews);
+    }
 
     //Dobbiamo gestire questa funzione importando il file giusto
     public void handleNewMail(MouseEvent mouseEvent) {
