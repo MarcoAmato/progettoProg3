@@ -10,25 +10,27 @@ import java.io.IOException;
 
 public class MailShowController {
 
-    private ClientDataModel model;
+    private ClientDataModel clientDataModel;
+    private Email email;
 
-    public void initClientDataModel(ClientDataModel model) {
-        if (this.model != null) {
+    public void initClientDataModel(ClientDataModel clientDataModel, Email email) {
+        if (this.clientDataModel != null || this.email != null) {
             throw new IllegalStateException("Model can only be initialized once");
         }
 
-        this.model = model;
+        this.clientDataModel = clientDataModel;
+        this.email = email;
     }
 
-    public void HandleRespond(ActionEvent actionEvent) {
+    public void handleReply(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyMail.fxml"));
-            Parent rootRespAll = fxmlLoader.load();
+            Parent rootReplyAll = fxmlLoader.load();
             ReplyMailController replyMailController = fxmlLoader.getController();
-            replyMailController.initClientDataModel(this.model);
+            replyMailController.initClientDataModel(this.clientDataModel, this.email);
             Stage stage = new Stage();
             stage.setTitle("Rispondi al mittente");
-            stage.setScene(new Scene(rootRespAll, 550, 600));
+            stage.setScene(new Scene(rootReplyAll, 550, 600));
             stage.setResizable(false);
             stage.show();
         }
@@ -37,7 +39,7 @@ public class MailShowController {
         }
     }
 
-    public void HandleForwardTo(ActionEvent actionEvent) {
+    public void handleForwardTo(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ForwardMail.fxml"));
             Parent rootFor = fxmlLoader.load();
@@ -52,7 +54,7 @@ public class MailShowController {
         }
     }
 
-    public void HandleRespondAll(ActionEvent actionEvent) {
+    public void handleReplyAll(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyAllMail.fxml"));
             Parent rootRespAll = fxmlLoader.load();
