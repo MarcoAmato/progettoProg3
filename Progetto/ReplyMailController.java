@@ -16,28 +16,31 @@ import java.util.Arrays;
 public class ReplyMailController {
 
     @FXML private VBox vBox;
+
     @FXML private TextArea mailText;
     @FXML private TextField subject;
     @FXML private TextField receiver;
     @FXML private Text controllo;
 
-    private ClientDataModel model;
+    private ClientDataModel clientDataModel;
+    private Email emailToReply;
 
-    public void initClientDataModel(ClientDataModel model) {
-        if (this.model != null) {
+    public void initClientDataModel(ClientDataModel clientDataModel, Email emailToReply) {
+        if (this.clientDataModel != null || this.emailToReply != null) {
             throw new IllegalStateException("Model can only be initialized once");
         }
 
-        this.model = model;
-        this.model.connectionOkayProperty().addListener(
-                new CloseOnLostConnection(this.vBox, this.model));
+        this.clientDataModel = clientDataModel;
+        this.emailToReply = emailToReply;
+        this.clientDataModel.connectionOkayProperty().addListener(
+                new CloseOnLostConnection(this.vBox, this.clientDataModel));
     }
 
-    public void handleMailRespond(ActionEvent actionEvent) {
+    public void handleMailReply(ActionEvent actionEvent) {
         ArrayList<String> listOfReceivers = new ArrayList<>(Arrays.asList(receiver.getText()));
         if (listOfReceivers.isEmpty()) {
             controllo.setText("Nessun destinatario inserito");
-        } else if (model.sendEmail(listOfReceivers, subject.getText(), mailText.getText())) {
+        } else if (clientDataModel.sendEmail(listOfReceivers, subject.getText(), mailText.getText())) {
             controllo.setFill(Color.GREEN);
             controllo.setText("Mail inviata!");
             mailText.setText("");
