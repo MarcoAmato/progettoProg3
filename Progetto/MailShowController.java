@@ -28,7 +28,7 @@ public class MailShowController {
         this.email = email;
     }
 
-    public void HandleRespond(ActionEvent actionEvent) {
+    /*public void HandleRespond(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyMail.fxml"));
             Parent rootReply = fxmlLoader.load();
@@ -43,7 +43,7 @@ public class MailShowController {
         catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void handleForwardTo(ActionEvent actionEvent) {
         try {

@@ -48,7 +48,7 @@
       <TextField editable="false" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"
                  GridPane.vgrow="ALWAYS"/>
    </GridPane>
-   <Button layoutX="396.0" layoutY="538.0" mnemonicParsing="false" onAction="#handleReply" prefHeight="26.0"
+   <Button layoutX="396.0" layoutY="538.0" mnemonicParsing="false" prefHeight="26.0"
            prefWidth="85.0" text="Rispondi" textFill="RED">
       <font>
          <Font name="Arial" size="12.0"/>

@@ -55,7 +55,7 @@ public class MailController {
         }
         this.clientDataModel = clientDataModel;
         mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
-        oggetto.setCellValueFactory(cellData -> cellData.getValue().bodyProperty());
+        oggetto.setCellValueFactory(cellData -> cellData.getValue().subjectProperty());
         data.setCellValueFactory(cellData -> cellData.getValue().sendingDateProperty());
 
         //Binds mailSentPreviews to clientDataModel.emailsSent
@@ -274,13 +274,13 @@ public class MailController {
 
     private static class EmailPreview implements Serializable {
         private SimpleStringProperty sender;
-        private SimpleStringProperty body;
+        private SimpleStringProperty subject;
         private SimpleStringProperty sendingDate;
         private Email emailConnected;
 
         public EmailPreview(Email emailToCopy){
             this.sender = new SimpleStringProperty(emailToCopy.getSender());
-            this.body = new SimpleStringProperty(emailToCopy.getBody());
+            this.subject = new SimpleStringProperty(emailToCopy.getSubject());
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             String emailToCopyDateToString = formatter.format(emailToCopy.getSendingDate());
             this.sendingDate = new SimpleStringProperty(emailToCopyDateToString);
@@ -291,9 +291,9 @@ public class MailController {
 
         public StringProperty senderProperty() { return sender; }
 
-        public String getBody() { return body.get(); }
+        public String getSubject() { return subject.get(); }
 
-        public StringProperty bodyProperty() { return body; }
+        public StringProperty subjectProperty() { return subject; }
 
         public String getSendingDate() { return sendingDate.toString(); }
 
