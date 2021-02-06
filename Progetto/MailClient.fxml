@@ -113,7 +113,7 @@
    </left>
    <center>
       <VBox prefHeight="600.0" prefWidth="593.0" BorderPane.alignment="CENTER">
-         <TableView fx:id="mailList" onMouseClicked="#handleShowMail" prefHeight="602.0" prefWidth="700.0">
+         <TableView fx:id="mailList" prefHeight="602.0" prefWidth="700.0">
             <columns>
                <TableColumn fx:id="mittente" prefWidth="179.19997251033783" text="Mittente"/>
                <TableColumn fx:id="oggetto" prefWidth="314.4000244140625" text="Oggetto"/>

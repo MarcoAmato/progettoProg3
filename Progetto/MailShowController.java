@@ -25,12 +25,12 @@ public class MailShowController {
     public void handleReply(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyMail.fxml"));
-            Parent rootReplyAll = fxmlLoader.load();
+            Parent rootReply = fxmlLoader.load();
             ReplyMailController replyMailController = fxmlLoader.getController();
             replyMailController.initClientDataModel(this.clientDataModel, this.email);
             Stage stage = new Stage();
-            stage.setTitle("Rispondi al mittente");
-            stage.setScene(new Scene(rootReplyAll, 550, 600));
+            stage.setTitle("Rispondi a "+this.email.getSender());
+            stage.setScene(new Scene(rootReply, 550, 600));
             stage.setResizable(false);
             stage.show();
         }

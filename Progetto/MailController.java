@@ -15,6 +15,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
@@ -27,8 +28,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 
 public class MailController {
     @FXML private BorderPane borderPane;
@@ -103,10 +102,42 @@ public class MailController {
 
     public void handleShowSentMail() {
         mailList.setItems(mailSentPreviews);
+        setEmailPreviewTable(mailList);
     }
 
     public void handleShowReceivedMail() {
         mailList.setItems(mailReceivedPreviews);
+        setEmailPreviewTable(mailList);
+    }
+
+    public void setEmailPreviewTable(TableView<EmailPreview> emailPreviewTableView){
+        emailPreviewTableView.setRowFactory(tv -> {
+            TableRow<EmailPreview> row = new TableRow<>();
+            row.setOnMouseClicked(event->{
+                if(event.getClickCount() == 2 && (!row.isEmpty()) ){
+                    EmailPreview rowEmailPreview = row.getItem();
+                    goToMailShow(rowEmailPreview.getEmail());
+                }
+            });
+            return row;
+        });
+    }
+
+    private void goToMailShow(Email emailToShow){
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailShow.fxml"));
+            Parent parentRoot = fxmlLoader.load();
+            MailShowController mailShowController = fxmlLoader.getController();
+            mailShowController.initClientDataModel(this.clientDataModel, emailToShow);
+            Stage stage = new Stage();
+            stage.setTitle(emailToShow.getSubject());
+            stage.setScene(new Scene(parentRoot, 800, 600));
+            stage.setResizable(false);
+            stage.show();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //Dobbiamo gestire questa funzione importando il file giusto
@@ -139,7 +170,7 @@ public class MailController {
         }
     }
 
-    public void handleShowMail(MouseEvent mouseEvent) {
+    /*public void handleShowMail(MouseEvent mouseEvent) {
         if(mailList.getSelectionModel().getSelectedIndex() != -1 && mouseEvent.getClickCount() == 2) {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailShow.fxml"));
@@ -156,7 +187,7 @@ public class MailController {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 
     public void handleRestoreDelete(ActionEvent actionEvent) {
         deleteHandler.setText("");
@@ -239,7 +270,7 @@ public class MailController {
                     }
                 }else if(change.wasRemoved()){
                     for(Email email: change.getRemoved()){
-                        emailsPreviewToUpdate.removeIf(preview -> email == preview.getEmailConnected());
+                        emailsPreviewToUpdate.removeIf(preview -> email == preview.getEmail());
                     }
                 }
             }
@@ -273,7 +304,7 @@ public class MailController {
 
         public StringProperty sendingDateProperty() { return sendingDate; }
 
-        public Email getEmailConnected(){
+        public Email getEmail(){
             return emailConnected;
         }
     }
