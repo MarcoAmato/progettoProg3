@@ -20,6 +20,7 @@ import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -67,17 +68,11 @@ public class MailController {
         this.clientDataModel.emailsSentProperty().addListener(new EmailPreviewUpdater(this.mailReceivedPreviews));
 
         //Client returns to login when connectionOkay becomes false
-        this.clientDataModel.connectionOkayProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
-                if(!newValue){
-                    goToLogin(clientDataModel);
-                }
-            }
-        });
+        this.clientDataModel.connectionOkayProperty().addListener
+            (new ConnectionFailedHandler(this.borderPane, this.clientDataModel));
     }
 
-    private void goToLogin(ClientDataModel clientDataModel){
+    /*private void goToLogin(ClientDataModel clientDataModel){
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -91,7 +86,7 @@ public class MailController {
                     Stage stageLogin = new Stage();
                     stageLogin.setTitle("Login");
                     stageLogin.setScene(new Scene(rootLogin, 500, 275));
-                    stage.setResizable(false);
+                    stageLogin.setResizable(false);
                     stageLogin.show();
                     stageLogin.setOnCloseRequest(event -> Platform.exit());
                 }catch (IOException e){
@@ -99,7 +94,7 @@ public class MailController {
                 }
             }
         });
-    }
+    }*/
 
     public void handleShowSentMail() {
         mailList.setItems(mailSentPreviews);
@@ -275,6 +270,43 @@ public class MailController {
 
         public Email getEmailConnected(){
             return emailConnected;
+        }
+    }
+
+    private static class ConnectionFailedHandler implements ChangeListener<Boolean> {
+
+        private final Pane paneToClose;
+        private final ClientDataModel clientDataModel;
+
+        public ConnectionFailedHandler(Pane paneToClose, ClientDataModel clientDataModel) {
+            this.paneToClose = paneToClose;
+            this.clientDataModel = clientDataModel;
+        }
+        @Override
+        public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
+            if(!newValue){
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Stage stage = (Stage) paneToClose.getScene().getWindow();
+                        stage.close();
+                        try{
+                            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
+                            Parent rootLogin = fxmlLoader.load();
+                            LoginController loginController = fxmlLoader.getController();
+                            loginController.initClientDataModel(clientDataModel);
+                            Stage stageLogin = new Stage();
+                            stageLogin.setTitle("Login");
+                            stageLogin.setScene(new Scene(rootLogin, 500, 275));
+                            stageLogin.setResizable(false);
+                            stageLogin.show();
+                            stageLogin.setOnCloseRequest(event -> Platform.exit());
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
         }
     }
 }

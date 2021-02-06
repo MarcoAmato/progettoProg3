@@ -1,14 +1,18 @@
 package Progetto;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class MailShowController {
+    @FXML
+    private AnchorPane anchorPane;
 
     private ClientDataModel model;
 
@@ -18,6 +22,8 @@ public class MailShowController {
         }
 
         this.model = model;
+        this.model.connectionOkayProperty().addListener
+                (new CloseOnLostConnection(anchorPane, model));
     }
 
     public void HandleRespond(ActionEvent actionEvent) {

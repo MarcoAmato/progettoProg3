@@ -1,5 +1,14 @@
 package Progetto;
 
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -164,6 +173,27 @@ class Email implements Serializable, Comparable<Email> {
         return true;
     }
 }
+
+class CloseOnLostConnection implements ChangeListener<Boolean> {
+
+    private final Pane paneToClose;
+    private final ClientDataModel clientDataModel;
+
+    public CloseOnLostConnection(Pane paneToClose, ClientDataModel clientDataModel) {
+        this.paneToClose = paneToClose;
+        this.clientDataModel = clientDataModel;
+    }
+    @Override
+    public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
+        if(!newValue){
+            Platform.runLater(() -> {
+                Stage stage = (Stage) paneToClose.getScene().getWindow();
+                stage.close();
+            });
+        }
+    }
+}
+
 
 
 
