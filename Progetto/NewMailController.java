@@ -29,7 +29,7 @@ public class NewMailController {
 
     private ClientDataModel model;
     boolean Selected = false;
-    private ObservableList<String> emailReceivers = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ObservableList<String> emailReceivers = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public void HandleSentMail(ActionEvent actionEvent) {
         ArrayList<String> listOfReceivers = new ArrayList<>(receiversList.getItems());
@@ -78,7 +78,12 @@ public class NewMailController {
     public void DeleteReceiversHandler(ActionEvent actionEvent) {
         if (Selected) {
             final int val = receiversList.getSelectionModel().getSelectedIndex();
-            receiversList.getItems().remove(val);
+            if(val == -1) {
+                deleteText.setText("Nessun Destinatario selezionato");
+            }else {
+                receiversList.getItems().remove(val);
+                deleteText.setText("");
+            }
         }
     }
 
