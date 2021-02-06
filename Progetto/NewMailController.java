@@ -10,6 +10,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 //import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 
 
 public class NewMailController {
+    @FXML private AnchorPane anchorPane;
     @FXML private TextArea mailText;
     @FXML private Text controllo;
     @FXML private TextField receivers;
@@ -31,6 +33,19 @@ public class NewMailController {
     private ClientDataModel model;
     boolean Selected = false;
     private final ObservableList<String> emailReceivers = new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    public void initClientDataModel(ClientDataModel model) {
+        if (this.model != null) {
+            throw new IllegalStateException("Model can only be initialized once");
+        }
+
+        this.model = model;
+
+        this.model.connectionOkayProperty().addListener(new CloseOnLostConnection(this.anchorPane, this.model));
+
+        sender.setText(model.getEmailAddress());
+        receiversList.setItems(emailReceivers);
+    }
 
     public void HandleSentMail() {
         ArrayList<String> listOfReceivers = new ArrayList<>(receiversList.getItems());
@@ -67,16 +82,6 @@ public class NewMailController {
 
         //model.ritornaCandidates().add(receivers.getText());
         receivers.setText("");
-    }
-
-    public void initClientDataModel(ClientDataModel model) {
-        if (this.model != null) {
-            throw new IllegalStateException("Model can only be initialized once");
-        }
-
-        this.model = model;
-        sender.setText(model.getEmailAddress());
-        receiversList.setItems(emailReceivers);
     }
 
     public void DeleteReceiversHandler() {

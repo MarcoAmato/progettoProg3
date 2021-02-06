@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 
 public class MailController {
     @FXML private BorderPane borderPane;
@@ -107,7 +105,7 @@ public class MailController {
     //Dobbiamo gestire questa funzione importando il file giusto
     public void handleNewMail(MouseEvent mouseEvent) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailCreator.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("NewMail.fxml"));
             Parent root2 = fxmlLoader.load();
             NewMailController newMailController = fxmlLoader.getController();
             newMailController.initClientDataModel(this.clientDataModel);
