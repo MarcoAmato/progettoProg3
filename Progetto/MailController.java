@@ -177,13 +177,15 @@ public class MailController {
 
         @Override
         public void onChanged(Change<? extends Email> change) {
-            if(change.wasAdded()){
-                for(Email email: change.getAddedSubList()){
-                    emailsPreviewToUpdate.add(new EmailPreview(email));
-                }
-            }else if(change.wasRemoved()){
-                for(Email email: change.getRemoved()){
-                    emailsPreviewToUpdate.removeIf(preview -> email == preview.getEmailConnected());
+            while(change.next()){
+                if(change.wasAdded()){
+                    for(Email email: change.getAddedSubList()){
+                        emailsPreviewToUpdate.add(new EmailPreview(email));
+                    }
+                }else if(change.wasRemoved()){
+                    for(Email email: change.getRemoved()){
+                        emailsPreviewToUpdate.removeIf(preview -> email == preview.getEmailConnected());
+                    }
                 }
             }
         }
