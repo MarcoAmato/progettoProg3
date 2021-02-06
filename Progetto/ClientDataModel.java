@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -343,8 +344,7 @@ public class ClientDataModel {
 							command = (Integer) input;
 						}
 					}
-					pino
-					new CommandExecutor(command).start();
+					executeCommand(command);
 				} catch (IOException | ClassNotFoundException e) {
 					System.out.println("Exception during getInputFromServerLoop");
 					e.printStackTrace();
@@ -352,9 +352,33 @@ public class ClientDataModel {
 				}
 			}
 		}
+
+		private void executeCommand(int command){
+			try{
+				switch (command) {
+					case CSMex.NEW_EMAIL_RECEIVED -> {
+						Email newEmail = getEmailFromServer();
+						emailsReceived.add(newEmail);
+					}
+					case CSMex.EMAIL_DELETED -> {
+						Email emailToDelete = getEmailFromServer();
+						emailsReceived.removeIf(email -> email.toString().equals(emailToDelete.toString()));
+						emailsSent.removeIf(email -> email.toString().equals(emailToDelete.toString()));
+					}
+					case CSMex.FORCE_DISCONNECTION -> System.out.println("Disconnecting from server...");
+					default -> System.out.println("Error, unexpected server command: " + command);
+				}
+			}catch (IOException e) {
+				System.out.println("Exception in Command #"+command);
+				e.printStackTrace();
+				restartConnection();
+			}finally {
+				serverRequestLock.unlock();
+			}
+		}
 	}
 
-	private class CommandExecutor extends Thread{
+	/*private class CommandExecutor extends Thread{
 		private final int command;
 
 		public CommandExecutor(int command){
@@ -383,9 +407,11 @@ public class ClientDataModel {
 				e.printStackTrace();
 				restartConnection();
 			}finally {
+				System.out.println();
+				notFinishedCondition.signal();
 				serverRequestLock.unlock();
 			}
 		}
-	}
+	}*/
 
 }

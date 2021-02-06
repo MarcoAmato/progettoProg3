@@ -21,24 +21,25 @@ import java.util.Date;
 import java.util.List;
 
 class Common {
-    public static <E> E getInputOfClass(ObjectInputStream inputStream, Class<E> expectedInputClass) throws ConnectException{
+    public static <E> E getInputOfClass(ObjectInputStream inputStream, Class<E> expectedInputClass) throws ConnectException {
         E sanitizedInput = null;
 
-        try{
-            Object input = inputStream.readObject();
-            if(input == null){
-                System.out.println("Expected "+ expectedInputClass.getName() +", received null");
-            }else if (!(input.getClass() == expectedInputClass)){
-                System.out.println("Expected "+ expectedInputClass.getName() +", received object of class: " + input.getClass().getName());
-            }
-            else{
+        Object input = null;
+        try {
+            input = inputStream.readObject();
+            if (input == null) {
+                System.out.println("Expected " + expectedInputClass.getName() + ", received null");
+            } else if (!(input.getClass() == expectedInputClass)) {
+                System.out.println("Expected " + expectedInputClass.getName() + ", received object of class: " + input.getClass().getName());
+            } else {
                 //input is not null and type arraylist
                 sanitizedInput = expectedInputClass.cast(input);
             }
-        }catch(IOException | ClassNotFoundException e){
-            if (e instanceof SocketException){
+        } catch (IOException | ClassNotFoundException e) {
+            if (e instanceof SocketException) {
                 throw new ConnectException();
             }
+            System.out.println(input);
             e.printStackTrace();
         }
 

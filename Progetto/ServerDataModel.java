@@ -57,9 +57,10 @@ public class ServerDataModel{
 	}
 
 	private static void log(String logMessage){ // lo devono fare gli handler
-		synchronized (logList){
+		/*synchronized (logList){
 			Platform.runLater(() -> logList.add(logMessage));
-		}
+		}*/
+		System.out.println(logMessage);
 	}
 
 	public ObservableList<String> logList(){
@@ -388,7 +389,7 @@ public class ServerDataModel{
 				streamLock.lock();
 				outStream.writeObject(CSMex.NEW_EMAIL_RECEIVED);
 				outStream.writeObject(email);
-				log(emailAddress+" received new email");
+				log(emailAddress+" received new email: " + email);
 			}catch (IOException e){
 				log("Error, server can't write new mail to client");
 				e.printStackTrace();
