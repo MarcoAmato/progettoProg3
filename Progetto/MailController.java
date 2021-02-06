@@ -71,30 +71,6 @@ public class MailController {
             (new ConnectionFailedHandler(this.borderPane, this.clientDataModel));
     }
 
-    /*private void goToLogin(ClientDataModel clientDataModel){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                Stage stage = (Stage) borderPane.getScene().getWindow();
-                stage.close();
-                try{
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
-                    Parent rootLogin = fxmlLoader.load();
-                    LoginController loginController = fxmlLoader.getController();
-                    loginController.initClientDataModel(clientDataModel);
-                    Stage stageLogin = new Stage();
-                    stageLogin.setTitle("Login");
-                    stageLogin.setScene(new Scene(rootLogin, 500, 275));
-                    stageLogin.setResizable(false);
-                    stageLogin.show();
-                    stageLogin.setOnCloseRequest(event -> Platform.exit());
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-            }
-        });
-    }*/
-
     public void handleShowSentMail() {
         mailList.setItems(mailSentPreviews);
         setEmailPreviewTable(mailList);

@@ -382,13 +382,13 @@ public class ServerDataModel{
 		 * @param email new Email received from another user
 		 */
 		private void receiveEmail(Email email){
-			log(emailAddress+" received new email");
 			emailsReceived.add(email);
 			try{
 				//needs synchro because multiple emails could be received in a row and this could lead to errors
 				streamLock.lock();
 				outStream.writeObject(CSMex.NEW_EMAIL_RECEIVED);
 				outStream.writeObject(email);
+				log(emailAddress+" received new email");
 			}catch (IOException e){
 				log("Error, server can't write new mail to client");
 				e.printStackTrace();
