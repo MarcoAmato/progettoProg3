@@ -51,19 +51,19 @@ public class MailController {
 
     public void HandleGlowDeleteMail() { deleteMail.setEffect(new Glow(0.8)); }
 
-    public void HandleOutGlowEmail(MouseEvent mouseEvent) { sentEmail.setEffect(new Glow(0)); }
+    public void HandleOutGlowEmail() { sentEmail.setEffect(new Glow(0)); }
 
-    public void MouseOutReceivedEmail(MouseEvent mouseEvent) { receivedEmail.setEffect(new Glow(0)); }
+    public void MouseOutReceivedEmail() { receivedEmail.setEffect(new Glow(0)); }
 
-    public void MouseOutNewMail(MouseEvent mouseEvent) { newMail.setEffect(new Glow(0)); }
+    public void MouseOutNewMail() { newMail.setEffect(new Glow(0)); }
 
-    public void MouseOutDeleteMail(MouseEvent mouseEvent) { deleteMail.setEffect(new Glow(0)); }
+    public void MouseOutDeleteMail() { deleteMail.setEffect(new Glow(0)); }
 
-    public void handleShowSentMail(MouseEvent mouseEvent) {
+    public void handleShowSentMail() {
         mailList.setItems(mailSentPreviews);
     }
 
-    public void handleShowReceivedMail(MouseEvent mouseEvent) {
+    public void handleShowReceivedMail() {
         mailList.setItems(mailReceivedPreviews);
     }
 
@@ -120,6 +120,8 @@ public class MailController {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailShow.fxml"));
                 Parent root3 = fxmlLoader.load();
+                MailShowController mailShowController = fxmlLoader.getController();
+                mailShowController.initClientDataModel(this.clientDataModel);
                 Stage stage = new Stage();
                 stage.setTitle("Oggetto");
                 stage.setScene(new Scene(root3, 800, 600));

@@ -4,17 +4,18 @@ import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
+//import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
+//import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.util.Date;
+//import java.util.Date;
 
 
 public class NewMailController {
@@ -31,12 +32,13 @@ public class NewMailController {
     boolean Selected = false;
     private final ObservableList<String> emailReceivers = new SimpleListProperty<>(FXCollections.observableArrayList());
 
-    public void HandleSentMail(ActionEvent actionEvent) {
+    public void HandleSentMail() {
         ArrayList<String> listOfReceivers = new ArrayList<>(receiversList.getItems());
-        Email insertedMail = new Email(sender.getText(), listOfReceivers, subject.getText(), mailText.getText(), new Date());
+        //Email insertedMail = new Email(sender.getText(), listOfReceivers, subject.getText(), mailText.getText(), new Date());
         if (listOfReceivers.isEmpty()) {
             controllo.setText("Nessun destinatario inserito");
         } else if (model.sendEmail(listOfReceivers, subject.getText(), mailText.getText())) {
+            controllo.setFill(Color.GREEN);
             controllo.setText("Mail inviata!");
             mailText.setText("");
             receivers.setText("");
@@ -46,11 +48,12 @@ public class NewMailController {
             delay.setOnFinished( event -> controllo.setText("") );
             delay.play();
         } else {
+            controllo.setFill(Color.GREEN);
             controllo.setText("Errore nell'invio della mail");
         }
     }
 
-    public void handleAddReceiver(ActionEvent actionEvent) {
+    public void handleAddReceiver() {
         if(!model.emailAddressExists(receivers.getText())) {
             deleteText.setText("Email non presente nel database.");
         } else if (receivers.getText().equals(model.getEmailAddress())){
@@ -59,7 +62,7 @@ public class NewMailController {
             deleteText.setText("L'Email richiesta è già stata inserita");
         } else {
             deleteText.setText("");
-            receiversList.getItems().add(receivers.getText());
+            emailReceivers.add(receivers.getText());
         }
 
         //model.ritornaCandidates().add(receivers.getText());
@@ -73,22 +76,17 @@ public class NewMailController {
 
         this.model = model;
         sender.setText(model.getEmailAddress());
+        receiversList.setItems(emailReceivers);
     }
 
-    public void DeleteReceiversHandler(ActionEvent actionEvent) {
-        if (Selected) {
-            final int val = receiversList.getSelectionModel().getSelectedIndex();
-            if(val == -1) {
-                deleteText.setText("Nessun Destinatario selezionato");
-            }else {
-                receiversList.getItems().remove(val);
-                deleteText.setText("");
-            }
+    public void DeleteReceiversHandler() {
+        final int val = receiversList.getSelectionModel().getSelectedIndex();
+        if(val == -1) {
+            deleteText.setText("Nessun Destinatario selezionato");
+        }else {
+            receiversList.getItems().remove(val);
+            deleteText.setText("");
         }
-    }
-
-    public void ReceiverSelected(MouseEvent mouseEvent) {
-        Selected = true;
     }
 
 }

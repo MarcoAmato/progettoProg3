@@ -9,12 +9,25 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class MailShowController {
+
+    private ClientDataModel model;
+
+    public void initClientDataModel(ClientDataModel model) {
+        if (this.model != null) {
+            throw new IllegalStateException("Model can only be initialized once");
+        }
+
+        this.model = model;
+    }
+
     public void HandleRespond(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyMail.fxml"));
             Parent rootRespAll = fxmlLoader.load();
+            ReplyMailController replyMailController = fxmlLoader.getController();
+            replyMailController.initClientDataModel(this.model);
             Stage stage = new Stage();
-            stage.setTitle("Rispondi a tutti");
+            stage.setTitle("Rispondi al mittente");
             stage.setScene(new Scene(rootRespAll, 550, 600));
             stage.setResizable(false);
             stage.show();
