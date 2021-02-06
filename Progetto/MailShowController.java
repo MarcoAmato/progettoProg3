@@ -33,7 +33,7 @@ public class MailShowController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyMail.fxml"));
             Parent rootReplyAll = fxmlLoader.load();
             ReplyMailController replyMailController = fxmlLoader.getController();
-            replyMailController.initClientDataModel(this.clientDataModel);
+            replyMailController.initClientDataModel(this.clientDataModel, this.email);
             Stage stage = new Stage();
             stage.setTitle("Rispondi al mittente");
             stage.setScene(new Scene(rootReplyAll, 550, 600));

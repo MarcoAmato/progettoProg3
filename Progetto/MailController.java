@@ -48,7 +48,6 @@ public class MailController {
     private final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList(new ArrayList<>());
 
     public void initClientDataModel(ClientDataModel clientDataModel) {
-        // assicura che il modello viene impostato una volta sola
         if (this.clientDataModel != null) {
             throw new IllegalStateException("Model can only be initialized once");
         }
@@ -132,13 +131,13 @@ public class MailController {
         }
     }
 
-    public void handleShowMail(MouseEvent mouseEvent) {
+    /*public void handleShowMail(MouseEvent mouseEvent) {
         if(mailList.getSelectionModel().getSelectedIndex() != -1 && mouseEvent.getClickCount() == 2) {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailShow.fxml"));
                 Parent root3 = fxmlLoader.load();
                 MailShowController mailShowController = fxmlLoader.getController();
-                mailShowController.initClientDataModel(this.clientDataModel);
+                mailShowController.initClientDataModel(this.clientDataModel, );
                 Stage stage = new Stage();
                 stage.setTitle("Oggetto");
                 stage.setScene(new Scene(root3, 800, 600));
@@ -149,7 +148,7 @@ public class MailController {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 
     public void handleRestoreDelete(ActionEvent actionEvent) {
         deleteHandler.setText("");

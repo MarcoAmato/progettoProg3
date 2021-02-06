@@ -10,32 +10,34 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<GridPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Progetto.forwardToController">
+<GridPane fx:id="gridPane" prefHeight="450.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Progetto.ForwardToController">
    <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
    </columnConstraints>
    <rowConstraints>
       <RowConstraints maxHeight="266.2000030517578" minHeight="10.0" prefHeight="42.0000244140625" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="242.00000610351566" minHeight="0.5999969482422216" prefHeight="39.60001220703125" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="194.6000274658203" minHeight="10.0" prefHeight="27.79999389648438" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="211.8000061035156" minHeight="10.0" prefHeight="211.8000061035156" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="194.6000274658203" minHeight="10.0" prefHeight="80.19998474121093" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="242.00000610351566" minHeight="0.5999969482422216" prefHeight="44.999981689453115" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="194.6000274658203" minHeight="10.0" prefHeight="28.800012207031244" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="315.59997253417964" minHeight="10.0" prefHeight="222.39998779296874" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="238.4000244140625" minHeight="10.0" prefHeight="35.39999999999998" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="194.6000274658203" minHeight="10.0" prefHeight="89.80000000000001" vgrow="SOMETIMES" />
    </rowConstraints>
    <Label alignment="CENTER" prefHeight="18.0" prefWidth="601.0" text="Seleziona i destinatari a cui inoltrare la mail">
       <font>
          <Font name="Arial Bold" size="12.0" />
       </font>
    </Label>
-   <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.rowIndex="1">
-      <TextField prefHeight="26.0" prefWidth="451.0">
+   <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
+      <TextField fx:id="receivers" prefHeight="26.0" prefWidth="451.0">
          <HBox.margin>
-            <Insets left="20.0" top="5.0" />
+            <Insets left="60.0" top="5.0" />
          </HBox.margin>
       </TextField>
-      <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="32.0" text="+" textFill="RED">
+      <Button mnemonicParsing="false" onAction="#handleAddReceivers" prefHeight="26.0" prefWidth="32.0" text="+" textFill="RED">
          <HBox.margin>
-            <Insets left="30.0" top="5.0" />
+            <Insets top="5.0" />
          </HBox.margin>
          <font>
             <Font name="Arial Bold" size="12.0" />
@@ -47,23 +49,35 @@
          <Font name="Arial Bold" size="12.0" />
       </font>
    </Label>
-   <ListView prefHeight="212.0" prefWidth="598.0" GridPane.rowIndex="3">
+   <ListView fx:id="receiversList" prefHeight="185.0" prefWidth="400.0" GridPane.rowIndex="3">
       <opaqueInsets>
          <Insets />
       </opaqueInsets>
       <GridPane.margin>
-         <Insets left="100.0" right="100.0" />
+         <Insets left="60.0" right="60.0" />
       </GridPane.margin>
    </ListView>
-   <HBox prefHeight="100.0" prefWidth="200.0" spacing="210.0" GridPane.rowIndex="4">
+   <Text fx:id="controllo" strokeType="OUTSIDE" strokeWidth="0.0" text="" GridPane.rowIndex="4">
       <GridPane.margin>
-         <Insets left="100.0" top="20.0" />
+         <Insets left="300.0" />
       </GridPane.margin>
-      <Button mnemonicParsing="false" prefHeight="42.0" prefWidth="134.0" text="Elimina destinatario selezionato" textAlignment="CENTER" textFill="RED" wrapText="true">
+      <font>
+         <Font name="Arial" size="12.0" />
+      </font>
+   </Text>
+   <HBox prefHeight="100.0" prefWidth="200.0" spacing="140.0" GridPane.rowIndex="5">
+      <GridPane.margin>
+         <Insets left="60.0" top="20.0" />
+      </GridPane.margin>
+      <Button mnemonicParsing="false" onAction="#forwardMail" prefHeight="42.0" prefWidth="134.0" text="Elimina destinatario selezionato" textAlignment="CENTER" textFill="RED" wrapText="true">
          <font>
             <Font name="Arial" size="12.0" />
          </font>
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
       </Button>
+      <Text fx:id="checkForward" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
       <Button mnemonicParsing="false" text="Invia" textFill="RED">
          <font>
             <Font name="Arial" size="12.0" />
