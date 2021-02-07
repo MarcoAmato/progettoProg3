@@ -63,7 +63,7 @@ public class MailController {
 
         //Binds mailReceivedPreviews to clientDataModel.emailsReceived
         fillEmailPreviewsWithEmails(mailReceivedPreviews, this.clientDataModel.emailsReceivedProperty());
-        this.clientDataModel.emailsSentProperty().addListener(new EmailPreviewUpdater(this.mailReceivedPreviews));
+        this.clientDataModel.emailsReceivedProperty().addListener(new EmailPreviewUpdater(this.mailReceivedPreviews));
 
         //Client returns to login when connectionOkay becomes false
         this.clientDataModel.connectionOkayProperty().addListener
@@ -72,11 +72,13 @@ public class MailController {
 
     public void handleShowSentMail() {
         mailList.setItems(mailSentPreviews);
+        System.out.println(mailSentPreviews);
         setEmailPreviewTable(mailList);
     }
 
     public void handleShowReceivedMail() {
         mailList.setItems(mailReceivedPreviews);
+        System.out.println(mailReceivedPreviews);
         setEmailPreviewTable(mailList);
     }
 
