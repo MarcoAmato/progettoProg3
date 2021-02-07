@@ -214,6 +214,18 @@ public class ClientDataModel {
 	}
 
 	/**
+	 * Forwards emailToForward to receivers
+	 * @param emailToForward Email to be forwarded
+	 * @param receivers ArrayList of receivers
+	 * @return true on success, false on failure
+	 */
+	public boolean forwardEmail(Email emailToForward, ArrayList<String> receivers){
+		String subject = emailToForward.getSubject();
+		String body = emailToForward.getBody();
+		return sendEmail(receivers, subject, body);
+	}
+
+	/**
 	 * Asks server if emailAddress is registered and get response back
 	 * @param emailAddress the email we want to verify is in database
 	 * @return true if emailAddress is contained in database, false otherwise
