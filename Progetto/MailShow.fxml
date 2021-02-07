@@ -39,13 +39,13 @@
             <Font name="Arial" size="12.0"/>
          </font>
       </Label>
-      <TextField fx:id="Sender" editable="false" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
+      <TextField fx:id="sender" editable="false" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
                  GridPane.vgrow="ALWAYS">
          <font>
             <Font name="Arial" size="12.0"/>
          </font>
       </TextField>
-      <TextField editable="false" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"
+      <TextField fx:id="subject" editable="false" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"
                  GridPane.vgrow="ALWAYS"/>
    </GridPane>
    <Button fx:id="reply" layoutX="396.0" layoutY="538.0" mnemonicParsing="false" prefHeight="26.0"
@@ -54,13 +54,13 @@
          <Font name="Arial" size="12.0"/>
       </font>
    </Button>
-   <TextArea fx:id="MailText" editable="false" layoutX="51.0" layoutY="188.0" prefHeight="322.0" prefWidth="430.0"
+   <TextArea fx:id="mailText" editable="false" layoutX="51.0" layoutY="188.0" prefHeight="322.0" prefWidth="430.0"
              wrapText="true">
       <font>
          <Font name="Arial" size="12.0"/>
       </font>
    </TextArea>
-   <ListView fx:id="ReceiversList" disable="true" editable="true" layoutX="540.0" layoutY="48.0" prefHeight="176.0"
+   <ListView fx:id="receiversList" disable="true" editable="true" layoutX="540.0" layoutY="48.0" prefHeight="176.0"
              prefWidth="200.0"/>
    <Label layoutX="541.0" layoutY="20.0" text="Mail inviata a:">
       <font>

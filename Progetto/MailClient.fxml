@@ -40,7 +40,7 @@
                </font>
             </Label>
          </HBox>
-         <HBox fx:id="sentEmail" onMouseClicked="#handleShowSentMail" onMouseEntered="#HandleGlowSentMail" onMouseExited="#HandleOutGlowEmail" prefHeight="66.0" prefWidth="108.0">
+         <HBox fx:id="sentEmail" onMouseClicked="#handleShowSentMail" onMouseEntered="#HandleGlowSentMail" onMouseExited="#HandleOutSentEmail" prefHeight="66.0" prefWidth="108.0">
             <ImageView fitHeight="62.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                <Image url="@../png/download__1_-removebg-preview.png" />
             </ImageView>

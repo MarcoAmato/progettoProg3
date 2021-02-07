@@ -1,23 +1,30 @@
 package Progetto;
 
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class MailShowController {
-    @FXML
-    private AnchorPane anchorPane;
-    @FXML
-    private Button reply;
-    @FXML
-    private Button replyAll;
+    @FXML private AnchorPane anchorPane;
+    @FXML private Button reply;
+    @FXML private Button replyAll;
+    @FXML private TextField sender;
+    @FXML private TextField subject;
+    @FXML private TextArea mailText;
+    @FXML private ListView<String> receiversList;
 
     private ClientDataModel clientDataModel;
     private Email email;
@@ -32,6 +39,13 @@ public class MailShowController {
         this.clientDataModel.connectionOkayProperty().addListener
                 (new CloseOnLostConnection(anchorPane, clientDataModel));
         this.email = email;
+
+        sender.setText(email.getSender());
+        subject.setText(email.getSubject());
+        mailText.setText(email.getBody());
+        //receiversList.setItems(email.getReceivers());
+
+
 
         if(email.getSender().equals(clientDataModel.getEmailAddress())){
             reply.setDisable(true);
