@@ -22,6 +22,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -43,6 +44,7 @@ public class MailController {
     @FXML private TableColumn<EmailPreview, String> mittente;
     @FXML private TableColumn<EmailPreview, String> oggetto;
     @FXML private TableColumn<EmailPreview, String> data;
+    @FXML private Text mailUpdater;
 
     private ClientDataModel clientDataModel;
     private final ObservableList<EmailPreview> mailSentPreviews = FXCollections.observableArrayList(new ArrayList<>());
@@ -68,6 +70,16 @@ public class MailController {
         //Client returns to login when connectionOkay becomes false
         this.clientDataModel.connectionOkayProperty().addListener
             (new ConnectionFailedHandler(this.borderPane, this.clientDataModel));
+
+        mailReceivedPreviews.addListener((ListChangeListener<EmailPreview>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    System.out.println("Test");
+                    mailUpdater.setText("Sono arrivate nuove mail!");
+                    mailUpdater.setFill(Color.RED);
+                }
+            }
+        });
     }
 
     public void handleShowSentMail() {
@@ -80,6 +92,8 @@ public class MailController {
         mailList.setItems(mailReceivedPreviews);
         System.out.println(mailReceivedPreviews);
         setEmailPreviewTable(mailList);
+        mailUpdater.setFill(Color.BLACK);
+        mailUpdater.setText("Non ci sono nuove mail");
     }
 
     public void setEmailPreviewTable(TableView<EmailPreview> emailPreviewTableView){
