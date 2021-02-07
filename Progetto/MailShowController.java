@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -13,9 +14,14 @@ import java.io.IOException;
 public class MailShowController {
     @FXML
     private AnchorPane anchorPane;
+    @FXML
+    private Button reply;
+    @FXML
+    private Button replyAll;
 
     private ClientDataModel clientDataModel;
     private Email email;
+    private boolean userIsSender;
 
     public void initClientDataModel(ClientDataModel clientDataModel, Email email) {
         if (this.clientDataModel != null) {
@@ -26,6 +32,13 @@ public class MailShowController {
         this.clientDataModel.connectionOkayProperty().addListener
                 (new CloseOnLostConnection(anchorPane, clientDataModel));
         this.email = email;
+
+        if(email.getSender().equals(clientDataModel.getEmailAddress())){
+            reply.setDisable(true);
+            reply.setVisible(false);
+            replyAll.setDisable(true);
+            replyAll.setVisible(false);
+        }
     }
 
     /*public void HandleRespond(ActionEvent actionEvent) {
