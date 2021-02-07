@@ -94,7 +94,7 @@
             <padding>
                <Insets left="20.0" top="15.0"/>
             </padding>
-            <Button fx:id="doDelete" disable="true" mnemonicParsing="false" text="Sì" textFill="RED" visible="false">
+            <Button fx:id="doDelete" disable="true" mnemonicParsing="false" text="Sì" textFill="RED" visible="false" onAction="#handleDelete">
                <HBox.margin>
                   <Insets/>
                </HBox.margin>
