@@ -158,10 +158,14 @@ public class ClientDataModel {
 
 	/**
 	 * Controller calls this method to delete an email
-	 * @param emailToDelete Email to be deleted
+	 * @param emailToDelete Email to be deleted,
+	 *                         only sender can delete email
 	 * @return true on email deleted correctly, false on error
 	 */
 	public boolean deleteEmail(Email emailToDelete){
+		if(!emailToDelete.getSender().equals(this.getEmailAddress())){
+			return false;
+		}
 		try{
 			serverRequestLock.lock();
 
@@ -212,6 +216,18 @@ public class ClientDataModel {
 		receiversOfReply.add(emailToReply.getSender());
 		String subjectOfReply = emailToReply.getSubject();
 		return sendEmail(receiversOfReply, subjectOfReply, body);
+	}
+
+	/**
+	 * Forwards emailToForward to receivers
+	 * @param emailToForward Email to be forwarded
+	 * @param receivers ArrayList of receivers
+	 * @return true on success, false on failure
+	 */
+	public boolean forwardEmail(Email emailToForward, ArrayList<String> receivers){
+		String subject = emailToForward.getSubject();
+		String body = emailToForward.getBody();
+		return sendEmail(receivers, subject, body);
 	}
 
 	/**
