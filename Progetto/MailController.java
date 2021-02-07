@@ -46,6 +46,7 @@ public class MailController {
     @FXML private TableColumn<EmailPreview, String> data;
     @FXML private Text mailUpdater;
 
+    private EmailPreview emailPreviewSelected;
     private ClientDataModel clientDataModel;
     private final ObservableList<EmailPreview> mailSentPreviews = FXCollections.observableArrayList(new ArrayList<>());
     private final ObservableList<EmailPreview> mailReceivedPreviews = FXCollections.observableArrayList(new ArrayList<>());
@@ -84,13 +85,11 @@ public class MailController {
 
     public void handleShowSentMail() {
         mailList.setItems(mailSentPreviews);
-        System.out.println(mailSentPreviews);
         setEmailPreviewTable(mailList);
     }
 
     public void handleShowReceivedMail() {
         mailList.setItems(mailReceivedPreviews);
-        System.out.println(mailReceivedPreviews);
         setEmailPreviewTable(mailList);
         mailUpdater.setFill(Color.BLACK);
         mailUpdater.setText("Non ci sono nuove mail");
@@ -146,6 +145,7 @@ public class MailController {
 
     public void handleDeleteSelectedMail(MouseEvent mouseEvent) {
         if(mailList.getSelectionModel().getSelectedIndex() != -1) {
+            this.emailPreviewSelected = mailList.getSelectionModel().getSelectedItem();
             deleteHandler.setText("Sei sicuro di voler eliminare questa mail?");
             doDelete.setDisable(false);
             doNotDelete.setDisable(false);
@@ -156,26 +156,17 @@ public class MailController {
         }
     }
 
-    /*public void handleShowMail(MouseEvent mouseEvent) {
-        if(mailList.getSelectionModel().getSelectedIndex() != -1 && mouseEvent.getClickCount() == 2) {
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MailShow.fxml"));
-                Parent root3 = fxmlLoader.load();
-                MailShowController mailShowController = fxmlLoader.getController();
-                mailShowController.initClientDataModel(this.clientDataModel, );
-                Stage stage = new Stage();
-                stage.setTitle("Oggetto");
-                stage.setScene(new Scene(root3, 800, 600));
-                stage.setResizable(false);
-                stage.show();
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
+    public void handleDelete(){
+        if(this.emailPreviewSelected != null){
+            Email emailToDelete = this.emailPreviewSelected.getEmail();
+            boolean emailIsDeleted = clientDataModel.deleteEmail(emailToDelete);
+            System.out.println("Email eliminata: " + emailIsDeleted);
+            handleRestoreDelete();
         }
-    }*/
+    }
 
-    public void handleRestoreDelete(ActionEvent actionEvent) {
+    public void handleRestoreDelete() {
+        this.emailPreviewSelected = null;
         deleteHandler.setText("");
         doDelete.setDisable(true);
         doNotDelete.setDisable(true);
