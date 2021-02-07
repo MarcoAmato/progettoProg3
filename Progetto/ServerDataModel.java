@@ -435,8 +435,8 @@ public class ServerDataModel{
 		private void removeEmailFromClientHandler(Email emailToDelete, String clientEmail){
 			ClientHandler activeClientHandler = getClientHandlerFromEmail(clientEmail);
 			if(activeClientHandler != null){
-				log("Removed email from ClientHandler of "+activeClientHandler.emailAddress);
 				activeClientHandler.removeEmail(emailToDelete);
+				log("Removed email from ClientHandler of "+activeClientHandler.emailAddress);
 			}
 		}
 

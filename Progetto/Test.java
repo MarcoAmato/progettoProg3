@@ -22,5 +22,10 @@ public class Test {
 		ArrayList<String> receivers = new ArrayList<>();
 		receivers.add("w");
 		cdmBubu.sendEmail(receivers, "prova", "body");
+		Email emailReceived = cdmW.emailsReceivedProperty().get(0);
+
+		System.out.println(emailReceived);
+
+		cdmBubu.deleteEmail(emailReceived);
 	}
 }
