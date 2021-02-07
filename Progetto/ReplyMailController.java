@@ -16,6 +16,7 @@ import java.util.Arrays;
 public class ReplyMailController {
 
     @FXML private VBox vBox;
+    @FXML private TextField sender;
     @FXML private TextArea mailText;
     @FXML private TextField subject;
     @FXML private TextField receiver;
@@ -33,6 +34,10 @@ public class ReplyMailController {
         this.emailToReply = emailToReply;
         this.clientDataModel.connectionOkayProperty().addListener(
                 new CloseOnLostConnection(this.vBox, this.clientDataModel));
+
+        sender.setText(clientDataModel.getEmailAddress());
+        receiver.setText(emailToReply.getSender());
+        subject.setText(emailToReply.getSubject());
     }
 
     public void handleMailReply(ActionEvent actionEvent) {
@@ -40,8 +45,6 @@ public class ReplyMailController {
             controllo.setFill(Color.GREEN);
             controllo.setText("Mail inviata!");
             mailText.setText("");
-            receiver.setText("");
-            subject.setText("");
             PauseTransition delay = new PauseTransition(Duration.seconds(5));
             delay.setOnFinished( event -> controllo.setText("") );
             delay.play();
