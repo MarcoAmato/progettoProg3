@@ -13,10 +13,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -33,6 +30,7 @@ import java.util.ArrayList;
 
 public class MailController {
     @FXML private BorderPane borderPane;
+    @FXML private Label mailIdentifier;
     @FXML private HBox sentEmail;
     @FXML private HBox receivedEmail;
     @FXML private HBox newMail;
@@ -56,6 +54,7 @@ public class MailController {
             throw new IllegalStateException("Model can only be initialized once");
         }
         this.clientDataModel = clientDataModel;
+        mailIdentifier.setText("Email di " + clientDataModel.getEmailAddress());
         mittente.setCellValueFactory(cellData -> cellData.getValue().senderProperty());
         oggetto.setCellValueFactory(cellData -> cellData.getValue().subjectProperty());
         data.setCellValueFactory(cellData -> cellData.getValue().sendingDateProperty());
@@ -84,11 +83,15 @@ public class MailController {
     }
 
     public void handleShowSentMail() {
+        deleteMail.setDisable(false);
+        deleteMail.setVisible(true);
         mailList.setItems(mailSentPreviews);
         setEmailPreviewTable(mailList);
     }
 
     public void handleShowReceivedMail() {
+        deleteMail.setDisable(true);
+        deleteMail.setVisible(false);
         mailList.setItems(mailReceivedPreviews);
         setEmailPreviewTable(mailList);
         mailUpdater.setFill(Color.BLACK);
