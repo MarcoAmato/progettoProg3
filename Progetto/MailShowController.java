@@ -16,6 +16,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MailShowController {
     @FXML private AnchorPane anchorPane;
@@ -42,7 +43,8 @@ public class MailShowController {
         sender.setText(email.getSender());
         subject.setText(email.getSubject());
         mailText.setText(email.getBody());
-        //receiversList.setItems(email.getReceivers());
+        final ObservableList<String> receivers = FXCollections.observableArrayList(email.getReceivers());
+        receiversList.setItems(receivers);
 
 
 

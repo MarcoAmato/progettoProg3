@@ -77,7 +77,7 @@
             <Insets />
          </HBox.margin>
       </Button>
-      <Text fx:id="checkForward" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
+      <Text fx:id="checkForward" strokeType="OUTSIDE" strokeWidth="0.0" />
       <Button mnemonicParsing="false" text="Invia" textFill="RED">
          <font>
             <Font name="Arial" size="12.0" />
