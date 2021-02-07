@@ -36,10 +36,7 @@ public class ReplyMailController {
     }
 
     public void handleMailReply(ActionEvent actionEvent) {
-        ArrayList<String> listOfReceivers = new ArrayList<>(Arrays.asList(receiver.getText()));
-        if (listOfReceivers.isEmpty()) {
-            controllo.setText("Nessun destinatario inserito");
-        } else if (clientDataModel.replyEmail(this.emailToReply, this.mailText.getText())) {
+        if (clientDataModel.replyEmail(this.emailToReply, this.mailText.getText())) {
             controllo.setFill(Color.GREEN);
             controllo.setText("Mail inviata!");
             mailText.setText("");

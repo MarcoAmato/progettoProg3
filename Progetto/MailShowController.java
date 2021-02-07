@@ -21,7 +21,6 @@ public class MailShowController {
 
     private ClientDataModel clientDataModel;
     private Email email;
-    private boolean userIsSender;
 
     public void initClientDataModel(ClientDataModel clientDataModel, Email email) {
         if (this.clientDataModel != null) {
@@ -41,7 +40,7 @@ public class MailShowController {
         }
     }
 
-    /*public void HandleRespond(ActionEvent actionEvent) {
+    public void handleReply() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyMail.fxml"));
             Parent rootReply = fxmlLoader.load();
@@ -56,7 +55,7 @@ public class MailShowController {
         catch (IOException e) {
             e.printStackTrace();
         }
-    }*/
+    }
 
     public void handleForwardTo(ActionEvent actionEvent) {
         try {
