@@ -15,7 +15,6 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ReplyAllMailController {
 

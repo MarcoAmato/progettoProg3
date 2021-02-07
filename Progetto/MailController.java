@@ -209,7 +209,7 @@ public class MailController {
         }
     }
 
-    public void HandleOutGlowEmail() { sentEmail.setEffect(new Glow(0)); }
+    public void HandleOutSentEmail() { sentEmail.setEffect(new Glow(0)); }
 
     public void MouseOutReceivedEmail() { receivedEmail.setEffect(new Glow(0)); }
 
@@ -224,15 +224,6 @@ public class MailController {
     public void HandleGlowNewMail() { newMail.setEffect(new Glow(0.8)); }
 
     public void HandleGlowDeleteMail() { deleteMail.setEffect(new Glow(0.8)); }
-
-    public void HandleOutGlowEmail(MouseEvent mouseEvent) { sentEmail.setEffect(new Glow(0)); }
-
-    public void MouseOutReceivedEmail(MouseEvent mouseEvent) { receivedEmail.setEffect(new Glow(0)); }
-
-    public void MouseOutNewMail(MouseEvent mouseEvent) { newMail.setEffect(new Glow(0)); }
-
-    public void MouseOutDeleteMail(MouseEvent mouseEvent) { deleteMail.setEffect(new Glow(0)); }
-
 
     private static class EmailPreviewUpdater implements ListChangeListener<Email> {
         private final ObservableList<EmailPreview> emailsPreviewToUpdate;
