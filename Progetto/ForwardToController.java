@@ -59,20 +59,20 @@ public class ForwardToController {
     public void forwardMail(ActionEvent actionEvent) {
 
         ArrayList<String> listOfReceivers = new ArrayList<>(receiversList.getItems());
-        //Email insertedMail = new Email(sender.getText(), listOfReceivers, subject.getText(), mailText.getText(), new Date());
         if (listOfReceivers.isEmpty()) {
             checkForward.setText("Nessun destinatario inserito");
-        } else if (clientDataModel.sendEmail(listOfReceivers, emailToReply.getSubject(), emailToReply.getBody())) {
+        } else if (clientDataModel.forwardEmail(this.emailToReply, listOfReceivers)) {
             checkForward.setFill(Color.GREEN);
             checkForward.setText("Mail inviata!");
             receivers.setText("");
             receiversList.getItems().clear();
             PauseTransition delay = new PauseTransition(Duration.seconds(5));
-            delay.setOnFinished( event -> controllo.setText("") );
+            delay.setOnFinished( event -> checkForward.setText("") );
             delay.play();
         } else {
             checkForward.setFill(Color.GREEN);
             checkForward.setText("Errore nell'invio della mail");
         }
     }
+
 }
