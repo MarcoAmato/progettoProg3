@@ -40,7 +40,7 @@ public class ForwardToController {
 
     }
 
-    public void handleAddReceivers(ActionEvent actionEvent) {
+    public void handleAddReceivers() {
         if(!clientDataModel.emailAddressExists(receivers.getText())) {
             controllo.setText("Email non presente nel database.");
         } else if (receivers.getText().equals(clientDataModel.getEmailAddress())){
@@ -52,17 +52,15 @@ public class ForwardToController {
             receiversList.getItems().add(receivers.getText());
         }
 
-        //model.ritornaCandidates().add(receivers.getText());
         receivers.setText("");
     }
 
     public void forwardMail(ActionEvent actionEvent) {
 
         ArrayList<String> listOfReceivers = new ArrayList<>(receiversList.getItems());
-        //Email insertedMail = new Email(sender.getText(), listOfReceivers, subject.getText(), mailText.getText(), new Date());
         if (listOfReceivers.isEmpty()) {
             controllo.setText("Nessun destinatario inserito");
-        } else if (clientDataModel.sendEmail(listOfReceivers, emailToReply.getSubject(), emailToReply.getBody())) {
+        } else if (clientDataModel.forwardEmail(this.emailToReply, listOfReceivers)) {
             controllo.setFill(Color.GREEN);
             controllo.setText("Mail inviata!");
             receivers.setText("");

@@ -57,10 +57,13 @@ public class MailShowController {
         }
     }
 
-    public void handleForwardTo(ActionEvent actionEvent) {
+    public void handleForwardTo() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ForwardMail.fxml"));
             Parent rootFor = fxmlLoader.load();
+            ForwardToController forwardToController = fxmlLoader.getController();
+            forwardToController.initClientDataModel(this.clientDataModel, this.email);
+
             Stage stage = new Stage();
             stage.setTitle("Inoltra a...");
             stage.setScene(new Scene(rootFor, 600, 400));
