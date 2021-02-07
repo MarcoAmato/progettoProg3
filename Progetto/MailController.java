@@ -72,13 +72,11 @@ public class MailController {
 
     public void handleShowSentMail() {
         mailList.setItems(mailSentPreviews);
-        System.out.println(mailSentPreviews);
         setEmailPreviewTable(mailList);
     }
 
     public void handleShowReceivedMail() {
         mailList.setItems(mailReceivedPreviews);
-        System.out.println(mailReceivedPreviews);
         setEmailPreviewTable(mailList);
     }
 
