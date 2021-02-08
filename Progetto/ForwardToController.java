@@ -69,7 +69,7 @@ public class ForwardToController {
             delay.setOnFinished( event -> checkForward.setText("") );
             delay.play();
         } else {
-            checkForward.setFill(Color.GREEN);
+            checkForward.setFill(Color.RED);
             checkForward.setText("Errore nell'invio della mail");
         }
     }
