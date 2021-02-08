@@ -57,9 +57,9 @@
          <Insets left="60.0" right="60.0" />
       </GridPane.margin>
    </ListView>
-   <Text fx:id="controllo" strokeType="OUTSIDE" strokeWidth="0.0" text="" GridPane.rowIndex="4">
+   <Text fx:id="controllo" strokeType="OUTSIDE" strokeWidth="0.0" text="" textAlignment="CENTER" GridPane.rowIndex="4">
       <GridPane.margin>
-         <Insets left="300.0" />
+         <Insets left="200.0" />
       </GridPane.margin>
       <font>
          <Font name="Arial" size="12.0" />
@@ -69,7 +69,7 @@
       <GridPane.margin>
          <Insets left="60.0" top="20.0" />
       </GridPane.margin>
-      <Button mnemonicParsing="false" onAction="#forwardMail" prefHeight="42.0" prefWidth="134.0" text="Elimina destinatario selezionato" textAlignment="CENTER" textFill="RED" wrapText="true">
+      <Button mnemonicParsing="false" onAction="#deleteReceiver" prefHeight="42.0" prefWidth="134.0" text="Elimina destinatario selezionato" textAlignment="CENTER" textFill="RED" wrapText="true">
          <font>
             <Font name="Arial" size="12.0" />
          </font>
@@ -78,7 +78,7 @@
          </HBox.margin>
       </Button>
       <Text fx:id="checkForward" strokeType="OUTSIDE" strokeWidth="0.0" />
-      <Button mnemonicParsing="false" text="Invia" textFill="RED">
+      <Button mnemonicParsing="false" text="Invia" textFill="RED" onAction="#forwardMail">
          <font>
             <Font name="Arial" size="12.0" />
          </font>

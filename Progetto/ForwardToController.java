@@ -52,7 +52,6 @@ public class ForwardToController {
             receiversList.getItems().add(receivers.getText());
         }
 
-        //model.ritornaCandidates().add(receivers.getText());
         receivers.setText("");
     }
 
@@ -75,4 +74,14 @@ public class ForwardToController {
         }
     }
 
+    public void deleteReceiver(ActionEvent actionEvent) {
+
+        final int val = receiversList.getSelectionModel().getSelectedIndex();
+        if(val == -1) {
+            controllo.setText("Nessun Destinatario selezionato");
+        }else {
+            receiversList.getItems().remove(val);
+            controllo.setText("");
+        }
+    }
 }

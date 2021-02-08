@@ -21,12 +21,13 @@ public class ReplyAllMailController {
     @FXML private AnchorPane anchorPane;
     @FXML private ListView<String> receiversList;
     @FXML private Text mailSenderCheck;
+    @FXML private TextField sender;
     @FXML private TextField subject;
     @FXML private TextArea mailText;
 
+
     private ClientDataModel clientDataModel;
     private Email emailToReply;
-    private final ObservableList<String> emailReceivers = new SimpleListProperty<>(FXCollections.observableArrayList());
 
 
     public void initClientDataModel(ClientDataModel clientDataModel, Email emailToReply) {
@@ -38,7 +39,10 @@ public class ReplyAllMailController {
         this.emailToReply = emailToReply;
         this.clientDataModel.connectionOkayProperty().addListener(
                 new CloseOnLostConnection(this.anchorPane, this.clientDataModel));
-
+        sender.setText(clientDataModel.getEmailAddress());
+        subject.setText(emailToReply.getSubject());
+        final ObservableList<String> receivers = FXCollections.observableArrayList(emailToReply.getReceivers());
+        receiversList.setItems(receivers);
     }
 
     public void handleReplyAll(ActionEvent actionEvent) {

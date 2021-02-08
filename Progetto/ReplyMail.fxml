@@ -53,8 +53,8 @@
             <Font name="Arial" size="12.0" />
          </font>
       </TextField>
-      <TextField fx:id="subject" text="quello precedente" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
-      <TextField fx:id="receiver" text="mail.mittente@prova.it" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <TextField fx:id="subject" editable="false" text="quello precedente" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
+      <TextField fx:id="receiver" editable="false" text="mail.mittente@prova.it" GridPane.columnIndex="1" GridPane.rowIndex="1" />
    </GridPane>
    <TextArea fx:id="mailText" prefHeight="322.0" prefWidth="502.0" wrapText="true">
       <font>
