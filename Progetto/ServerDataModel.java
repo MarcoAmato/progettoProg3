@@ -237,15 +237,6 @@ public class ServerDataModel{
 				writeLock.unlock();
 			}
 		}
-
-		public void printDatabase(){
-			for(String s: emailAddressesArray){
-				System.out.println(s);
-			}
-			for(Email e: emailsArray){
-				System.out.println(e);
-			}
-		}
 	}
 
 	private static class ClientHandler implements Runnable{
@@ -491,8 +482,6 @@ public class ServerDataModel{
 
 				return true;
 
-                /*System.out.println(emailsSent);
-                System.out.println(emailsReceived);*/
 			}catch (IOException e){
 				log("Error in client login");
 				e.printStackTrace();
