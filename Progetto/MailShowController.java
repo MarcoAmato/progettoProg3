@@ -34,7 +34,7 @@ public class MailShowController {
 
         this.clientDataModel = clientDataModel;
         this.clientDataModel.connectionOkayProperty().addListener
-                (new CloseOnLostConnection(anchorPane, clientDataModel));
+                (new CloseOnLostConnection(anchorPane));
         this.email = email;
 
         sender.setText(email.getSender());

@@ -36,7 +36,7 @@ public class ReplyAllMailController {
         this.clientDataModel = clientDataModel;
         this.emailToReply = emailToReply;
         this.clientDataModel.connectionOkayProperty().addListener(
-                new CloseOnLostConnection(this.anchorPane, this.clientDataModel));
+                new CloseOnLostConnection(this.anchorPane));
         sender.setText(clientDataModel.getEmailAddress());
         subject.setText(emailToReply.getSubject());
         final ObservableList<String> receivers = FXCollections.observableArrayList(emailToReply.getReceivers());

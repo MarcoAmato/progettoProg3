@@ -41,7 +41,7 @@ public class NewMailController {
 
         this.model = model;
 
-        this.model.connectionOkayProperty().addListener(new CloseOnLostConnection(this.anchorPane, this.model));
+        this.model.connectionOkayProperty().addListener(new CloseOnLostConnection(this.anchorPane));
 
         sender.setText(model.getEmailAddress());
         receiversList.setItems(emailReceivers);

@@ -35,7 +35,7 @@ public class ForwardToController {
         this.clientDataModel = clientDataModel;
         this.emailToReply = emailToReply;
         this.clientDataModel.connectionOkayProperty().addListener(
-                new CloseOnLostConnection(this.gridPane, this.clientDataModel));
+                new CloseOnLostConnection(this.gridPane));
         receiversList.setItems(emailReceivers);
 
     }

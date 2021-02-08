@@ -3,9 +3,6 @@ package Progetto;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -141,9 +138,9 @@ class Email implements Serializable, Comparable<Email> {
         return returnString.toString();
         /*  +nomeMittente@test.it
             ;*;nomeDestinatario1@test.it nomeDestinatario2@test.it nomeDestinatarioN@test.it
-            ;*;argomento della mail
-            ;*;corpo della mail
-            ;*;dd/MM/yyyy HH:mm:ss(Data https://docs.oracle.com/javase/8/docs/api/java/util/Date.html)
+            ;*;subject of mail
+            ;*;body of mail
+            ;*;dd/MM/yyyy HH:mm:ss(Date https://docs.oracle.com/javase/8/docs/api/java/util/Date.html)
          */
     }
 
@@ -159,29 +156,14 @@ class Email implements Serializable, Comparable<Email> {
             return 0;
         }
     }
-
-    public static boolean isArrayListOfEmails(ArrayList<Email> emails){
-        for(Object o: emails){
-            if(o == null){
-                System.out.println("Error: a null object was found in email arraylist");
-                return false;
-            }else if(o.getClass() != Email.class){
-                System.out.println("Error: a non-email object was found in email arraylist");
-                return false;
-            }
-        }
-        return true;
-    }
 }
 
 class CloseOnLostConnection implements ChangeListener<Boolean> {
 
     private final Pane paneToClose;
-    private final ClientDataModel clientDataModel;
 
-    public CloseOnLostConnection(Pane paneToClose, ClientDataModel clientDataModel) {
+    public CloseOnLostConnection(Pane paneToClose) {
         this.paneToClose = paneToClose;
-        this.clientDataModel = clientDataModel;
     }
     @Override
     public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
