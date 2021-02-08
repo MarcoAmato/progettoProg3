@@ -74,4 +74,14 @@ public class ForwardToController {
         }
     }
 
+    public void deleteReceiver(ActionEvent actionEvent) {
+
+        final int val = receiversList.getSelectionModel().getSelectedIndex();
+        if(val == -1) {
+            controllo.setText("Nessun Destinatario selezionato");
+        }else {
+            receiversList.getItems().remove(val);
+            controllo.setText("");
+        }
+    }
 }

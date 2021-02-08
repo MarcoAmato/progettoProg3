@@ -76,7 +76,6 @@ public class MailShowController {
             Parent rootFor = fxmlLoader.load();
             ForwardToController forwardToController = fxmlLoader.getController();
             forwardToController.initClientDataModel(this.clientDataModel, this.email);
-
             Stage stage = new Stage();
             stage.setTitle("Inoltra a...");
             stage.setScene(new Scene(rootFor, 600, 400));
@@ -94,7 +93,6 @@ public class MailShowController {
             Parent rootRespAll = fxmlLoader.load();
             ReplyAllMailController replyAllMailController = fxmlLoader.getController();
             replyAllMailController.initClientDataModel(this.clientDataModel, this.email);
-
             Stage stage = new Stage();
             stage.setTitle("Rispondi a tutti");
             stage.setScene(new Scene(rootRespAll, 800, 600));
