@@ -40,13 +40,15 @@ public class ReplyAllMailController {
         subject.setText(emailToReply.getSubject());
         final ObservableList<String> receivers = FXCollections.observableArrayList(emailToReply.getReceivers());
         receiversList.setItems(receivers);
+        receiversList.getItems().add(emailToReply.getSender());
+        receivers.remove(clientDataModel.getEmailAddress());
     }
 
     public void handleReplyAll() {
         ArrayList<String> listOfReceivers = new ArrayList<>(receiversList.getItems());
         if (listOfReceivers.isEmpty()) {
             mailSenderCheck.setText("Nessun destinatario inserito");
-        } else if (clientDataModel.sendEmail(listOfReceivers, subject.getText(), mailText.getText())) {
+        } else if (clientDataModel.replyAllEmail(emailToReply, mailText.getText())) {
             mailSenderCheck.setFill(Color.GREEN);
             mailSenderCheck.setText("Mail inviata!");
             mailText.setText("");
