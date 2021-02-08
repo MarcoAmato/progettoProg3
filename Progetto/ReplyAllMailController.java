@@ -1,7 +1,6 @@
 package Progetto;
 
 import javafx.animation.PauseTransition;
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -24,7 +23,6 @@ public class ReplyAllMailController {
     @FXML private TextField sender;
     @FXML private TextField subject;
     @FXML private TextArea mailText;
-
 
     private ClientDataModel clientDataModel;
     private Email emailToReply;
