@@ -10,9 +10,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 public class ReplyMailController {
 
     @FXML private VBox vBox;
@@ -33,7 +30,7 @@ public class ReplyMailController {
         this.clientDataModel = clientDataModel;
         this.emailToReply = emailToReply;
         this.clientDataModel.connectionOkayProperty().addListener(
-                new CloseOnLostConnection(this.vBox, this.clientDataModel));
+                new CloseOnLostConnection(this.vBox));
 
         sender.setText(clientDataModel.getEmailAddress());
         receiver.setText(emailToReply.getSender());
