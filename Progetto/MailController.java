@@ -8,14 +8,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.Glow;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -129,7 +127,7 @@ public class MailController {
     }
 
     //Dobbiamo gestire questa funzione importando il file giusto
-    public void handleNewMail(MouseEvent mouseEvent) {
+    public void handleNewMail() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("NewMail.fxml"));
             Parent root2 = fxmlLoader.load();
@@ -146,7 +144,7 @@ public class MailController {
         }
     }
 
-    public void handleDeleteSelectedMail(MouseEvent mouseEvent) {
+    public void handleDeleteSelectedMail() {
         if(mailList.getSelectionModel().getSelectedIndex() != -1) {
             this.emailPreviewSelected = mailList.getSelectionModel().getSelectedItem();
             deleteHandler.setText("Sei sicuro di voler eliminare questa mail?");
@@ -177,31 +175,7 @@ public class MailController {
         doNotDelete.setVisible(false);
     }
 
-    public ObservableList<EmailPreview> mailSentListProperty() {
-        return mailSentPreviews;
-    }
-
-    public EmailPreview getMailSentPreviews(int index) {
-        return mailSentPreviews.get(index);
-    }
-
-    public EmailPreview setMailSentPreviews(int index, EmailPreview element) {
-        return mailSentPreviews.set(index, element);
-    }
-
-    public ObservableList<EmailPreview> mailReceivedPreviewsProperty() {
-        return mailReceivedPreviews;
-    }
-
-    public EmailPreview getMailPreviews(int index) {
-        return mailReceivedPreviews.get(index);
-    }
-
-    public EmailPreview setReceivedMails(int index, EmailPreview element) {
-        return mailReceivedPreviews.set(index, element);
-    }
-
-    public void deselection(MouseEvent mouseEvent) { mailList.getSelectionModel().clearSelection(); }
+    public void deselection() { mailList.getSelectionModel().clearSelection(); }
 
     private void fillEmailPreviewsWithEmails(ObservableList<EmailPreview> emailPreviews, ObservableList<Email> emails){
         for(Email email: emails){
@@ -249,10 +223,10 @@ public class MailController {
     }
 
     private static class EmailPreview implements Serializable {
-        private SimpleStringProperty sender;
-        private SimpleStringProperty subject;
-        private SimpleStringProperty sendingDate;
-        private Email emailConnected;
+        private final SimpleStringProperty sender;
+        private final SimpleStringProperty subject;
+        private final SimpleStringProperty sendingDate;
+        private final Email emailConnected;
 
         public EmailPreview(Email emailToCopy){
             this.sender = new SimpleStringProperty(emailToCopy.getSender());
@@ -270,8 +244,6 @@ public class MailController {
         public String getSubject() { return subject.get(); }
 
         public StringProperty subjectProperty() { return subject; }
-
-        public String getSendingDate() { return sendingDate.toString(); }
 
         public StringProperty sendingDateProperty() { return sendingDate; }
 

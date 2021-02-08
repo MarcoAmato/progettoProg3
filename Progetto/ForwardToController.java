@@ -4,7 +4,6 @@ import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -74,7 +73,7 @@ public class ForwardToController {
         }
     }
 
-    public void deleteReceiver(ActionEvent actionEvent) {
+    public void deleteReceiver() {
 
         final int val = receiversList.getSelectionModel().getSelectedIndex();
         if(val == -1) {
