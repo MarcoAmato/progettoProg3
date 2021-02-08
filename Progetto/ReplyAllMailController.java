@@ -38,7 +38,6 @@ public class ReplyAllMailController {
         this.emailToReply = emailToReply;
         this.clientDataModel.connectionOkayProperty().addListener(
                 new CloseOnLostConnection(this.anchorPane, this.clientDataModel));
-
     }
 
     public void handleReplyAll(ActionEvent actionEvent) {

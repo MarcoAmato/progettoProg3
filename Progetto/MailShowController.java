@@ -1,9 +1,7 @@
 package Progetto;
 
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,7 +14,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class MailShowController {
     @FXML private AnchorPane anchorPane;
@@ -91,10 +88,13 @@ public class MailShowController {
         }
     }
 
-    public void handleReplyAll(ActionEvent actionEvent) {
+    public void handleReplyAll() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ReplyAllMail.fxml"));
             Parent rootRespAll = fxmlLoader.load();
+            ReplyAllMailController replyAllMailController = fxmlLoader.getController();
+            replyAllMailController.initClientDataModel(this.clientDataModel, this.email);
+
             Stage stage = new Stage();
             stage.setTitle("Rispondi a tutti");
             stage.setScene(new Scene(rootRespAll, 800, 600));
