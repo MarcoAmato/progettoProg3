@@ -193,6 +193,20 @@ public class ClientDataModel {
 	}
 
 	/**
+	 * Replies to all emailToReply receivers using body as reply content
+	 * @param emailToReply Email whose receivers are to be replied
+	 * @param body Body of reply
+	 * @return true on replied all correctly, false otherwise
+	 */
+	public boolean replyAllEmail(Email emailToReply, String body){
+		ArrayList<String> receiversOfReply = emailToReply.getReceivers();
+		receiversOfReply.remove(emailAddress.get());
+		receiversOfReply.add(emailToReply.getSender());
+		String subjectOfReply = emailToReply.getSubject();
+		return sendEmail(receiversOfReply, subjectOfReply, body);
+	}
+
+	/**
 	 * Forwards emailToForward to receivers
 	 * @param emailToForward Email to be forwarded
 	 * @param receivers ArrayList of receivers

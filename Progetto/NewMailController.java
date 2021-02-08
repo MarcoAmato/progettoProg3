@@ -31,7 +31,6 @@ public class NewMailController {
 
 
     private ClientDataModel model;
-    boolean Selected = false;
     private final ObservableList<String> emailReceivers = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public void initClientDataModel(ClientDataModel model) {

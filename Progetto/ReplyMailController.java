@@ -37,7 +37,7 @@ public class ReplyMailController {
         subject.setText(emailToReply.getSubject());
     }
 
-    public void handleMailReply(ActionEvent actionEvent) {
+    public void handleMailReply() {
         if (clientDataModel.replyEmail(this.emailToReply, this.mailText.getText())) {
             controllo.setFill(Color.GREEN);
             controllo.setText("Mail inviata!");
