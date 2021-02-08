@@ -52,13 +52,6 @@ public class ClientDataModel {
 	}
 
 	/**
-	 * @return emailAddress property
-	 */
-	public StringProperty emailAddressProperty(){
-		return emailAddress;
-	}
-
-	/**
 	 * @return emailsReceived property
 	 */
 	public ObservableList<Email> emailsReceivedProperty(){
@@ -200,20 +193,6 @@ public class ClientDataModel {
 	}
 
 	/**
-	 * Replies to all emailToReply receivers using body as reply content
-	 * @param emailToReply Email whose receivers are to be replied
-	 * @param body Body of reply
-	 * @return true on replied all correctly, false otherwise
-	 */
-	public boolean replyAllEmail(Email emailToReply, String body){
-		ArrayList<String> receiversOfReply = emailToReply.getReceivers();
-		receiversOfReply.remove(emailAddress.get());
-		receiversOfReply.add(emailToReply.getSender());
-		String subjectOfReply = emailToReply.getSubject();
-		return sendEmail(receiversOfReply, subjectOfReply, body);
-	}
-
-	/**
 	 * Forwards emailToForward to receivers
 	 * @param emailToForward Email to be forwarded
 	 * @param receivers ArrayList of receivers
@@ -230,6 +209,7 @@ public class ClientDataModel {
 	 * @param emailAddress the email we want to verify is in database
 	 * @return true if emailAddress is contained in database, false otherwise
 	 */
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean emailAddressExists(String emailAddress){
 		try{
 			serverRequestLock.lock();
@@ -273,14 +253,6 @@ public class ClientDataModel {
 	private List<Email> getSynchronizedListOfEmailsFromServer() throws ConnectException {
 		final List<Email> syncArrayList =  Collections.synchronizedList(new ArrayList<>());
 		return Common.ConvertToSyncArrayList(Common.getInputOfClass(inStream, syncArrayList.getClass()), Email.class);
-	}
-
-	/**
-	 * @return an Email sent from serverInputReader
-	 * @throws ConnectException when Email is not correctly received
-	 */
-	private Email getEmailFromServerInputReader() throws ConnectException{
-		return Common.getInputOfClass(serverOutputReaderStream, Email.class);
 	}
 
 	/**
@@ -389,41 +361,4 @@ public class ClientDataModel {
 			}
 		}
 	}
-
-	/*private class CommandExecutor extends Thread{
-		private final int command;
-
-		public CommandExecutor(int command){
-			setDaemon(true);
-			this.command=command;
-		}
-
-		@Override
-		public void run() {
-			try{
-				switch (command) {
-					case CSMex.NEW_EMAIL_RECEIVED -> {
-						Email newEmail = getEmailFromServer();
-						emailsReceived.add(newEmail);
-					}
-					case CSMex.EMAIL_DELETED -> {
-						Email emailToDelete = getEmailFromServer();
-						emailsReceived.removeIf(email -> email.toString().equals(emailToDelete.toString()));
-						emailsSent.removeIf(email -> email.toString().equals(emailToDelete.toString()));
-					}
-					case CSMex.FORCE_DISCONNECTION -> System.out.println("Disconnecting from server...");
-					default -> System.out.println("Error, unexpected server command: " + command);
-				}
-			}catch (IOException e) {
-				System.out.println("Exception in Command #"+command);
-				e.printStackTrace();
-				restartConnection();
-			}finally {
-				System.out.println();
-				notFinishedCondition.signal();
-				serverRequestLock.unlock();
-			}
-		}
-	}*/
-
 }
