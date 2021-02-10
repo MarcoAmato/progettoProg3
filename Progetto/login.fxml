@@ -50,7 +50,7 @@
             </font>
         </Button>
     </HBox>
-    <Text fx:id="labelTest" fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="276.36498260498047" GridPane.rowIndex="3">
+    <Text fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="276.36498260498047" GridPane.rowIndex="3">
         <font>
           <Font name="Arial" size="18.0" />
         </font>

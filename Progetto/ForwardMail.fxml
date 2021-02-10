@@ -57,7 +57,7 @@
          <Insets left="60.0" right="60.0" />
       </GridPane.margin>
    </ListView>
-   <Text fx:id="controllo" fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" text="" textAlignment="CENTER" GridPane.rowIndex="4">
+   <Text fx:id="controllo" fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" GridPane.rowIndex="4">
       <GridPane.margin>
          <Insets left="200.0" />
       </GridPane.margin>
