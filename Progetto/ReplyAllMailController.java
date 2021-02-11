@@ -52,7 +52,6 @@ public class ReplyAllMailController {
             mailSenderCheck.setFill(Color.GREEN);
             mailSenderCheck.setText("Mail inviata!");
             mailText.setText("");
-            subject.setText("");
             PauseTransition delay = new PauseTransition(Duration.seconds(5));
             delay.setOnFinished( event -> mailSenderCheck.setText("") );
             delay.play();

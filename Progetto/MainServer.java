@@ -15,7 +15,6 @@ public class MainServer extends Application {
 		ServerController serverController = fxmlLoader.getController(); //connects to ServerController
 		ServerDataModel serverModel = new ServerDataModel("src/database"); //creates ServerDataModel
 		serverController.initModel(serverModel);
-		serverController.createLogList();
 		primaryStage.setTitle("Mail Server");
 		primaryStage.setScene(new Scene(root, 640, 400));
 		primaryStage.show();

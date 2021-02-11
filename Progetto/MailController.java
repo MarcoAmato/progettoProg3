@@ -1,5 +1,6 @@
 package Progetto;
 
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -20,6 +21,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -72,7 +74,6 @@ public class MailController {
         mailReceivedPreviews.addListener((ListChangeListener<EmailPreview>) change -> {
             while (change.next()) {
                 if (change.wasAdded()) {
-                    System.out.println("Test");
                     mailUpdater.setText("Sono arrivate nuove mail!");
                     mailUpdater.setFill(Color.RED);
                 }
@@ -126,7 +127,6 @@ public class MailController {
         }
     }
 
-    //Dobbiamo gestire questa funzione importando il file giusto
     public void handleNewMail() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("NewMail.fxml"));
@@ -154,6 +154,9 @@ public class MailController {
             doNotDelete.setVisible(true);
         } else {
             deleteHandler.setText("Nessuna mail selezionata");
+            PauseTransition delay = new PauseTransition(Duration.seconds(3));
+            delay.setOnFinished( event -> deleteHandler.setText("") );
+            delay.play();
         }
     }
 

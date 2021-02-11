@@ -16,9 +16,7 @@ public class ServerController{
 		}
 
 		this.serverDataModel = serverDataModel;
-	}
-
-	public void createLogList(){
 		logList.setItems(serverDataModel.logList());
 	}
+
 }
